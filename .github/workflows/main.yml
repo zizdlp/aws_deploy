@@ -39,7 +39,7 @@ jobs:
       uses: ./.github/actions/aws_create
 
     # Step 6: 从 inventory.ini 文件提取 DNS
-    - name: Extract all nodes from inventory.ini
+    - name: Do Extract all nodes from inventory.ini
       id: extract_nodes
       run: |
         # 提取 master 节点的 DNS
