@@ -90,8 +90,18 @@ jobs:
         cat ~/.ssh/known_hosts >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
   
+
+      # Step 10: 使用 Ansible 部署 Spark 集群
+    - name: Install java & deps to nodes
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_deps.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+
     # Step 10: 使用 Ansible 部署 Spark 集群
-    - name: Run playbook
+    - name: install spark
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_spark.yml

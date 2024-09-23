@@ -1,0 +1,204 @@
+- name: Install and Configure deps
+  hosts: all
+  become: yes
+  # Define handlers for restarting the SSH service
+  handlers:
+    - name: Restart SSH
+      service:
+        name: sshd
+        state: restarted
+      when: ansible_service_mgr == 'systemd'
+
+    - name: Restart SSH for non-systemd (SysVinit or Upstart)
+      service:
+        name: ssh
+        state: restarted
+      when: ansible_service_mgr != 'systemd'
+  tasks:
+    ### 1. 设置hostname && host ip
+    - name: Parse nodes_ip_map from JSON string
+      set_fact:
+        nodes_ip_map_parsed: "{{ nodes_ip_map | from_json }}"
+
+    - name: Write nodes IPs to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ item.value }} {{ item.key }}"
+        state: present
+      loop: "{{ nodes_ip_map_parsed | dict2items }}"
+      when: ansible_facts['distribution'] == 'Ubuntu'
+      tags:
+        - setup
+    ### 2. 设置免密登录
+    - name: Ensure .ssh directory exists
+      file:
+        path: /home/{{ ansible_user }}/.ssh
+        state: directory
+        mode: '0700'
+      become: yes
+      become_user: "{{ ansible_user }}"
+
+    - name: Generate SSH key pair if not present
+      command: ssh-keygen -t rsa -b 2048 -f /home/{{ ansible_user }}/.ssh/id_rsa -N ''
+      args:
+        creates: /home/{{ ansible_user }}/.ssh/id_rsa
+      become: yes
+      become_user: "{{ ansible_user }}"
+
+    - name: Read public key
+      command: cat /home/{{ ansible_user }}/.ssh/id_rsa.pub
+      register: public_key
+      become: yes
+      become_user: "{{ ansible_user }}"
+
+    - name: Share public key with all other nodes
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ public_key.stdout }}"
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['all'] }}"
+      # when: inventory_hostname != item  # Avoid adding public key to the same host
+
+    ### 2.1. Add known hosts for all nodes
+    - name: Add host key for all nodes to known_hosts
+      shell: ssh-keyscan -H "{{ item }}" >> /home/{{ ansible_user }}/.ssh/known_hosts
+      become: yes
+      become_user: "{{ ansible_user }}"
+      loop: "{{ groups['all'] }}"
+      # when: inventory_hostname != item  # Skip the current host
+
+    ### 3. 设置免密登录（为root用户）
+    - name: Ensure .ssh directory exists for root
+      file:
+        path: /root/.ssh
+        state: directory
+        mode: '0700'
+      become: yes
+      become_user: root
+
+    - name: Generate SSH key pair for root if not present
+      command: ssh-keygen -t rsa -b 2048 -f /root/.ssh/id_rsa -N ''
+      args:
+        creates: /root/.ssh/id_rsa
+      become: yes
+      become_user: root
+
+    - name: Read root public key
+      command: cat /root/.ssh/id_rsa.pub
+      register: public_key_root
+      become: yes
+      become_user: root
+
+    - name: Share root public key with all other nodes
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ public_key_root.stdout }}"
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['all'] }}"
+
+    ### 3. 重启ssh
+    - name: Ensure PubkeyAuthentication and AuthorizedKeysFile are set in /etc/ssh/sshd_config
+      blockinfile:
+        path: /etc/ssh/sshd_config
+        block: |
+          # Ensure public key authentication is enabled
+          PubkeyAuthentication yes
+
+          # Specify additional authorized keys file
+          AuthorizedKeysFile      .ssh/authorized_keys .ssh/authorized_keys2
+        create: yes
+        backup: yes
+      notify: Restart SSH
+
+    ## 4 install deps
+    - name: Update package list
+      apt:
+        update_cache: yes
+      register: update_result
+      retries: 3
+      delay: 10
+      until: update_result is succeeded
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+      register: upgrade_result
+      retries: 3
+      delay: 10
+      until: upgrade_result is succeeded
+
+    - name: Install necessary software
+      apt:
+        name: 
+          - tmux
+          - unzip
+          - git
+          - byacc
+          - flex
+          - bison
+          - locales
+          - tzdata
+          - ccache
+          - cmake
+          - ninja-build
+          - build-essential
+          - llvm-11-dev
+          - clang-11
+          - libiberty-dev
+          - libdwarf-dev
+          - libre2-dev
+          - libz-dev
+          - libssl-dev
+          - libboost-all-dev
+          - libcurl4-openssl-dev
+          - openjdk-17-jdk
+          - maven
+          - libtbb-dev
+          - libjemalloc-dev
+          - libspdlog-dev
+          - g++-10
+          - libmsgsl-dev
+          - libgtest-dev
+          - nfs-common
+          - nfs-kernel-server
+        state: present
+      register: install_result
+      retries: 3
+      delay: 15
+      until: install_result is succeeded
+
+
+
+
+    ## 5.设置环境变量 java_home
+    - name: Set JAVA_HOME in profile.d
+      copy:
+        dest: /etc/profile.d/java.sh
+        content: |
+          export JAVA_HOME={{ java_home }}
+          export CLASSPATH=.:${JAVA_HOME}/lib
+          export PATH=$PATH:$JAVA_HOME/bin
+        mode: '0644'
+
+    - name: Ensure Python 3 is installed
+      apt:
+        name: python3
+        state: present
+      become: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Ensure Python 3 pip is installed
+      apt:
+        name: python3-pip
+        state: present
+      become: yes
+      when: ansible_os_family == 'Debian'
+    - name: Ensure boto3 and botocore are installed
+      pip:
+        name:
+          - boto3
+          - botocore
+        extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
+      become: yes
