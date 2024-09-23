@@ -30,11 +30,11 @@ jobs:
         chmod 400 ~/.ssh/local_test.pem              
         ls -la ~/.ssh/  # 查看文件列表和权限
 
-    # Step 3: 使用 deps.yml 安装依赖
+    # Step 4: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
       uses: ./.github/actions/deps
   
-    # Step 4: 调用复合操作来创建 EC2 实例
+    # Step 5: 调用复合操作来创建 EC2 实例
     - name: Deploy EC2 Instances
       uses: ./.github/actions/aws_create
 
@@ -55,5 +55,8 @@ jobs:
 
 
     # Step 7: 调用复合操作来销毁 EC2 实例
-    - name: Terminate EC2 Instances
-      uses: ./.github/actions/aws_destory
+    - name: Terminate EC2 instances
+      if: always()
+      run: |
+        python ./scripts/terminate_ec2_instances.py
+      shell: bash  # 添加 shell 指定属性
