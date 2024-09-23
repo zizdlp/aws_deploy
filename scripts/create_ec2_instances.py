@@ -1,5 +1,6 @@
 import boto3
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Initialize EC2 client
 ec2 = boto3.resource('ec2', region_name='cn-northwest-1')
@@ -61,11 +62,24 @@ def create_instance(index):
     
     return instance
 
-instances = []
-for index in range(4):
-    instance = create_instance(index)
-    instances.append(instance)
+# Function to manage parallel instance creation
+def parallel_create_instances(num_instances):
+    instances = []
+    with ThreadPoolExecutor(max_workers=num_instances) as executor:
+        # Submit tasks for parallel execution
+        future_to_index = {executor.submit(create_instance, index): index for index in range(num_instances)}
+        
+        # Process results as they complete
+        for future in as_completed(future_to_index):
+            index = future_to_index[future]
+            try:
+                instance = future.result()
+                instances.append(instance)
+                print(f'Instance {instance.id} launched as node{index}. Public DNS: {instance.public_dns_name}')
+            except Exception as e:
+                print(f'Error launching instance {index}: {e}')
+    
+    return instances
 
-# Print EC2 instance IDs and public DNS
-for instance in instances:
-    print(f'Instance {instance.id} launched as node{instance.id[-1]}. Public DNS: {instance.public_dns_name}')
+# Launch 4 instances in parallel
+instances = parallel_create_instances(4)
