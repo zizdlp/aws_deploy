@@ -44,9 +44,9 @@ jobs:
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_spark.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
+        inventory: ${{ steps.extract_nodes.outputs.inventory_content }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+        known_hosts: ${{ steps.extract_nodes.outputs.known_hosts_content }}
 
     # Step 6: spark test
     - name: Spark Test

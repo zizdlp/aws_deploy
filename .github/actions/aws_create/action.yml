@@ -38,11 +38,20 @@ runs:
         echo "::set-output name=master_dns::$MASTER_DNS"
         echo "::set-output name=worker_dns::$WORKER_DNS"
 
+
+        # 读取 inventory.ini 文件内容并设置为输出变量
+        INVENTORY_CONTENT=$(cat ./ansible/inventory.ini)
+        echo "::set-output name=inventory_content::$INVENTORY_CONTENT"
+
         # 将所有节点的 DNS 添加到 known_hosts
         ssh-keyscan -H $MASTER_DNS >> ~/.ssh/known_hosts
         for WORKER in $WORKER_DNS; do
           ssh-keyscan -H $WORKER >> ~/.ssh/known_hosts
         done
+
+
+        KNOWN_HOSTS_CONTENT=$(cat ~/.ssh/known_hosts)
+        echo "::set-output name=known_hosts_content::$KNOWN_HOSTS_CONTENT"
       shell: bash  # 添加 shell 指定属性
    
 
@@ -56,22 +65,3 @@ runs:
         done
       shell: bash  # 添加 shell 指定属性
         
-    # Step 6: 读取 inventory.ini 文件内容
-    - name: Read inventory.ini content
-      id: read_inventory
-      run: |
-        cat ./ansible/inventory.ini
-        echo "INVENTORY_CONTENT<<EOF" >> $GITHUB_ENV
-        cat ./ansible/inventory.ini >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-      shell: bash  # 添加 shell 指定属性
-
-    # Step 7: 读取 known_hosts 文件内容并设置为环境变量
-    - name: Read known_hosts content
-      id: read_known_hosts
-      run: |
-        cat ~/.ssh/known_hosts
-        echo "KNOWN_HOSTS_CONTENT<<EOF" >> $GITHUB_ENV
-        cat ~/.ssh/known_hosts >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-      shell: bash  # 添加 shell 指定属性
