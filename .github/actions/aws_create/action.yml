@@ -7,7 +7,8 @@ runs:
     - name: Launch EC2 instances
       run: |
         python ./scripts/create_ec2_instances.py
-
+      shell: bash  # 添加 shell 指定属性
     - name: Wait for EC2 instances
       run: |
         python ./scripts/get_instance_dns.py
+      shell: bash  # 添加 shell 指定属性

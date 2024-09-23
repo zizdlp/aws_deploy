@@ -9,3 +9,4 @@ runs:
       if: always()
       run: |
         python ./scripts/terminate_ec2_instances.py
+      shell: bash  # 添加 shell 指定属性
