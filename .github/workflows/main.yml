@@ -24,12 +24,12 @@ jobs:
 
     # Step 3: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
-      uses: ./.github/actions/deps.yml
+      uses: ./.github/actions/deps
   
     # Step 4: 调用复合操作来创建 EC2 实例
     - name: Deploy EC2 Instances
-      uses: ./.github/actions/aws_instances_create.yml
+      uses: ./.github/actions/aws_create.yml
 
     # Step 5: 调用复合操作来销毁 EC2 实例
     - name: Terminate EC2 Instances
-      uses: ./.github/actions/aws_instances_destory.yml
+      uses: ./.github/actions/aws_destory.yml
