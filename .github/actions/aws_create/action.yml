@@ -21,7 +21,7 @@ runs:
       run: |
         python ./scripts/generate_inventory.py  # 根据实例信息生成 inventory.ini 文件
         cat ./ansible/inventory.ini
-
+      shell: bash  # 添加 shell 指定属性
     # Step 4: 从 inventory.ini 文件提取 DNS
     - name: Extract all nodes from inventory.ini
       id: extract_nodes
@@ -44,8 +44,8 @@ runs:
         for WORKER in $WORKER_DNS; do
           ssh-keyscan -H $WORKER >> ~/.ssh/known_hosts
         done
-
-     # Step 5: 测试dns 联通
+      shell: bash  # 添加 shell 指定属性
+    # Step 5: 测试dns 联通
     - name: Test SSH connection to master
       run: |
         ssh -i ~/.ssh/local_test.pem ubuntu@${{ steps.extract_nodes.outputs.master_dns }} 'hostname'
@@ -53,8 +53,8 @@ runs:
         for WORKER in ${{ steps.extract_nodes.outputs.worker_dns }}; do
           ssh -i ~/.ssh/local_test.pem ubuntu@$WORKER 'hostname'
         done
-
-  
+      shell: bash  # 添加 shell 指定属性
+        
     # Step 6: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content
       id: read_inventory
@@ -63,7 +63,7 @@ runs:
         echo "INVENTORY_CONTENT<<EOF" >> $GITHUB_ENV
         cat ./ansible/inventory.ini >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
-
+      shell: bash  # 添加 shell 指定属性
     # Step 7: 读取 known_hosts 文件内容并设置为环境变量
     - name: Read known_hosts content
       id: read_known_hosts
@@ -72,3 +72,4 @@ runs:
         echo "KNOWN_HOSTS_CONTENT<<EOF" >> $GITHUB_ENV
         cat ~/.ssh/known_hosts >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
+      shell: bash  # 添加 shell 指定属性
