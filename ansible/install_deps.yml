@@ -1,6 +1,19 @@
 - name: Install and Configure deps
   hosts: all
   become: yes
+  vars:
+    spark_version: "3.4.3"  # Adjust Spark version as needed
+    hadoop_version: "3.3.5"  # Ensure compatibility
+    hadoop_home: "/usr/local/hadoop"
+    hive_version: "4.0.0"    # Update as needed
+    hive_home: "/usr/local/hive"
+    spark_home: "/usr/local/spark"
+    java_home: "/usr/lib/jvm/java-17-openjdk-amd64"
+    hadoop_user: "root"
+    mysql_host: "{{ groups['master'][0] }}"  # 主节点地址
+    mysql_database: "hive"
+    mysql_user: "hiveuser"
+    mysql_password: "your_password"
   # Define handlers for restarting the SSH service
   handlers:
     - name: Restart SSH
