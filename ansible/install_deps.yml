@@ -8,7 +8,7 @@
     hive_version: "4.0.0"    # Update as needed
     hive_home: "/usr/local/hive"
     spark_home: "/usr/local/spark"
-    java_home: "/usr/lib/jvm/java-17-openjdk-amd64"
+    java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
     hadoop_user: "root"
     mysql_host: "{{ groups['master'][0] }}"  # 主节点地址
     mysql_database: "hive"
@@ -166,7 +166,7 @@
           - libssl-dev
           - libboost-all-dev
           - libcurl4-openssl-dev
-          - openjdk-17-jdk
+          - openjdk-11-jdk
           - maven
           - libtbb-dev
           - libjemalloc-dev

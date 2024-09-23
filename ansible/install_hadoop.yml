@@ -4,7 +4,7 @@
   vars:
     hadoop_version: "3.3.5"  # Ensure compatibility
     hadoop_home: "/usr/local/hadoop"
-    java_home: "/usr/lib/jvm/java-17-openjdk-amd64"
+    java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
     hadoop_user: "root"
 
   tasks:

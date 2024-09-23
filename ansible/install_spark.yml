@@ -8,7 +8,7 @@
     hive_version: "4.0.0"    # Update as needed
     hive_home: "/usr/local/hive"
     spark_home: "/usr/local/spark"
-    java_home: "/usr/lib/jvm/java-17-openjdk-amd64"
+    java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
     hadoop_user: "root"
     mysql_host: "{{ groups['master'][0] }}"  # 主节点地址
     mysql_database: "hive"
@@ -55,7 +55,7 @@
     - name: Start Spark master
       shell: |
         export SPARK_HOME=/usr/local/spark
-        export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+        export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
         export HADOOP_HOME=/usr/local/hadoop
         export HIVE_HOME=/usr/local/hive
         export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin
@@ -65,7 +65,7 @@
     - name: Start Spark worker
       shell: |
         export SPARK_HOME=/usr/local/spark
-        export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+        export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
         export HADOOP_HOME=/usr/local/hadoop
         export HIVE_HOME=/usr/local/hive
         export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin
