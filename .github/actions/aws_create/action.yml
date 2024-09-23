@@ -45,3 +45,33 @@ runs:
         done
       shell: bash  # 添加 shell 指定属性
    
+
+    # Step 5: 测试dns 联通
+    - name: Test SSH connection to master
+      run: |
+        ssh -i ~/.ssh/local_test.pem ubuntu@${{ steps.extract_nodes.outputs.master_dns }} 'hostname'
+
+        for WORKER in ${{ steps.extract_nodes.outputs.worker_dns }}; do
+          ssh -i ~/.ssh/local_test.pem ubuntu@$WORKER 'hostname'
+        done
+      shell: bash  # 添加 shell 指定属性
+        
+    # Step 6: 读取 inventory.ini 文件内容
+    - name: Read inventory.ini content
+      id: read_inventory
+      run: |
+        cat ./ansible/inventory.ini
+        echo "INVENTORY_CONTENT<<EOF" >> $GITHUB_ENV
+        cat ./ansible/inventory.ini >> $GITHUB_ENV
+        echo EOF >> $GITHUB_ENV  # 移除引号，确保 EOF 被正确识别
+      shell: bash  # 添加 shell 指定属性
+
+    # Step 7: 读取 known_hosts 文件内容并设置为环境变量
+    - name: Read known_hosts content
+      id: read_known_hosts
+      run: |
+        cat ~/.ssh/known_hosts
+        echo "KNOWN_HOSTS_CONTENT<<EOF" >> $GITHUB_ENV
+        cat ~/.ssh/known_hosts >> $GITHUB_ENV
+        echo EOF >> $GITHUB_ENV  # 同样移除引号
+      shell: bash  # 添加 shell 指定属性
