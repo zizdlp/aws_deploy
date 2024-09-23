@@ -63,7 +63,7 @@ runs:
         cat ./ansible/inventory.ini
         echo "INVENTORY_CONTENT<<EOF" >> $GITHUB_ENV
         cat ./ansible/inventory.ini >> $GITHUB_ENV
-        echo EOF >> $GITHUB_ENV  # 移除引号，确保 EOF 被正确识别
+        echo "EOF" >> $GITHUB_ENV
       shell: bash  # 添加 shell 指定属性
 
     # Step 7: 读取 known_hosts 文件内容并设置为环境变量
@@ -73,5 +73,5 @@ runs:
         cat ~/.ssh/known_hosts
         echo "KNOWN_HOSTS_CONTENT<<EOF" >> $GITHUB_ENV
         cat ~/.ssh/known_hosts >> $GITHUB_ENV
-        echo EOF >> $GITHUB_ENV  # 同样移除引号
+        echo "EOF" >> $GITHUB_ENV
       shell: bash  # 添加 shell 指定属性
