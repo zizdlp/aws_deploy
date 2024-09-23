@@ -1,0 +1,35 @@
+name: Deploy and Test Spark Cluster on AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: 检出代码
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: 配置 AWS 凭据
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: cn-northwest-1
+
+    # Step 3: 使用 deps.yml 安装依赖
+    - name: Set up Python and Install Boto3
+      uses: ./.github/actions/deps.yml
+  
+    # Step 4: 调用复合操作来创建 EC2 实例
+    - name: Deploy EC2 Instances
+      uses: ./.github/actions/aws_instances_create.yml
+
+    # Step 5: 调用复合操作来销毁 EC2 实例
+    - name: Terminate EC2 Instances
+      uses: ./.github/actions/aws_instances_destory.yml

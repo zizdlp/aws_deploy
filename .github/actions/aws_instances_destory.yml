@@ -1,0 +1,11 @@
+name: Terminate EC2 Instances
+description: Creates and manages EC2 instances
+
+runs:
+  using: 'composite'
+  steps:
+    # 清理 EC2 实例
+    - name: Terminate EC2 instances
+      if: always()
+      run: |
+        python ./scripts/terminate_ec2_instances.py

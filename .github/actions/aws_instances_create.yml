@@ -1,0 +1,13 @@
+name: Deploy EC2 Instances
+description: Creates and manages EC2 instances
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Launch EC2 instances
+      run: |
+        python ./scripts/create_ec2_instances.py
+
+    - name: Wait for EC2 instances
+      run: |
+        python ./scripts/get_instance_dns.py
