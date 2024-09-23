@@ -63,6 +63,19 @@ jobs:
         KNOWN_HOSTS_CONTENT=$(cat ~/.ssh/known_hosts)
         echo "known_hosts_content=${KNOWN_HOSTS_CONTENT}" >> $GITHUB_OUTPUT
   
+    # Step 5: 测试dns 联通
+    - name: Test SSH connection to master
+      run: |
+        ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS 'hostname'
+
+        for WORKER in $WORKER_DNS; do
+          ssh -i ~/.ssh/local_test.pem ubuntu@$WORKER 'hostname'
+        done
+      shell: bash  # 添加 shell 指定属性
+        
+
+
+
     # Step 5: 使用 Ansible 部署 Spark 集群
     - name: Run playbook
       uses: dawidd6/action-ansible-playbook@v2
