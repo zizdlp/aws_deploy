@@ -4,11 +4,71 @@ description: Creates and manages EC2 instances
 runs:
   using: 'composite'
   steps:
+    # Step 1. 创建aws集群
     - name: Launch EC2 instances
       run: |
         python ./scripts/create_ec2_instances.py
       shell: bash  # 添加 shell 指定属性
+
+    # Step 2. 获取各个节点dns和ip，并存入文件
     - name: Wait for EC2 instances
       run: |
         python ./scripts/get_instance_dns.py
       shell: bash  # 添加 shell 指定属性
+
+    # Step 3: 根据./scripts/nodes_info.txt 生成动态 inventory.ini 文件
+    - name: Generate inventory.ini
+      run: |
+        python ./scripts/generate_inventory.py  # 根据实例信息生成 inventory.ini 文件
+        cat ./ansible/inventory.ini
+
+    # Step 4: 从 inventory.ini 文件提取 DNS
+    - name: Extract all nodes from inventory.ini
+      id: extract_nodes
+      run: |
+        # 提取 master 节点的 DNS
+        MASTER_DNS=$(grep -A 1 "\[master\]" ./ansible/inventory.ini | tail -n 1 | awk '{print $1}')
+
+        # 提取 worker 节点的 DNS
+        WORKER_DNS=$(awk '/^\[worker\]/ {flag=1; next} /^\[/{flag=0} flag' ./ansible/inventory.ini | awk '{print $1}')
+
+        echo "Master DNS: $MASTER_DNS"
+        echo "Worker DNS: $WORKER_DNS"
+        
+        # 设置 GitHub Actions 输出变量
+        echo "::set-output name=master_dns::$MASTER_DNS"
+        echo "::set-output name=worker_dns::$WORKER_DNS"
+
+        # 将所有节点的 DNS 添加到 known_hosts
+        ssh-keyscan -H $MASTER_DNS >> ~/.ssh/known_hosts
+        for WORKER in $WORKER_DNS; do
+          ssh-keyscan -H $WORKER >> ~/.ssh/known_hosts
+        done
+
+     # Step 5: 测试dns 联通
+    - name: Test SSH connection to master
+      run: |
+        ssh -i ~/.ssh/local_test.pem ubuntu@${{ steps.extract_nodes.outputs.master_dns }} 'hostname'
+
+        for WORKER in ${{ steps.extract_nodes.outputs.worker_dns }}; do
+          ssh -i ~/.ssh/local_test.pem ubuntu@$WORKER 'hostname'
+        done
+
+  
+    # Step 6: 读取 inventory.ini 文件内容
+    - name: Read inventory.ini content
+      id: read_inventory
+      run: |
+        cat ./ansible/inventory.ini
+        echo "INVENTORY_CONTENT<<EOF" >> $GITHUB_ENV
+        cat ./ansible/inventory.ini >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    # Step 7: 读取 known_hosts 文件内容并设置为环境变量
+    - name: Read known_hosts content
+      id: read_known_hosts
+      run: |
+        cat ~/.ssh/known_hosts
+        echo "KNOWN_HOSTS_CONTENT<<EOF" >> $GITHUB_ENV
+        cat ~/.ssh/known_hosts >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV

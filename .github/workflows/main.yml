@@ -30,6 +30,22 @@ jobs:
     - name: Deploy EC2 Instances
       uses: ./.github/actions/aws_create
 
-    # Step 5: 调用复合操作来销毁 EC2 实例
+
+    # Step 5: 使用 Ansible 部署 Spark 集群
+    - name: Run playbook
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_spark.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+
+    # Step 6: spark test
+    - name: Spark Test
+      uses: ./.github/actions/spark_test
+
+
+
+    # Step 7: 调用复合操作来销毁 EC2 实例
     - name: Terminate EC2 Instances
       uses: ./.github/actions/aws_destory
