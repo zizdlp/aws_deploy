@@ -3,7 +3,8 @@ name: Deploy and Test Spark Cluster on AWS
 on:
   push:
     branches:
-      - main
+      - main  # 当推送到主分支时触发
+
 jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
@@ -19,7 +20,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: cn-northwest-1
+        aws-region: cn-northwest-1  # 根据你的实际需求修改
 
     # Step 3: 添加 SSH 密钥
     - name: Ensure .ssh directory exists
@@ -37,7 +38,7 @@ jobs:
     - name: Deploy EC2 Instances
       uses: ./.github/actions/aws_create
 
-    # Step 4: 从 inventory.ini 文件提取 DNS
+    # Step 6: 从 inventory.ini 文件提取 DNS
     - name: Extract all nodes from inventory.ini
       id: extract_nodes
       run: |
@@ -59,37 +60,71 @@ jobs:
         for WORKER in $WORKER_DNS; do
           ssh-keyscan -H $WORKER >> ~/.ssh/known_hosts
         done
-    # Step 5: 测试dns 联通
+
+     # Step 7: 测试dns 联通
     - name: Test SSH connection to master
       run: |
-        ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS 'hostname'
+        ssh -i ~/.ssh/local_test.pem ubuntu@${{ steps.extract_nodes.outputs.master_dns }} 'hostname'
 
-        for WORKER in $WORKER_DNS; do
+    - name: Test SSH connection to workers
+      run: |
+        for WORKER in ${{ steps.extract_nodes.outputs.worker_dns }}; do
           ssh -i ~/.ssh/local_test.pem ubuntu@$WORKER 'hostname'
         done
-      shell: bash  # 添加 shell 指定属性
-        
 
+    # Step 8: 读取 inventory.ini 文件内容
+    - name: Read inventory.ini content
+      id: read_inventory
+      run: |
+        cat ./ansible/inventory.ini
+        echo "INVENTORY_CONTENT<<EOF" >> $GITHUB_ENV
+        cat ./ansible/inventory.ini >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
-
-    # Step 5: 使用 Ansible 部署 Spark 集群
+    # Step 9: 读取 known_hosts 文件内容并设置为环境变量
+    - name: Read known_hosts content
+      id: read_known_hosts
+      run: |
+        cat ~/.ssh/known_hosts
+        echo "KNOWN_HOSTS_CONTENT<<EOF" >> $GITHUB_ENV
+        cat ~/.ssh/known_hosts >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+  
+    # Step 10: 使用 Ansible 部署 Spark 集群
     - name: Run playbook
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_spark.yml
-        inventory: ${{ steps.extract_nodes.outputs.inventory_content }}
+        inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ steps.extract_nodes.outputs.known_hosts_content }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 6: spark test
-    - name: Spark Test
-      uses: ./.github/actions/spark_test
+    # Step 13: 运行 Spark 测试
+    - name: Extract Master DNS
+      id: extract_master_dns
+      run: |
+        MASTER_DNS=$(grep '^[master]' ./ansible/inventory.ini | head -n 1)
+        echo "MASTER_DNS=$MASTER_DNS" >> $GITHUB_ENV
 
+    # Step 14: Copy 测试文件到master
+    - name: Create directory on master
+      run: |
+        MASTER_DNS=${{ env.MASTER_DNS }}
+        ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS 'mkdir -p /home/ubuntu/tests'
 
+    - name: Copy Test cases
+      run: |
+        MASTER_DNS=${{ env.MASTER_DNS }}
+        scp -i ~/.ssh/local_test.pem ./tests/case0.py ubuntu@${MASTER_DNS}:/home/ubuntu/tests/case0.py
 
-    # Step 7: 调用复合操作来销毁 EC2 实例
+    # Step 15: 测试
+    - name: Run Spark Test
+      run: |
+        MASTER_DNS=${{ env.MASTER_DNS }}
+        ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        "export SPARK_HOME=/usr/local/spark; export PATH=\$PATH:\$SPARK_HOME/bin; spark-submit --master spark://$MASTER_DNS:7077 ~/tests/case0.py"
+    # # Step 8: 清理 EC2 实例
     - name: Terminate EC2 instances
       if: always()
       run: |
-        python ./scripts/terminate_ec2_instances.py
-      shell: bash  # 添加 shell 指定属性
+        python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
