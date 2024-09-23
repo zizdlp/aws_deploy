@@ -22,6 +22,14 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: cn-northwest-1
 
+    # Step 3: 添加 SSH 密钥
+    - name: Ensure .ssh directory exists
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
+        chmod 400 ~/.ssh/local_test.pem              
+        ls -la ~/.ssh/  # 查看文件列表和权限
+
     # Step 3: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
       uses: ./.github/actions/deps

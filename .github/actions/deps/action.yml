@@ -14,12 +14,3 @@ runs:
         python -m pip install --upgrade pip
         pip install boto3
       shell: bash  # 添加 shell 指定属性
-
-    # Step 3: 添加 SSH 密钥
-    - name: Ensure .ssh directory exists
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
-        chmod 400 ~/.ssh/local_test.pem              
-        ls -la ~/.ssh/  # 查看文件列表和权限
-      shell: bash  # 添加 shell 指定属性
