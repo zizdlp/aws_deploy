@@ -36,11 +36,8 @@ inventory_content += """
 [all:vars]
 ansible_user=ubuntu
 ansible_ssh_private_key_file=/home/runner/.ssh/local_test.pem
-nodes_ip_map='"""
-# 将字典转换为 JSON 字符串
-inventory_content += json.dumps(nodes_ip_map)
-inventory_content += """'"""
-
+nodes_ip_map={nodes_ip_map}
+""".format(nodes_ip_map=json.dumps(nodes_ip_map))
 
 # 写入 inventory.ini 文件
 with open('./ansible/inventory.ini', 'w') as f:
