@@ -91,14 +91,14 @@ jobs:
         echo "EOF" >> $GITHUB_ENV
   
 
-    #   # Step 10: 使用 Ansible 部署 Spark 集群
-    # - name: Install java & deps to nodes
-    #   uses: dawidd6/action-ansible-playbook@v2
-    #   with:
-    #     playbook: ./ansible/install_deps.yml
-    #     inventory: ${{ env.INVENTORY_CONTENT }}
-    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # Step 10: 使用 Ansible 部署 Spark 集群
+    - name: Install java & deps to nodes
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_deps.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     # # Step 10: 使用 Ansible 部署 Spark 集群
     # - name: install spark
@@ -109,14 +109,14 @@ jobs:
     #     key: ${{ secrets.SSH_PRIVATE_KEY }}
     #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # # Step 11: 使用 Ansible 部署 hadoop 集群
-    # - name: install hadoop
-    #   uses: dawidd6/action-ansible-playbook@v2
-    #   with:
-    #     playbook: ./ansible/install_hadoop.yml
-    #     inventory: ${{ env.INVENTORY_CONTENT }}
-    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # Step 11: 使用 Ansible 部署 hadoop 集群
+    - name: install hadoop
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_hadoop.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     # Step 11: 使用 Ansible 部署 mysql
     - name: install mysql
@@ -127,13 +127,13 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # Step 11: 使用 Ansible 部署 hive
-    # - name: install hive
-    #   uses: dawidd6/action-ansible-playbook@v2
-    #   with:
-    #     playbook: ./ansible/install_hive.yml
-    #     inventory: ${{ env.INVENTORY_CONTENT }}
-    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    - name: install hive
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_hive.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # # Step 13: 运行 Spark 测试
     # - name: Extract Master DNS
     #   id: extract_master_dns
