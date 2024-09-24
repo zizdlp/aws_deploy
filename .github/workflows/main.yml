@@ -118,9 +118,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-
-
-
     # Step 13: 运行 Spark 测试
     - name: Extract Master DNS
       id: extract_master_dns
