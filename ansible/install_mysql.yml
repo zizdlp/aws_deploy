@@ -33,11 +33,11 @@
         state: started
         enabled: yes
       when: "'master' in group_names"
-    # - name: Install Python MySQL dependencies (PyMySQL for Python 3)
-    #   package:
-    #     name: python3-pymysql
-    #     state: present
-    #   when: "'master' in group_names"
+    - name: Install Python MySQL dependencies (PyMySQL for Python 3)
+      package:
+        name: python3-pymysql
+        state: present
+      when: "'master' in group_names"
 
     # - name: Create Hive database and user
     #   mysql_db:
