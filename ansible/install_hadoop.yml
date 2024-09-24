@@ -82,6 +82,6 @@
         - workers
         - yarn-site.xml
     - name: Format HDFS on master node
-      command: hadoop namenode -format
+      command: sudo -i hadoop namenode -format
       when: inventory_hostname == groups['master'][0]   # 仅在 master 节点执行
       become: true   # 提升为 root 用户执行（如果需要）
