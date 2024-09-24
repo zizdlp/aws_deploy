@@ -85,9 +85,6 @@
       become: yes
       become_user: root
 
-
-
-
     ### 2.1 Add known hosts for all nodes
     # - name: Add host key for all nodes to known_hosts
     #   shell: ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
