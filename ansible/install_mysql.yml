@@ -14,6 +14,10 @@
     mysql_database: "hive"
     mysql_user: "hiveuser"
     mysql_password: "your_password"
+
+    hive_db_name: "hive"
+    hive_user: "hive"
+    hive_password: "*Hive123"
   # Define handlers for restarting the SSH service
  
   tasks:
@@ -52,20 +56,52 @@
     #     name: hive
     #   when: "'master' in group_names"
 
-    # - name: Modify MySQL bind address to 0.0.0.0
-    #   lineinfile:
-    #     path: /etc/mysql/mysql.conf.d/mysqld.cnf
-    #     regexp: '^bind-address'
-    #     line: 'bind-address = 0.0.0.0'
-    #   when: "'master' in group_names"
-    # - name: Restart MySQL service
-    #   service:
-    #     name: mysql
-    #     state: restarted
-    #   when: "'master' in group_names"
-    # - name: Check if MySQL is listening on port 3306
-    #   command: netstat -plunt | grep 3306
-    #   register: mysql_port_check
-    #   failed_when: mysql_port_check.stdout.find('0.0.0.0:3306') == -1
-    #   when: "'master' in group_names"
+    - name: Install Python MySQL dependencies (PyMySQL for Python 3)
+      package:
+        name: python3-pymysql
+        state: present
+
+    - name: Ensure MySQL is running
+      service:
+        name: mysql
+        state: started
+
+    - name: Create Hive database
+      mysql_db:
+        name: "{{ hive_db_name }}"
+        state: present
+        login_user: root  # 没有密码的情况下，不需要 login_password
+
+    - name: Create Hive user with permissions
+      mysql_user:
+        name: "{{ hive_user }}"
+        password: "{{ hive_password }}"
+        priv: "{{ hive_db_name }}.*:ALL"
+        host: "%"
+        state: present
+        login_user: root  # 没有密码的情况下，不需要 login_password
+
+    - name: Flush privileges to apply changes
+      mysql_query:
+        query: "FLUSH PRIVILEGES;"
+        login_user: root  # 没有密码的情况下，不需要 login_password
+
+
+
+    - name: Modify MySQL bind address to 0.0.0.0
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+      when: "'master' in group_names"
+    - name: Restart MySQL service
+      service:
+        name: mysql
+        state: restarted
+      when: "'master' in group_names"
+    - name: Check if MySQL is listening on port 3306
+      command: netstat -plunt | grep 3306
+      register: mysql_port_check
+      failed_when: mysql_port_check.stdout.find('0.0.0.0:3306') == -1
+      when: "'master' in group_names"
 
