@@ -1,0 +1,92 @@
+---
+- name: Install and Configure Hive Cluster
+  hosts: all
+  become: yes
+  vars:
+    hive_version: "4.0.0"  # Adjust Hive version as needed
+    hadoop_version: "3.3.5"  # Ensure compatibility
+    hadoop_home: "/usr/local/hadoop"
+    hive_home: "/usr/local/hive"
+    java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
+    mysql_host: "{{ groups['master'][0] }}"  # MySQL 主节点地址
+    mysql_database: "hive"
+    mysql_user: "hiveuser"
+    mysql_password: "your_password"
+
+  tasks:
+    - name: Create Hive directories
+      file:
+        path: "/opt/hive"
+        state: directory
+        owner: ubuntu
+        mode: '0755'
+
+    - name: Download Hive from S3
+      aws_s3:
+        bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
+        object: "apache-hive-{{ hive_version }}-bin.tar.gz"  # S3 中的 Hive 包
+        region: "cn-northwest-1"  # 替换为你的 S3 区域
+        dest: "/opt/hive/apache-hive-{{ hive_version }}-bin.tar.gz"  # 下载路径
+        mode: get
+
+    - name: Extract Hive
+      unarchive:
+        src: "/opt/hive/apache-hive-{{ hive_version }}-bin.tar.gz"
+        dest: "/opt/hive/"
+        remote_src: yes
+
+    - name: Symlink Hive to /usr/local/hive
+      file:
+        src: "/opt/hive/apache-hive-{{ hive_version }}-bin"
+        dest: "/usr/local/hive"
+        state: link
+
+    - name: Set environment variables for Hive
+      copy:
+        dest: /etc/profile.d/hive.sh
+        content: |
+          export HIVE_HOME=/usr/local/hive
+          export PATH=$PATH:$HIVE_HOME/bin
+        mode: '0644'
+
+    - name: Copy config files to all nodes
+      copy:
+        src: ./{{ item }}
+        dest: /usr/local/hive/conf/{{ item }}
+        owner: root
+        mode: '0644'
+      loop:
+        - hive-env.sh
+        - hive-site.xml
+
+    # - name: Download MySQL JDBC driver
+    #   get_url:
+    #     url: "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.25.tar.gz"
+    #     dest: "/opt/mysql-connector-java-8.0.25.tar.gz"
+
+    # - name: Extract MySQL JDBC driver
+    #   unarchive:
+    #     src: "/opt/mysql-connector-java-8.0.25.tar.gz"
+    #     dest: "/opt/"
+
+    # - name: Copy MySQL JDBC driver to Hive lib
+    #   copy:
+    #     src: "/opt/mysql-connector-java-8.0.25/mysql-connector-java-8.0.25.jar"
+    #     dest: "{{ hive_home }}/lib/"
+
+    # - name: Start Hive metastore
+    #   shell: |
+    #     export HIVE_HOME=/usr/local/hive
+    #     export HADOOP_HOME=/usr/local/hadoop
+    #     export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    #     $HIVE_HOME/bin/schematool -dbType mysql -initSchema
+    #     $HIVE_HOME/bin/hive --service metastore &
+    #   when: "'master' in group_names"
+
+    # - name: Start HiveServer2
+    #   shell: |
+    #     export HIVE_HOME=/usr/local/hive
+    #     export HADOOP_HOME=/usr/local/hadoop
+    #     export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    #     $HIVE_HOME/bin/hive --service hiveserver2 &
+    #   when: "'master' in group_names"

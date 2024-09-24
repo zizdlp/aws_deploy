@@ -100,14 +100,14 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 10: 使用 Ansible 部署 Spark 集群
-    - name: install spark
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_spark.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 10: 使用 Ansible 部署 Spark 集群
+    # - name: install spark
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_spark.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     # Step 11: 使用 Ansible 部署 hadoop 集群
     - name: install hadoop
@@ -118,30 +118,46 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 13: 运行 Spark 测试
-    - name: Extract Master DNS
-      id: extract_master_dns
-      run: |
-        MASTER_DNS=$(grep '^[master]' ./ansible/inventory.ini | head -n 1)
-        echo "MASTER_DNS=$MASTER_DNS" >> $GITHUB_ENV
+    # Step 11: 使用 Ansible 部署 mysql
+    - name: install mysql
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_mysql.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # Step 11: 使用 Ansible 部署 hive
+    - name: install hive
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_hive.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 13: 运行 Spark 测试
+    # - name: Extract Master DNS
+    #   id: extract_master_dns
+    #   run: |
+    #     MASTER_DNS=$(grep '^[master]' ./ansible/inventory.ini | head -n 1)
+    #     echo "MASTER_DNS=$MASTER_DNS" >> $GITHUB_ENV
 
-    # Step 14: Copy 测试文件到master
-    - name: Create directory on master
-      run: |
-        MASTER_DNS=${{ env.MASTER_DNS }}
-        ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS 'mkdir -p /home/ubuntu/tests'
+    # # Step 14: Copy 测试文件到master
+    # - name: Create directory on master
+    #   run: |
+    #     MASTER_DNS=${{ env.MASTER_DNS }}
+    #     ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS 'mkdir -p /home/ubuntu/tests'
 
-    - name: Copy Test cases
-      run: |
-        MASTER_DNS=${{ env.MASTER_DNS }}
-        scp -i ~/.ssh/local_test.pem ./tests/case0.py ubuntu@${MASTER_DNS}:/home/ubuntu/tests/case0.py
+    # - name: Copy Test cases
+    #   run: |
+    #     MASTER_DNS=${{ env.MASTER_DNS }}
+    #     scp -i ~/.ssh/local_test.pem ./tests/case0.py ubuntu@${MASTER_DNS}:/home/ubuntu/tests/case0.py
 
-    # Step 15: 测试
-    - name: Run Spark Test
-      run: |
-        MASTER_DNS=${{ env.MASTER_DNS }}
-        ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-        "export SPARK_HOME=/usr/local/spark; export PATH=\$PATH:\$SPARK_HOME/bin; spark-submit --master spark://$MASTER_DNS:7077 ~/tests/case0.py"
+    # # Step 15: 测试
+    # - name: Run Spark Test
+    #   run: |
+    #     MASTER_DNS=${{ env.MASTER_DNS }}
+    #     ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+    #     "export SPARK_HOME=/usr/local/spark; export PATH=\$PATH:\$SPARK_HOME/bin; spark-submit --master spark://$MASTER_DNS:7077 ~/tests/case0.py"
     # # # Step 8: 清理 EC2 实例
     # - name: Terminate EC2 instances
     #   if: always()
