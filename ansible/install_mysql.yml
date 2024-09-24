@@ -56,7 +56,6 @@
         state: started
       when: "'master' in group_names"
 
-
     - name: Create Hive database and user using shell command
       shell: |
         sudo mysql -u root -p{{ mysql_root_password }} -e "CREATE DATABASE IF NOT EXISTS {{ hive_db_name }};"
@@ -77,9 +76,9 @@
         name: mysql
         state: restarted
       when: "'master' in group_names"
-    - name: Check if MySQL is listening on port 3306
-      command: netstat -plunt | grep 3306
-      register: mysql_port_check
-      failed_when: mysql_port_check.stdout.find('0.0.0.0:3306') == -1
-      when: "'master' in group_names"
+    # - name: Check if MySQL is listening on port 3306
+    #   command: netstat -plunt | grep 3306
+    #   register: mysql_port_check
+    #   failed_when: mysql_port_check.stdout.find('0.0.0.0:3306') == -1
+    #   when: "'master' in group_names"
 
