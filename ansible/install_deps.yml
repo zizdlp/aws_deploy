@@ -94,16 +94,16 @@
     #   become: yes
     #   become_user: root
     #   loop: "{{ groups['all'] }}"
-    - name: Add public key for root to authorized_keys using a lockfile
-      shell: |
-        (
-          flock -x 200
-          echo "{{ public_key_root.stdout }}" >> /root/.ssh/authorized_keys
-        ) 200>/var/run/ansible_authorized_keys.lock
-      become: yes
-      become_user: root
+    - name: Add public key for root to authorized_keys using lineinfile
+      lineinfile:
+        path: /root/.ssh/authorized_keys
+        create: yes
+        line: "{{ public_key_root.stdout }}"
+        state: present
       delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
+      become: yes
+      become_user: root
 
     ### 3. 重启ssh
     - name: Ensure PubkeyAuthentication and AuthorizedKeysFile are set in /etc/ssh/sshd_config
