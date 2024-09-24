@@ -29,19 +29,26 @@
         state: started
         enabled: yes
       when: "'master' in group_names"
+    - name: Install Python MySQL dependencies (PyMySQL for Python 3)
+      hosts: master
+      become: yes
+      package:
+        name: python3-pymysql
+        state: present
+      when: "'master' in group_names"
+
     - name: Create Hive database and user
       mysql_db:
         name: hive
         state: present
-      when: "'master' in group_names"
-    - name: Create user for Hive with remote access
       mysql_user:
         name: hive
-        host: '%'
         password: "*Hive123"
         priv: 'hive.*:ALL'
+        host: "%"
         state: present
       when: "'master' in group_names"
+
     - name: Flush MySQL privileges
       mysql_user:
         name: hive
