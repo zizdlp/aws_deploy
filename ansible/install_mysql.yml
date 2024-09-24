@@ -29,43 +29,43 @@
         state: started
         enabled: yes
       when: "'master' in group_names"
-    - name: Install Python MySQL dependencies (PyMySQL for Python 3)
-      package:
-        name: python3-pymysql
-        state: present
-      when: "'master' in group_names"
+    # - name: Install Python MySQL dependencies (PyMySQL for Python 3)
+    #   package:
+    #     name: python3-pymysql
+    #     state: present
+    #   when: "'master' in group_names"
 
-    - name: Create Hive database and user
-      mysql_db:
-        name: hive
-        state: present
-      mysql_user:
-        name: hive
-        password: "*Hive123"
-        priv: 'hive.*:ALL'
-        host: "%"
-        state: present
-      when: "'master' in group_names"
+    # - name: Create Hive database and user
+    #   mysql_db:
+    #     name: hive
+    #     state: present
+    #   mysql_user:
+    #     name: hive
+    #     password: "*Hive123"
+    #     priv: 'hive.*:ALL'
+    #     host: "%"
+    #     state: present
+    #   when: "'master' in group_names"
 
-    - name: Flush MySQL privileges
-      mysql_user:
-        name: hive
-      when: "'master' in group_names"
+    # - name: Flush MySQL privileges
+    #   mysql_user:
+    #     name: hive
+    #   when: "'master' in group_names"
 
-    - name: Modify MySQL bind address to 0.0.0.0
-      lineinfile:
-        path: /etc/mysql/mysql.conf.d/mysqld.cnf
-        regexp: '^bind-address'
-        line: 'bind-address = 0.0.0.0'
-      when: "'master' in group_names"
-    - name: Restart MySQL service
-      service:
-        name: mysql
-        state: restarted
-      when: "'master' in group_names"
-    - name: Check if MySQL is listening on port 3306
-      command: netstat -plunt | grep 3306
-      register: mysql_port_check
-      failed_when: mysql_port_check.stdout.find('0.0.0.0:3306') == -1
-      when: "'master' in group_names"
+    # - name: Modify MySQL bind address to 0.0.0.0
+    #   lineinfile:
+    #     path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    #     regexp: '^bind-address'
+    #     line: 'bind-address = 0.0.0.0'
+    #   when: "'master' in group_names"
+    # - name: Restart MySQL service
+    #   service:
+    #     name: mysql
+    #     state: restarted
+    #   when: "'master' in group_names"
+    # - name: Check if MySQL is listening on port 3306
+    #   command: netstat -plunt | grep 3306
+    #   register: mysql_port_check
+    #   failed_when: mysql_port_check.stdout.find('0.0.0.0:3306') == -1
+    #   when: "'master' in group_names"
 
