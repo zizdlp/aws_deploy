@@ -74,26 +74,6 @@
     #   loop: "{{ groups['all'] }}"
 
     ## 避免并发问题
-    - name: Add public key for root to authorized_keys using a lockfile
-      shell: |
-        {
-          flock -x 200
-          echo "{{ public_key_root.stdout }}" >> /root/.ssh/authorized_keys
-        } 200>/var/run/ansible_authorized_keys.lock
-      become: yes
-      become_user: root
-      loop: "{{ groups['all'] }}"
-
-
-
-
-
-    ### 2.1 Add known hosts for all nodes
-    # - name: Add host key for all nodes to known_hosts
-    #   shell: ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
-    #   become: yes
-    #   become_user: root
-    #   loop: "{{ groups['all'] }}"
     - name: Add public key for root to authorized_keys using lineinfile
       lineinfile:
         path: /root/.ssh/authorized_keys
@@ -104,6 +84,25 @@
       loop: "{{ groups['all'] }}"
       become: yes
       become_user: root
+
+
+
+
+    ### 2.1 Add known hosts for all nodes
+    # - name: Add host key for all nodes to known_hosts
+    #   shell: ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
+    #   become: yes
+    #   become_user: root
+    #   loop: "{{ groups['all'] }}"
+    - name: Add host key for all nodes to known_hosts using lineinfile
+      lineinfile:
+        path: /root/.ssh/known_hosts
+        line: "{{ lookup('pipe', 'ssh-keyscan -H ' + item) }}"
+        create: yes
+        state: present
+      become: yes
+      become_user: root
+      loop: "{{ groups['all'] }}"
 
     ### 3. 重启ssh
     - name: Ensure PubkeyAuthentication and AuthorizedKeysFile are set in /etc/ssh/sshd_config
