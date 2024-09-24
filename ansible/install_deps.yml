@@ -65,21 +65,45 @@
       become: yes
       become_user: root
 
-    - name: Share root public key with all other nodes
-      authorized_key:
-        user: root
-        state: present
-        key: "{{ public_key_root.stdout }}"
+    # - name: Share root public key with all other nodes
+    #   authorized_key:
+    #     user: root
+    #     state: present
+    #     key: "{{ public_key_root.stdout }}"
+    #   delegate_to: "{{ item }}"
+    #   loop: "{{ groups['all'] }}"
+
+    ## 避免并发问题
+    - name: Add public key for root to authorized_keys using a lockfile
+      shell: |
+        (
+          flock -x 200
+          echo "{{ public_key_root.stdout }}" >> /root/.ssh/authorized_keys
+        ) 200>/var/run/ansible_authorized_keys.lock
       delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
+      become: yes
+      become_user: root
+
+
+
+
 
     ### 2.1 Add known hosts for all nodes
-    - name: Add host key for all nodes to known_hosts
-      shell: ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
+    # - name: Add host key for all nodes to known_hosts
+    #   shell: ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
+    #   become: yes
+    #   become_user: root
+    #   loop: "{{ groups['all'] }}"
+    - name: Add host key for all nodes to known_hosts using a lockfile
+      shell: |
+        (
+          flock -x 200
+          ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
+        ) 200>/var/run/ansible_known_hosts.lock
       become: yes
       become_user: root
       loop: "{{ groups['all'] }}"
-
 
 
     ### 3. 重启ssh
