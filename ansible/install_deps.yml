@@ -94,16 +94,16 @@
     #   become: yes
     #   become_user: root
     #   loop: "{{ groups['all'] }}"
-    - name: Add host key for all nodes to known_hosts using a lockfile
+    - name: Add public key for root to authorized_keys using a lockfile
       shell: |
-        {
+        (
           flock -x 200
-          ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
-        } 200>/var/run/ansible_known_hosts.lock
+          echo "{{ public_key_root.stdout }}" >> /root/.ssh/authorized_keys
+        ) 200>/var/run/ansible_authorized_keys.lock
       become: yes
       become_user: root
+      delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
-
 
     ### 3. 重启ssh
     - name: Ensure PubkeyAuthentication and AuthorizedKeysFile are set in /etc/ssh/sshd_config
