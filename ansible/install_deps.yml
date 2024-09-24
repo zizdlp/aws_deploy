@@ -42,46 +42,8 @@
       when: ansible_facts['distribution'] == 'Ubuntu'
       tags:
         - setup
-    ### 2. 设置免密登录
-    - name: Ensure .ssh directory exists
-      file:
-        path: /home/{{ ansible_user }}/.ssh
-        state: directory
-        mode: '0700'
-      become: yes
-      become_user: "{{ ansible_user }}"
 
-    - name: Generate SSH key pair if not present
-      command: ssh-keygen -t rsa -b 2048 -f /home/{{ ansible_user }}/.ssh/id_rsa -N ''
-      args:
-        creates: /home/{{ ansible_user }}/.ssh/id_rsa
-      become: yes
-      become_user: "{{ ansible_user }}"
-
-    - name: Read public key
-      command: cat /home/{{ ansible_user }}/.ssh/id_rsa.pub
-      register: public_key
-      become: yes
-      become_user: "{{ ansible_user }}"
-
-    - name: Share public key with all other nodes
-      authorized_key:
-        user: "{{ ansible_user }}"
-        state: present
-        key: "{{ public_key.stdout }}"
-      delegate_to: "{{ item }}"
-      loop: "{{ groups['all'] }}"
-      # when: inventory_hostname != item  # Avoid adding public key to the same host
-
-    ### 2.1. Add known hosts for all nodes
-    - name: Add host key for all nodes to known_hosts
-      shell: ssh-keyscan -H "{{ item }}" >> /home/{{ ansible_user }}/.ssh/known_hosts
-      become: yes
-      become_user: "{{ ansible_user }}"
-      loop: "{{ groups['all'] }}"
-      # when: inventory_hostname != item  # Skip the current host
-
-    ### 3. 设置免密登录（为root用户）
+    ### 2. 设置免密登录（为root用户）
     - name: Ensure .ssh directory exists for root
       file:
         path: /root/.ssh
@@ -110,6 +72,15 @@
         key: "{{ public_key_root.stdout }}"
       delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
+
+    ### 2.1 Add known hosts for all nodes
+    - name: Add host key for all nodes to known_hosts
+      shell: ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
+      become: yes
+      become_user: root
+      loop: "{{ groups['all'] }}"
+
+
 
     ### 3. 重启ssh
     - name: Ensure PubkeyAuthentication and AuthorizedKeysFile are set in /etc/ssh/sshd_config
