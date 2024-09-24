@@ -39,23 +39,6 @@
         state: present
       when: "'master' in group_names"
 
-    # - name: Create Hive database and user
-    #   mysql_db:
-    #     name: hive
-    #     state: present
-    #   mysql_user:
-    #     name: hive
-    #     password: "*Hive123"
-    #     priv: 'hive.*:ALL'
-    #     host: "%"
-    #     state: present
-    #   when: "'master' in group_names"
-
-    # - name: Flush MySQL privileges
-    #   mysql_user:
-    #     name: hive
-    #   when: "'master' in group_names"
-
     - name: Create /root/.my.cnf file for MySQL root user
       copy:
         dest: /root/.my.cnf
@@ -74,32 +57,14 @@
       when: "'master' in group_names"
 
 
-    - name: Create Hive database
-      mysql_db:
-        name: "{{ hive_db_name }}"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"  # 使用 root 用户密码进行连接
+    - name: Create Hive database and user using shell command
+      shell: |
+        sudo mysql -u root -p{{ mysql_root_password }} -e "CREATE DATABASE IF NOT EXISTS {{ hive_db_name }};"
+        sudo mysql -u root -p{{ mysql_root_password }} -e "CREATE USER IF NOT EXISTS '{{ hive_user }}'@'%' IDENTIFIED BY '{{ hive_password }}';"
+        sudo mysql -u root -p{{ mysql_root_password }} -e "GRANT ALL PRIVILEGES ON {{ hive_db_name }}.* TO '{{ hive_user }}'@'%';"
+        sudo mysql -u root -p{{ mysql_root_password }} -e "FLUSH PRIVILEGES;"
+      become: yes
       when: "'master' in group_names"
-    - name: Create Hive user with permissions
-      mysql_user:
-        name: "{{ hive_user }}"
-        password: "{{ hive_password }}"
-        priv: "{{ hive_db_name }}.*:ALL"
-        host: "%"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"  # 使用 root 用户密码进行连接
-      when: "'master' in group_names"
-    - name: Flush privileges to apply changes
-      mysql_query:
-        query: "FLUSH PRIVILEGES;"
-        login_user: root
-        login_password: "{{ mysql_root_password }}"  # 使用 root 用户密码进行连接
-      when: "'master' in group_names"
-
-
-
 
     - name: Modify MySQL bind address to 0.0.0.0
       lineinfile:
