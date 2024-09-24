@@ -14,7 +14,7 @@
     mysql_database: "hive"
     mysql_user: "hiveuser"
     mysql_password: "your_password"
-
+    mysql_root_password: "helloworld"
     hive_db_name: "hive"
     hive_user: "hive"
     hive_password: "*Hive123"
@@ -56,10 +56,21 @@
     #     name: hive
     #   when: "'master' in group_names"
 
-    - name: Install Python MySQL dependencies (PyMySQL for Python 3)
-      package:
-        name: python3-pymysql
-        state: present
+    - name: Create /root/.my.cnf file for MySQL root user
+      copy:
+        dest: /root/.my.cnf
+        content: |
+          [client]
+          user=root
+          password=helloworld  # 将your_password替换为你的 MySQL root 用户的密码
+        owner: root
+        group: root
+        mode: '0600'  # 确保只有 root 用户能读取文件
+      when: "'master' in group_names"
+    - name: Ensure MySQL is running
+      service:
+        name: mysql
+        state: started
       when: "'master' in group_names"
 
 
@@ -67,7 +78,8 @@
       mysql_db:
         name: "{{ hive_db_name }}"
         state: present
-        login_user: root  # 没有密码的情况下，不需要 login_password
+        login_user: root
+        login_password: "{{ mysql_root_password }}"  # 使用 root 用户密码进行连接
       when: "'master' in group_names"
     - name: Create Hive user with permissions
       mysql_user:
@@ -76,13 +88,19 @@
         priv: "{{ hive_db_name }}.*:ALL"
         host: "%"
         state: present
-        login_user: root  # 没有密码的情况下，不需要 login_password
+        login_user: root
+        login_password: "{{ mysql_root_password }}"  # 使用 root 用户密码进行连接
       when: "'master' in group_names"
     - name: Flush privileges to apply changes
       mysql_query:
         query: "FLUSH PRIVILEGES;"
-        login_user: root  # 没有密码的情况下，不需要 login_password
+        login_user: root
+        login_password: "{{ mysql_root_password }}"  # 使用 root 用户密码进行连接
       when: "'master' in group_names"
+
+
+
+
     - name: Modify MySQL bind address to 0.0.0.0
       lineinfile:
         path: /etc/mysql/mysql.conf.d/mysqld.cnf
