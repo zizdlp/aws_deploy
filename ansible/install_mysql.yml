@@ -60,18 +60,15 @@
       package:
         name: python3-pymysql
         state: present
+      when: "'master' in group_names"
 
-    - name: Ensure MySQL is running
-      service:
-        name: mysql
-        state: started
 
     - name: Create Hive database
       mysql_db:
         name: "{{ hive_db_name }}"
         state: present
         login_user: root  # 没有密码的情况下，不需要 login_password
-
+      when: "'master' in group_names"
     - name: Create Hive user with permissions
       mysql_user:
         name: "{{ hive_user }}"
@@ -80,14 +77,12 @@
         host: "%"
         state: present
         login_user: root  # 没有密码的情况下，不需要 login_password
-
+      when: "'master' in group_names"
     - name: Flush privileges to apply changes
       mysql_query:
         query: "FLUSH PRIVILEGES;"
         login_user: root  # 没有密码的情况下，不需要 login_password
-
-
-
+      when: "'master' in group_names"
     - name: Modify MySQL bind address to 0.0.0.0
       lineinfile:
         path: /etc/mysql/mysql.conf.d/mysqld.cnf
