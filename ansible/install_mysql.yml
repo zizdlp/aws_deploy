@@ -30,8 +30,6 @@
         enabled: yes
       when: "'master' in group_names"
     - name: Install Python MySQL dependencies (PyMySQL for Python 3)
-      hosts: master
-      become: yes
       package:
         name: python3-pymysql
         state: present
