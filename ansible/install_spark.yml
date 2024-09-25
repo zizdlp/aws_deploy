@@ -2,7 +2,7 @@
   hosts: all
   become: yes
   vars:
-    spark_version: "3.4.3"  # Adjust Spark version as needed
+    spark_version: "3.4.1"  # Adjust Spark version as needed
     hadoop_version: "3.3.5"  # Ensure compatibility
     hadoop_home: "/usr/local/hadoop"
     hive_version: "4.0.0"    # Update as needed
@@ -19,7 +19,7 @@
   tasks:
     - name: Create Spark directories
       file:
-        path: "/opt/spark"
+        path: "/opt/spark-{{spark_version}}"
         state: directory
         owner: ubuntu
         mode: '0755'
@@ -27,20 +27,20 @@
     - name: Download Spark from S3
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的S3 bucket名称
-        object: "spark-{{ spark_version }}-bin-hadoop3.tgz"  # S3中的对象路径
+        object: "spark-{{ spark_version }}.tgz"  # S3中的对象路径
         region: "cn-northwest-1"  # 替换为你的 S3 桶所在区域
-        dest: "/opt/spark/spark-{{ spark_version }}-bin-hadoop3.tgz"  # 下载到本地的路径
+        dest: "/opt/spark-{{ spark_version }}.tgz"  # 下载到本地的路径
         mode: get  # 下载模式
 
     - name: Extract Spark
       unarchive:
-        src: "/opt/spark/spark-{{ spark_version }}-bin-hadoop3.tgz"
-        dest: "/opt/spark/"
+        src: "/opt/spark-{{ spark_version }}.tgz"
+        dest: "/opt/"
         remote_src: yes
 
     - name: Symlink Spark to /usr/local/spark
       file:
-        src: "/opt/spark/spark-{{ spark_version }}-bin-hadoop3"
+        src: "/opt/spark-{{ spark_version }}"
         dest: "/usr/local/spark"
         state: link
 
@@ -52,22 +52,34 @@
           export PATH=$PATH:$SPARK_HOME/bin
         mode: '0644'
 
-    - name: Start Spark master
-      shell: |
-        export SPARK_HOME=/usr/local/spark
-        export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-        export HADOOP_HOME=/usr/local/hadoop
-        export HIVE_HOME=/usr/local/hive
-        export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin
-        $SPARK_HOME/sbin/start-master.sh
-      when: "'master' in group_names"
+    - name: Copy config files to all nodes
+      copy:
+        src: ./{{ item }}
+        dest: /usr/local/spark/conf/{{ item }}
+        owner: root
+        mode: '0644'
+      loop:
+        - spark-env.sh
+        - spark-defaults.conf
+        - hive-site.xml
+        - workers
 
-    - name: Start Spark worker
-      shell: |
-        export SPARK_HOME=/usr/local/spark
-        export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-        export HADOOP_HOME=/usr/local/hadoop
-        export HIVE_HOME=/usr/local/hive
-        export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin
-        $SPARK_HOME/sbin/start-slave.sh spark://node0:7077
-      when: "'worker' in group_names"
+    # - name: Start Spark master
+    #   shell: |
+    #     export SPARK_HOME=/usr/local/spark
+    #     export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    #     export HADOOP_HOME=/usr/local/hadoop
+    #     export HIVE_HOME=/usr/local/hive
+    #     export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin
+    #     $SPARK_HOME/sbin/start-master.sh
+    #   when: "'master' in group_names"
+
+    # - name: Start Spark worker
+    #   shell: |
+    #     export SPARK_HOME=/usr/local/spark
+    #     export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    #     export HADOOP_HOME=/usr/local/hadoop
+    #     export HIVE_HOME=/usr/local/hive
+    #     export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin
+    #     $SPARK_HOME/sbin/start-slave.sh spark://node0:7077
+    #   when: "'worker' in group_names"
