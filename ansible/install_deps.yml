@@ -123,6 +123,41 @@
     #   delay: 10
     #   until: upgrade_result is succeeded
 
+    ## 1. 备份 sources.list
+    - name: Backup existing sources.list
+      command: cp /etc/apt/sources.list /etc/apt/sources.list.bak
+      become: yes
+
+    ## 2. 替换为阿里云镜像源 (Ubuntu 22.04)
+    - name: Set Aliyun apt source list for Ubuntu 22.04
+      blockinfile:
+        path: /etc/apt/sources.list
+        create: yes
+        block: |
+          deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+          deb http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
+          deb http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
+          deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
+      become: yes
+
+    ## 3. 更新包列表并升级
+    - name: Update package list
+      apt:
+        update_cache: yes
+      register: update_result
+      retries: 3
+      delay: 10
+      until: update_result is succeeded
+      become: yes
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+      register: upgrade_result
+      retries: 3
+      delay: 10
+      until: upgrade_result is succeeded
+      become: yes
     - name: Install necessary software
       apt:
         name: 
