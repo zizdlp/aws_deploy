@@ -134,6 +134,14 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # Step 12: 使用 Ansible 部署 scala
+    - name: install hive
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_scala.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # # Step 13: 运行 Spark 测试
     # - name: Extract Master DNS
     #   id: extract_master_dns
