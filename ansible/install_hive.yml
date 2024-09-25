@@ -16,7 +16,7 @@
   tasks:
     - name: Create Hive directories
       file:
-        path: "/opt/hive"
+        path: "/opt/hive-{{ hive_version }}"
         state: directory
         owner: ubuntu
         mode: '0755'
@@ -24,20 +24,20 @@
     - name: Download Hive from S3
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
-        object: "apache-hive-{{ hive_version }}-bin.tar.gz"  # S3 中的 Hive 包
+        object: "hive-{{ hive_version }}.tar.gz"  # S3 中的 Hive 包
         region: "cn-northwest-1"  # 替换为你的 S3 区域
-        dest: "/opt/hive/apache-hive-{{ hive_version }}-bin.tar.gz"  # 下载路径
+        dest: "/opt/hive-{{ hive_version }}.tar.gz"  # 下载路径
         mode: get
 
     - name: Extract Hive
       unarchive:
-        src: "/opt/hive/apache-hive-{{ hive_version }}-bin.tar.gz"
-        dest: "/opt/hive/"
+        src: "/opt/hive-{{ hive_version }}.tar.gz"
+        dest: "/opt/hive-{{ hive_version }}"
         remote_src: yes
 
     - name: Symlink Hive to /usr/local/hive
       file:
-        src: "/opt/hive/apache-hive-{{ hive_version }}-bin"
+        src: "/opt/hive-{{ hive_version }}"
         dest: "/usr/local/hive"
         state: link
 
@@ -49,15 +49,15 @@
           export PATH=$PATH:$HIVE_HOME/bin
         mode: '0644'
 
-    - name: Copy config files to all nodes
-      copy:
-        src: ./{{ item }}
-        dest: /usr/local/hive/conf/{{ item }}
-        owner: root
-        mode: '0644'
-      loop:
-        - hive-env.sh
-        - hive-site.xml
+    # - name: Copy config files to all nodes
+    #   copy:
+    #     src: ./{{ item }}
+    #     dest: /usr/local/hive/conf/{{ item }}
+    #     owner: root
+    #     mode: '0644'
+    #   loop:
+    #     - hive-env.sh
+    #     - hive-site.xml
 
     # - name: Download MySQL JDBC driver
     #   get_url:
