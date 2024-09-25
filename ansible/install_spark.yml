@@ -27,14 +27,14 @@
     - name: Download Spark from S3
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的S3 bucket名称
-        object: "spark-{{ spark_version }}.tgz"  # S3中的对象路径
+        object: "spark-{{ spark_version }}.tar.gz"  # S3中的对象路径
         region: "cn-northwest-1"  # 替换为你的 S3 桶所在区域
-        dest: "/opt/spark-{{ spark_version }}.tgz"  # 下载到本地的路径
+        dest: "/opt/spark-{{ spark_version }}.tar.gz"  # 下载到本地的路径
         mode: get  # 下载模式
 
     - name: Extract Spark
       unarchive:
-        src: "/opt/spark-{{ spark_version }}.tgz"
+        src: "/opt/spark-{{ spark_version }}.tar.gz"
         dest: "/opt/"
         remote_src: yes
 
