@@ -106,22 +106,22 @@
         backup: yes
       notify: Restart SSH
 
-    ## 4 install deps
-    - name: Update package list
-      apt:
-        update_cache: yes
-      register: update_result
-      retries: 3
-      delay: 10
-      until: update_result is succeeded
+    # ## 4 install deps
+    # - name: Update package list
+    #   apt:
+    #     update_cache: yes
+    #   register: update_result
+    #   retries: 3
+    #   delay: 10
+    #   until: update_result is succeeded
 
-    - name: Upgrade all packages
-      apt:
-        upgrade: dist
-      register: upgrade_result
-      retries: 3
-      delay: 10
-      until: upgrade_result is succeeded
+    # - name: Upgrade all packages
+    #   apt:
+    #     upgrade: dist
+    #   register: upgrade_result
+    #   retries: 3
+    #   delay: 10
+    #   until: upgrade_result is succeeded
 
     - name: Install necessary software
       apt:
