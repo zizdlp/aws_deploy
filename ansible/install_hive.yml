@@ -82,7 +82,7 @@
       when: "'master' in group_names"
 
     - name: Start Hive Metastore service in the background
-      shell: "nohup hive --service metastore > metastore.log 2>&1 &"
+      shell: "sudo -i hive --service metastore > hive_store.log 2>&1"
       args:
         chdir: "{{ hive_home }}"
       async: 0
@@ -90,7 +90,7 @@
       when: "'master' in group_names"
 
     - name: Start HiveServer2 service in the background
-      shell: "nohup hive --service hiveserver2 > hiveserver2.log 2>&1 &"
+      shell: "sudo -i hive --service hiveserver2 > hive_server.log 2>&1"
       args:
         chdir: "{{ hive_home }}"
       async: 0
