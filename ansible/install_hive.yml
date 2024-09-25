@@ -80,6 +80,21 @@
         sudo -i hdfs dfs -chmod -R 777 /user/hive
         sudo -i hdfs dfs -chmod -R 777 /user/metastore
       when: "'master' in group_names"
+
+    - name: Start Hive Metastore service in the background
+      shell: "sudo -i hive --service metastore &"
+      args:
+        chdir: "{{ hive_home }}"
+      async: 0
+      poll: 0
+      when: "'master' in group_names"
+    - name: Start HiveServer2 service in the background
+      shell: "sudo -i hive --service hiveserver2 &"
+      args:
+        chdir: "{{ hive_home }}"
+      async: 0
+      poll: 0
+      when: "'master' in group_names"
     # - name: Download MySQL JDBC driver
     #   get_url:
     #     url: "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.25.tar.gz"

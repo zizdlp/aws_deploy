@@ -1,0 +1,37 @@
+- name: Install Scala
+  hosts: all
+  become: yes
+  vars:
+    scala_version: "2.12.18"
+    scala_home: "/opt/scala-{{ scala_version }}"
+
+  tasks:
+    - name: Create Scala directory
+      file:
+        path: "{{ scala_home }}"
+        state: directory
+
+    - name: Download and extract Scala
+      unarchive:
+        src: "https://downloads.lightbend.com/scala/{{ scala_version }}/scala-{{ scala_version }}.tgz"
+        dest: "/opt"
+        remote_src: yes
+
+    - name: Symlink Scala to /usr/local/scala
+      file:
+        src: "{{ scala_home }}"
+        dest: "/usr/local/scala"
+        state: link
+
+    - name: Set environment variables for Scala
+      copy:
+        dest: /etc/profile.d/scala.sh
+        content: |
+          export SCALA_HOME=/usr/local/scala
+          export PATH=$PATH:$SCALA_HOME/bin
+        mode: '0644'
+
+    - name: Source the Scala environment variables
+      shell: source /etc/profile.d/scala.sh
+      args:
+        executable: /bin/bash
