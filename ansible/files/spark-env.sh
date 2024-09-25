@@ -1,0 +1,14 @@
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_HOME=/usr/local/hadoop
+export SCALA_HOME=/usr/local/scala
+export SPARK_HOME=/usr/local/spark
+export YARN_CONF_DIR=${HADOOP_HOME}/etc/hadoop/
+export SPARK_DIST_CLASSPATH=$(hadoop classpath)
+export SPARK_MASTER_IP=node0
+export SPARK_WORKER_CORES=4
+export SPARK_WORKER_INSTANCES=3
+export SPARK_WORKER_MEMORY=12g
+export SPARK_EXECUTOR_CORES=1
+export SPARK_EXECUTOR_MEMORY=3g
+export SPARK_DRIVER_MEMORY=10g
+export SPARK_MASTER_HOST=node0
