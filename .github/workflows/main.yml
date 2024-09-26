@@ -91,7 +91,7 @@ jobs:
         echo "EOF" >> $GITHUB_ENV
   
 
-    # Step 10: 使用 Ansible 部署 Spark 集群
+    # Step 10: 使用 Ansible 安装依赖
     - name: Install java & deps to nodes
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -100,6 +100,14 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
+    # Step 12: 使用 Ansible 部署 scala
+    - name: install scala
+    uses: dawidd6/action-ansible-playbook@v2
+    with:
+      playbook: ./ansible/install_scala.yml
+      inventory: ${{ env.INVENTORY_CONTENT }}
+      key: ${{ secrets.SSH_PRIVATE_KEY }}
+      known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # Step 10: 使用 Ansible 部署 Spark 集群
     - name: install spark
       uses: dawidd6/action-ansible-playbook@v2
@@ -131,14 +139,6 @@ jobs:
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_hive.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    # Step 12: 使用 Ansible 部署 scala
-    - name: install scala
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_scala.yml
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}

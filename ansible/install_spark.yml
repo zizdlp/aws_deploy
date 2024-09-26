@@ -63,6 +63,7 @@
         - spark-defaults.conf
         - hive-site.xml
         - workers
+        - log4j2.properties
 
     # - name: Start Spark master
     #   shell: |

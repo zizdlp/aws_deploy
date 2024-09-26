@@ -1,38 +1,31 @@
-- name: Install and Configure Spark Cluster
+- name: Install and Configure hadoop Cluster
   hosts: all
   become: yes
   vars:
-    hadoop_version: "3.3.5"  # Ensure compatibility
+    hadoop_version: "3.3.3"  # Ensure compatibility
     hadoop_home: "/usr/local/hadoop"
     java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
     hadoop_user: "root"
 
   tasks:
-    - name: Ensure /opt/hadoop directory exists
-      file:
-        path: /opt/hadoop
-        state: directory
-        mode: '0755'
-      become: true  # 提升权限以确保目录创建和文件写入
-
     - name: Download Hadoop from S3
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的S3 bucket名称
         object: "hadoop-{{ hadoop_version }}.tar.gz"  # S3中的对象路径
         region: "cn-northwest-1"  # 替换为你的 S3 桶所在区域
-        dest: "/opt/hadoop/hadoop-{{ hadoop_version }}.tar.gz"
+        dest: "/opt/hadoop-{{ hadoop_version }}.tar.gz"
         mode: get  # 下载模式
 
     - name: Extract Hadoop
       unarchive:
-        src: "/opt/hadoop/hadoop-{{ hadoop_version }}.tar.gz"
-        dest: "/opt/hadoop/"
+        src: "/opt/hadoop-{{ hadoop_version }}.tar.gz"
+        dest: "/opt/"
         remote_src: yes
       become: true  # 确保拥有足够的权限进行解压
 
     - name: Ensure symlink /usr/local/hadoop points to the correct Hadoop version
       file:
-        src: "/opt/hadoop/hadoop-{{ hadoop_version }}"
+        src: "/opt/hadoop-{{ hadoop_version }}"
         dest: "{{ hadoop_home }}"
         state: link
         force: true  # 强制覆盖已存在的文件或链接
