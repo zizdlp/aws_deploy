@@ -133,3 +133,8 @@
         name: hive-server2
         enabled: yes
         state: started
+    - name: Start Spark History Server
+      shell: /opt/spark-3.4.1/sbin/start-history-server.sh
+      args:
+        chdir: /opt/spark-3.4.1
+      when: "'master' in group_names"

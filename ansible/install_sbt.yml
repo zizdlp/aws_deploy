@@ -1,0 +1,39 @@
+- name: Install SBT
+  hosts: all
+  become: yes
+  tasks:
+    - name: Download and extract SBT
+      get_url:
+        url: https://github.com/sbt/sbt/releases/download/v1.10.1/sbt-1.10.1.tgz
+        dest: /opt/sbt.tgz
+      when: "'master' in group_names"
+    - name: Extract SBT
+      unarchive:
+        src: /opt/sbt.tgz
+        dest: /opt
+        remote_src: yes
+      when: "'master' in group_names"
+    - name: Remove the downloaded tar file
+      file:
+        path: /opt/sbt.tgz
+        state: absent
+      when: "'master' in group_names"
+    - name: Create symlink for sbt
+      file:
+        src: /opt/sbt/bin/sbt
+        dest: /usr/local/bin/sbt
+        state: link
+      when: "'master' in group_names"
+    - name: Ensure sbt is executable
+      file:
+        path: /usr/local/bin/sbt
+        mode: '0755'
+      when: "'master' in group_names"
+    - name: Check SBT version
+      command: sbt --version
+      register: sbt_version
+      when: "'master' in group_names"
+    - name: Display SBT version
+      debug:
+        var: sbt_version.stdout
+      when: "'master' in group_names"
