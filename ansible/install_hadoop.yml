@@ -57,13 +57,13 @@
 
     - name: Ensure target directory exists
       file:
-        path: /opt/hadoop/hadoop-{{ hadoop_version }}/etc/hadoop/
+        path: /opt/hadoop-{{ hadoop_version }}/etc/hadoop/
         state: directory
         mode: '0755'
     - name: Copy config files to all nodes
       copy:
         src: ./{{ item }}
-        dest: /opt/hadoop/hadoop-{{ hadoop_version }}/etc/hadoop/{{ item }}
+        dest: /opt/hadoop-{{ hadoop_version }}/etc/hadoop/{{ item }}
         owner: "{{ ansible_user }}"
         mode: '0644'
       loop:

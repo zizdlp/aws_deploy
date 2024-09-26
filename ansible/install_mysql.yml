@@ -3,7 +3,6 @@
   become: yes
   vars:
     spark_version: "3.4.3"  # Adjust Spark version as needed
-    hadoop_version: "3.3.5"  # Ensure compatibility
     hadoop_home: "/usr/local/hadoop"
     hive_version: "4.0.0"    # Update as needed
     hive_home: "/usr/local/hive"

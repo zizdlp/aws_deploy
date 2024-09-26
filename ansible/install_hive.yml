@@ -4,7 +4,6 @@
   become: yes
   vars:
     hive_version: "4.0.0"  # Adjust Hive version as needed
-    hadoop_version: "3.3.5"  # Ensure compatibility
     hadoop_home: "/usr/local/hadoop"
     hive_home: "/usr/local/hive"
     java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
