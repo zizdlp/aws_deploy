@@ -108,7 +108,7 @@
           After=network.target
 
           [Service]
-          User=hive
+          User=root
           ExecStart=/usr/local/hive/bin/hive --service metastore
           Restart=on-failure
 
@@ -126,7 +126,7 @@
           After=network.target
 
           [Service]
-          User=hive
+          User=root
           ExecStart=/usr/local/hive/bin/hive --service hiveserver2
           Restart=on-failure
 
