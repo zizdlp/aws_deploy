@@ -81,12 +81,19 @@
         sudo -i hdfs dfs -chmod -R 777 /user/metastore
       when: "'master' in group_names"
 
+    # - name: Start Hive Metastore service synchronously
+    #   shell: "sudo -i nohup hive --service metastore > hive_store.log 2>&1 &"
+    #   when: "'master' in group_names"
+
+    # - name: Start HiveServer2 service in the background
+    #   shell: "sudo -i nohup hive --service hiveserver2 > hive_server.log 2>&1 &"
+    #   when: "'master' in group_names"
     - name: Start Hive Metastore service synchronously
-      shell: "sudo -i nohup hive --service metastore > hive_store.log 2>&1 &"
+      shell: "sudo -i nohup hive --service metastore > hive_store.log 2>&1 & disown"
       when: "'master' in group_names"
 
     - name: Start HiveServer2 service in the background
-      shell: "sudo -i nohup hive --service hiveserver2 > hive_server.log 2>&1 &"
+      shell: "sudo -i nohup hive --service hiveserver2 > hive_server.log 2>&1 & disown"
       when: "'master' in group_names"
     # - name: Download MySQL JDBC driver
     #   get_url:
