@@ -6,11 +6,6 @@
     scala_home: "/opt/scala-{{ scala_version }}"
 
   tasks:
-    - name: Create Scala directory
-      file:
-        path: "{{ scala_home }}"
-        state: directory
-
     - name: Download scala from S3
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
