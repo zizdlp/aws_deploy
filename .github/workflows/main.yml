@@ -102,12 +102,12 @@ jobs:
 
     # Step 12: 使用 Ansible 部署 scala
     - name: install scala
-    uses: dawidd6/action-ansible-playbook@v2
-    with:
-      playbook: ./ansible/install_scala.yml
-      inventory: ${{ env.INVENTORY_CONTENT }}
-      key: ${{ secrets.SSH_PRIVATE_KEY }}
-      known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_scala.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # Step 10: 使用 Ansible 部署 Spark 集群
     - name: install spark
       uses: dawidd6/action-ansible-playbook@v2
