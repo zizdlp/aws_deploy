@@ -29,7 +29,14 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
         chmod 400 ~/.ssh/local_test.pem              
         ls -la ~/.ssh/  # 查看文件列表和权限
-
+    # Step 15: 使用 Ansible 部署 sbt
+    - name: install sbt
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_sbt.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # Step 4: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
       uses: ./.github/actions/deps
@@ -150,14 +157,14 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    # Step 15: 使用 Ansible 部署 sbt
-    - name: install sbt
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_sbt.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 15: 使用 Ansible 部署 sbt
+    # - name: install sbt
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_sbt.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     # # Step 13: 运行 Spark 测试
     # - name: Extract Master DNS
