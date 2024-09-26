@@ -150,7 +150,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # Step 15: 使用 Ansible 部署 tpcds
-    - name: install hive
+    - name: install tpcds
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_tpcds.yml
