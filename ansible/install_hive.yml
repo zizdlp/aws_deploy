@@ -13,7 +13,10 @@
     mysql_user: "hiveuser"
     mysql_password: "your_password"
     mysql_db_type: "mysql"
-
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
   tasks:
     - name: Create Hive directories
       file:
@@ -88,13 +91,62 @@
     # - name: Start HiveServer2 service in the background
     #   shell: "sudo -i nohup hive --service hiveserver2 > hive_server.log 2>&1 &"
     #   when: "'master' in group_names"
-    - name: Start Hive Metastore service synchronously
-      shell: "sudo -i nohup hive --service metastore > hive_store.log 2>&1 & disown"
-      when: "'master' in group_names"
+    # - name: Start Hive Metastore service synchronously
+    #   shell: "sudo -i nohup hive --service metastore > hive_store.log 2>&1 & disown"
+    #   when: "'master' in group_names"
 
-    - name: Start HiveServer2 service in the background
-      shell: "sudo -i nohup hive --service hiveserver2 > hive_server.log 2>&1 & disown"
-      when: "'master' in group_names"
+    # - name: Start HiveServer2 service in the background
+    #   shell: "sudo -i nohup hive --service hiveserver2 > hive_server.log 2>&1 & disown"
+    #   when: "'master' in group_names"
+
+    - name: Create systemd service file for Hive Metastore
+      copy:
+        dest: /etc/systemd/system/hive-metastore.service
+        content: |
+          [Unit]
+          Description=Hive Metastore Service
+          After=network.target
+
+          [Service]
+          User=hive
+          ExecStart=/usr/local/hive/bin/hive --service metastore
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - Reload systemd
+
+    - name: Create systemd service file for HiveServer2
+      copy:
+        dest: /etc/systemd/system/hive-server2.service
+        content: |
+          [Unit]
+          Description=HiveServer2 Service
+          After=network.target
+
+          [Service]
+          User=hive
+          ExecStart=/usr/local/hive/bin/hive --service hiveserver2
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - Reload systemd
+
+    - name: Ensure Hive Metastore is started and enabled at boot
+      systemd:
+        name: hive-metastore
+        enabled: yes
+        state: started
+
+    - name: Ensure HiveServer2 is started and enabled at boot
+      systemd:
+        name: hive-server2
+        enabled: yes
+        state: started
+
     # - name: Download MySQL JDBC driver
     #   get_url:
     #     url: "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.25.tar.gz"
