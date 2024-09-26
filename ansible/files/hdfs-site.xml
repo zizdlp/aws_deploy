@@ -13,6 +13,6 @@
     </property>
     <property>
     <name>dfs.domain.socket.path</name>
-    <value>/usr/local/hadoop/dn_socket</value>
+    <value>/opt/dn_socket</value>
     </property>
 </configuration>
