@@ -3,34 +3,44 @@
   hosts: all
   become: yes
   tasks:
-    - name: Download sbt from S3
-      aws_s3:
-        bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
-        object: "sbt-1.10.1.tgz"  # S3 中的 SBT 包
-        region: "cn-northwest-1"  # 替换为你的 S3 区域
-        dest: "/opt/sbt-1.10.1.tgz"  # 下载路径
-        mode: get
-    - name: Extract SBT
-      unarchive:
-        src: /opt/sbt-1.10.1.tgz
-        dest: /opt
-        remote_src: yes
-    - name: Remove the downloaded tar file
-      file:
-        path: /opt/sbt-1.10.1.tgz
-        state: absent
-    - name: Create symlink for sbt
-      file:
-        src: /opt/sbt/bin/sbt  # 确保路径正确
-        dest: /usr/local/bin/sbt
-        state: link
-    - name: Ensure sbt is executable
-      file:
-        path: /usr/local/bin/sbt
-        mode: '0755'
-    - name: Check SBT version
-      command: sbt --version
-      register: sbt_version
-    - name: Display SBT version
-      debug:
-        var: sbt_version.stdout
+    - block:
+        - name: Download sbt from S3
+          aws_s3:
+            bucket: "zzbuckent"
+            object: "sbt-1.10.1.tgz"
+            region: "cn-northwest-1"
+            dest: "/opt/sbt-1.10.1.tgz"
+            mode: get
+
+        - name: Extract SBT
+          unarchive:
+            src: /opt/sbt-1.10.1.tgz
+            dest: /opt
+            remote_src: yes
+
+        - name: Remove the downloaded tar file
+          file:
+            path: /opt/sbt-1.10.1.tgz
+            state: absent
+
+        - name: Create symlink for sbt
+          file:
+            src: /opt/sbt/bin/sbt
+            dest: /usr/local/bin/sbt
+            state: link
+
+        - name: Ensure sbt is executable
+          file:
+            path: /usr/local/bin/sbt
+            mode: '0755'
+
+        - name: Check SBT version
+          command: sbt --version
+          register: sbt_version
+
+        - name: Display SBT version
+          debug:
+            var: sbt_version.stdout
+      retries: 5
+      delay: 10
+      until: sbt_version.rc == 0

@@ -1,3 +1,4 @@
+---
 - name: Install Scala
   hosts: all
   become: yes
@@ -6,35 +7,40 @@
     scala_home: "/opt/scala-{{ scala_version }}"
 
   tasks:
-    - name: Download scala from S3
-      aws_s3:
-        bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
-        object: "scala-2.12.18.tgz"  # S3 中的 Hive 包
-        region: "cn-northwest-1"  # 替换为你的 S3 区域
-        dest: "/opt/scala-2.12.18.tgz"  # 下载路径
-        mode: get
+    - block:
+        - name: Download Scala from S3
+          aws_s3:
+            bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
+            object: "scala-2.12.18.tgz"  # S3 中的 Scala 包
+            region: "cn-northwest-1"  # 替换为你的 S3 区域
+            dest: "/opt/scala-2.12.18.tgz"  # 下载路径
+            mode: get
 
-    - name: Extract scala
-      unarchive:
-        src: "/opt/scala-2.12.18.tgz"
-        dest: "/opt"
-        remote_src: yes
+        - name: Extract Scala
+          unarchive:
+            src: "/opt/scala-2.12.18.tgz"
+            dest: "/opt"
+            remote_src: yes
 
-    - name: Symlink Scala to /usr/local/scala
-      file:
-        src: "{{ scala_home }}"
-        dest: "/usr/local/scala"
-        state: link
+        - name: Symlink Scala to /usr/local/scala
+          file:
+            src: "{{ scala_home }}"
+            dest: "/usr/local/scala"
+            state: link
 
-    - name: Set environment variables for Scala
-      copy:
-        dest: /etc/profile.d/scala.sh
-        content: |
-          export SCALA_HOME=/usr/local/scala
-          export PATH=$PATH:$SCALA_HOME/bin
-        mode: '0644'
+        - name: Set environment variables for Scala
+          copy:
+            dest: /etc/profile.d/scala.sh
+            content: |
+              export SCALA_HOME=/usr/local/scala
+              export PATH=$PATH:$SCALA_HOME/bin
+            mode: '0644'
 
-    - name: Source the Scala environment variables
-      shell: source /etc/profile.d/scala.sh
-      args:
-        executable: /bin/bash
+        - name: Source the Scala environment variables
+          shell: source /etc/profile.d/scala.sh
+          args:
+            executable: /bin/bash
+      retries: 5      # 设置重试次数
+      delay: 10       # 设置每次重试之间的延迟时间（秒）
+      when: scala_version is defined  # 可选条件（根据需要调整）
+      ignore_errors: yes  # 可选设置，忽略错误，继续任务
