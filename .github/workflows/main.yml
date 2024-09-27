@@ -45,7 +45,7 @@ jobs:
         MASTER_DNS=$(grep -A 1 "\[master\]" ./ansible/inventory.ini | tail -n 1 | awk '{print $1}')
     
         # 提取 worker 节点的 DNS
-        WORKER_DNS=$(awk '/^\[worker\]/ {flag=1; next} /^\[/{flag=0} flag' ./ansible/inventory.ini | awk '{print $1}')
+        WORKER_DNS=$(awk '/^\[worker\]/ {flag=1; next} /^\[/{flag=0} flag' ./ansible/inventory.ini | awk '{print $1}' | paste -sd "," -)
     
         echo "Master DNS: $MASTER_DNS"
         echo "Worker DNS: $WORKER_DNS"
@@ -62,7 +62,9 @@ jobs:
         }
     
         retry_ssh_keyscan $MASTER_DNS
-        for WORKER in $WORKER_DNS; do
+
+        IFS=',' read -ra ADDR <<< "$WORKER_DNS"
+        for WORKER in "${ADDR[@]}"; do
           retry_ssh_keyscan $WORKER
         done
 
@@ -73,7 +75,8 @@ jobs:
 
     - name: Test SSH connection to workers
       run: |
-        for WORKER in $WORKER_DNS; do
+        IFS=',' read -ra ADDR <<< "$WORKER_DNS"
+        for WORKER in "${ADDR[@]}"; do
           ssh -i ~/.ssh/local_test.pem ubuntu@$WORKER 'hostname'
         done
 
