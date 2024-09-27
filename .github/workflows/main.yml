@@ -3,7 +3,7 @@ name: Deploy and Test Spark Cluster on AWS
 on:
   push:
     branches:
-      - main  # 当推送到主分支时触发
+      - feature/table  # 当推送到主分支时触发
 
 jobs:
   deploy-and-test:
@@ -195,7 +195,7 @@ jobs:
         ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
         "sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > result.log 2>&1"
     # # # Step 8: 清理 EC2 实例
-    - name: Terminate EC2 instances
-      if: always()
-      run: |
-        python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    # - name: Terminate EC2 instances
+    #   if: always()
+    #   run: |
+    #     python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
