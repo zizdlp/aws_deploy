@@ -84,6 +84,13 @@
         sudo -i hdfs dfs -mkdir /user/spark
         sudo -i hdfs dfs -mkdir /user/spark/logs
         sudo -i hdfs dfs -chmod -R 777 /user/spark
+
+        sudo -i hdfs dfs -mkdir /user/byr23
+        sudo -i hdfs dfs -mkdir /user/byr23/warehouse
+        sudo -i hdfs dfs -chmod -R 777 /user/byr23
+        sudo -i mkdir /opt/tmp
+        sudo -i mkdir /opt/tmp_byr
+        sudo -i mkdir /opt/tmp_spark/
       when: "'master' in group_names"
 
     - name: Create systemd service file for Hive Metastore
