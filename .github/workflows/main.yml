@@ -191,7 +191,7 @@ jobs:
     # Step 15: 测试
     - name: Run Spark Test
       run: |
-        MASTER_DNS=${{ env.MASTER_DNS }}
+        MASTER_DNS=${{ steps.extract_nodes.outputs.master_dns  }}
         ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
         "sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > result.log 2>&1"
     # # # Step 8: 清理 EC2 实例
