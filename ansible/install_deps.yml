@@ -29,7 +29,6 @@
     - name: Parse nodes_ip_map from JSON string
       set_fact:
         nodes_ip_map_parsed: "{{ nodes_ip_map | from_json }}"
-
     - name: Write nodes IPs to /etc/hosts
       lineinfile:
         path: /etc/hosts
@@ -221,6 +220,7 @@
         state: present
       become: yes
       when: ansible_os_family == 'Debian'
+
     - name: Ensure boto3 and botocore are installed
       pip:
         name:
