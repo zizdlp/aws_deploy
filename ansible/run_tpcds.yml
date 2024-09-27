@@ -1,0 +1,15 @@
+- name: Run TPC-DS benchmark script on master
+  hosts: master
+  become: yes
+  tasks:
+    - name: Execute TPC-DS benchmark script
+      shell: |
+        sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > /opt/tpcds-benchmark/result.log 2>&1
+      args:
+        chdir: /opt/tpcds-benchmark  # 确保当前工作目录是脚本所在目录
+      register: tpcds_benchmark_output
+      ignore_errors: yes  # 如果不希望 Playbook 由于错误退出可以忽略错误
+
+    - name: Print TPC-DS benchmark script output
+      debug:
+        var: tpcds_benchmark_output.stdout_lines

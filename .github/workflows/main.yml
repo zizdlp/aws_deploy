@@ -202,12 +202,19 @@ jobs:
     #   run: |
     #     ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
     #     "sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > result.log 2>&1"
-    - name: Run Spark Test
-      run: |
-        ssh -i ~/.ssh/local_test.pem ubuntu@${{ env.MASTER_DNS }} \
-        "sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > result.log 2>&1"
-    # # # Step 8: 清理 EC2 实例
-    # - name: Terminate EC2 instances
-    #   if: always()
+    # - name: Run Spark Test
     #   run: |
-    #     python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    #     ssh -i ~/.ssh/local_test.pem ubuntu@${{ env.MASTER_DNS }} \
+    #     "sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > result.log 2>&1"
+    - name: run tpcds
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/run_tpcds.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # # Step 8: 清理 EC2 实例
+    - name: Terminate EC2 instances
+      if: always()
+      run: |
+        python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
