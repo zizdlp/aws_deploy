@@ -13,25 +13,19 @@
         region: "cn-northwest-1"  # 替换为你的 S3 区域
         dest: "/opt/scala-2.12.18.tgz"  # 下载路径
         mode: get
-      retries: 5           # 重试次数
-      delay: 10            # 每次重试之间的延迟（以秒为单位）
-      until: sbt_version.rc == 0  # 重试条件，直到命令执行成功（返回码为 0）
+
     - name: Extract scala
       unarchive:
         src: "/opt/scala-2.12.18.tgz"
         dest: "/opt"
         remote_src: yes
-      retries: 5           # 重试次数
-      delay: 10            # 每次重试之间的延迟（以秒为单位）
-      until: sbt_version.rc == 0  # 重试条件，直到命令执行成功（返回码为 0）
+
     - name: Symlink Scala to /usr/local/scala
       file:
         src: "{{ scala_home }}"
         dest: "/usr/local/scala"
         state: link
-      retries: 5           # 重试次数
-      delay: 10            # 每次重试之间的延迟（以秒为单位）
-      until: sbt_version.rc == 0  # 重试条件，直到命令执行成功（返回码为 0）
+
     - name: Set environment variables for Scala
       copy:
         dest: /etc/profile.d/scala.sh
@@ -39,13 +33,8 @@
           export SCALA_HOME=/usr/local/scala
           export PATH=$PATH:$SCALA_HOME/bin
         mode: '0644'
-      retries: 5           # 重试次数
-      delay: 10            # 每次重试之间的延迟（以秒为单位）
-      until: sbt_version.rc == 0  # 重试条件，直到命令执行成功（返回码为 0）
+
     - name: Source the Scala environment variables
       shell: source /etc/profile.d/scala.sh
       args:
         executable: /bin/bash
-      retries: 5           # 重试次数
-      delay: 10            # 每次重试之间的延迟（以秒为单位）
-      until: sbt_version.rc == 0  # 重试条件，直到命令执行成功（返回码为 0）
