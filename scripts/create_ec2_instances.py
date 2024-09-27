@@ -25,7 +25,7 @@ def create_instance(index):
         InstanceType='i4i.4xlarge',  # Choose instance type
         KeyName='local_test',  # Your EC2 key pair
         SecurityGroupIds=['sg-01afc3b646b79f84b'],  # Replace with your security group ID
-        SubnetId='subnet-050fe41bd0d816003',  # Replace with your subnet ID
+        SubnetId='subnet-0b387a115a4176faa',  # Replace with your subnet ID
         IamInstanceProfile={
             'Name': 's3_read'  # Replace with your IAM role name
         },
@@ -40,7 +40,7 @@ def create_instance(index):
             }
         ],
         Placement={
-            'AvailabilityZone': 'cn-northwest-1b'  # Choose availability zone
+            'AvailabilityZone': 'cn-northwest-1c'  # Choose availability zone
         },
         TagSpecifications=[
             {
