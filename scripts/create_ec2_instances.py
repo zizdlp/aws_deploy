@@ -22,7 +22,7 @@ def create_instance(index):
         ImageId='ami-063dbdfa885edce48',  # Replace with your AMI ID
         MinCount=1,
         MaxCount=1,
-        InstanceType='c5d.2xlarge',  # Choose instance type
+        InstanceType='i4i.4xlarge',  # Choose instance type
         KeyName='local_test',  # Your EC2 key pair
         SecurityGroupIds=['sg-01afc3b646b79f84b'],  # Replace with your security group ID
         SubnetId='subnet-050fe41bd0d816003',  # Replace with your subnet ID
