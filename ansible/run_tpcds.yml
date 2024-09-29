@@ -1,49 +1,35 @@
-- name: Create systemd service file for TPC-DS benchmark
-  become: yes
-  copy:
-    dest: /etc/systemd/system/tpcds-benchmark.service
-    content: |
-      [Unit]
-      Description=TPC-DS Benchmark Service
-      After=network.target
+- name: Create systemd service for TPC-DS benchmark
+  hosts: master  # 这里指定主节点
+  become: yes  # 提升为 root 用户
+  tasks:
+    - name: Create systemd service file for TPC-DS benchmark
+      copy:
+        dest: /etc/systemd/system/tpcds-benchmark.service
+        content: |
+          [Unit]
+          Description=TPC-DS Benchmark Service
+          After=network.target
 
-      [Service]
-      Type=simple
-      User=root
-      WorkingDirectory=/opt/tpcds-benchmark
-      ExecStart=/opt/tpcds-benchmark/run-spark.sh true true true true
-      Restart=on-failure
-      StandardOutput=append:/opt/tpcds-benchmark/result.log
-      StandardError=append:/opt/tpcds-benchmark/error.log
+          [Service]
+          Type=simple
+          ExecStart=/opt/tpcds-benchmark/run-spark.sh true true true true
+          Restart=on-failure
+          User=root
+          WorkingDirectory=/opt/tpcds-benchmark
 
-      [Install]
-      WantedBy=multi-user.target
-  notify:
-    - Reload systemd
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - Restart TPC-DS benchmark service
 
-- name: Reload systemd to apply the new service
-  become: yes
-  systemd:
-    daemon_reload: yes
+    - name: Enable and start TPC-DS benchmark service
+      systemd:
+        name: tpcds-benchmark
+        enabled: yes
+        state: started
 
-- name: Enable and start TPC-DS benchmark service
-  become: yes
-  systemd:
-    name: tpcds-benchmark
-    enabled: yes
-    state: started
-
-- name: Restart TPC-DS benchmark service (if needed)
-  become: yes
-  systemd:
-    name: tpcds-benchmark
-    state: restarted
-
-- name: Print result log of TPC-DS benchmark
-  become: yes
-  shell: cat /opt/tpcds-benchmark/result.log
-  register: tpcds_benchmark_output
-
-- name: Debug TPC-DS benchmark log
-  debug:
-    var: tpcds_benchmark_output.stdout_lines
+  handlers:
+    - name: Restart TPC-DS benchmark service
+      systemd:
+        name: tpcds-benchmark
+        state: restarted
