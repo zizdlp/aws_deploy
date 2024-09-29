@@ -22,13 +22,13 @@ JAR=${TPCDSBENCHMARK}"/target/scala-2.12/tpcds-benchmark_2.12-0.1.0-SNAPSHOT.jar
 MASTER="yarn"
 numexecutors=3
 executorcores=12
-executormemory="60g"
+executormemory="30g"
 offsize="0g"
-parallelism=1000
+parallelism=100
 
 format="delta"
 # format="parquet"
-dsdgen_partitioned=10000
+dsdgen_partitioned=200
 dsdgen_nonpartitioned=10
 warehousePath="hdfs://node0:9898/user/byr23/warehouse"
 tmp_spark=${LOCAL_DIR}/tmp_spark
