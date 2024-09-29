@@ -3,7 +3,7 @@ name: Deploy and Test Spark Cluster on AWS
 on:
   push:
     branches:
-      - feature/table  # 当推送到主分支时触发
+      - main  # 当推送到主分支时触发
 
 jobs:
   deploy-and-test:
@@ -214,7 +214,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # # # Step 8: 清理 EC2 实例
-    - name: Terminate EC2 instances
-      if: always()
-      run: |
-        python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    # - name: Terminate EC2 instances
+    #   if: always()
+    #   run: |
+    #     python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
