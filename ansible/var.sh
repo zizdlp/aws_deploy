@@ -26,8 +26,8 @@ executormemory="60g"
 offsize="0g"
 parallelism=1000
 
-#format="delta"
-format="parquet"
+format="delta"
+# format="parquet"
 dsdgen_partitioned=10000
 dsdgen_nonpartitioned=10
 warehousePath="hdfs://node0:9898/user/byr23/warehouse"
