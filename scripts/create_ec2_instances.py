@@ -16,17 +16,6 @@ def create_instance(index):
     user_data_script = '''#!/bin/bash
     # Set hostname
     hostnamectl set-hostname node{0}
-
-    # Wait for the NVMe device to become available
-    until ls /dev/nvme1n1; do sleep 1; done
-
-    # Create a filesystem and mount the NVMe device
-    mkfs.ext4 /dev/nvme1n1
-    mkdir -p /mnt/data
-    mount /dev/nvme1n1 /mnt/data
-
-    # Persist the mount in /etc/fstab
-    echo "/dev/nvme1n1 /mnt/data ext4 defaults,nofail 0 2" >> /etc/fstab
     '''.format(index)
     
     instance = ec2.create_instances(
@@ -36,6 +25,7 @@ def create_instance(index):
         InstanceType='i4i.4xlarge',  # Choose instance type
         KeyName='local_test',  # Your EC2 key pair
         SecurityGroupIds=['sg-01afc3b646b79f84b'],  # Replace with your security group ID
+        # SubnetId='subnet-0b387a115a4176faa',  # Replace with your subnet ID
         IamInstanceProfile={
             'Name': 's3_read'  # Replace with your IAM role name
         },
@@ -47,16 +37,11 @@ def create_instance(index):
                     'VolumeType': 'gp3',  # Volume type
                     'DeleteOnTermination': True  # Delete volume on instance termination
                 }
-            },
-            {
-                'DeviceName': '/dev/nvme1n1',  # NVMe device for 3TB volume
-                'Ebs': {
-                    'VolumeSize': 3072,  # 3TB = 3072 GiB
-                    'VolumeType': 'gp3',  # Volume type
-                    'DeleteOnTermination': True  # Ensure the volume is deleted with instance termination
-                }
             }
         ],
+        # Placement={
+        #     'AvailabilityZone': 'cn-northwest-1c'  # Choose availability zone
+        # },
         TagSpecifications=[
             {
                 'ResourceType': 'instance',
@@ -66,7 +51,7 @@ def create_instance(index):
                          ]
             }
         ],
-        UserData=user_data_script  # Add UserData script to set hostname and mount NVMe
+        UserData=user_data_script  # Add UserData script to set hostname
     )[0]
     
     # Wait for the instance to be running
