@@ -1,14 +1,49 @@
-- name: Run TPC-DS benchmark script on master
-  hosts: master
+- name: Create systemd service file for TPC-DS benchmark
   become: yes
-  tasks:
-    - name: Execute TPC-DS benchmark script as root in /opt/tpcds-benchmark
-      become: yes
-      become_user: root
-      shell: |
-        cd /opt/tpcds-benchmark && ./run-spark.sh true true true true > result.log 2>&1
-      register: tpcds_benchmark_output
-      ignore_errors: yes
-    - name: Print TPC-DS benchmark script output
-      debug:
-        var: tpcds_benchmark_output.stdout_lines
+  copy:
+    dest: /etc/systemd/system/tpcds-benchmark.service
+    content: |
+      [Unit]
+      Description=TPC-DS Benchmark Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=root
+      WorkingDirectory=/opt/tpcds-benchmark
+      ExecStart=/opt/tpcds-benchmark/run-spark.sh true true true true
+      Restart=on-failure
+      StandardOutput=append:/opt/tpcds-benchmark/result.log
+      StandardError=append:/opt/tpcds-benchmark/error.log
+
+      [Install]
+      WantedBy=multi-user.target
+  notify:
+    - Reload systemd
+
+- name: Reload systemd to apply the new service
+  become: yes
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start TPC-DS benchmark service
+  become: yes
+  systemd:
+    name: tpcds-benchmark
+    enabled: yes
+    state: started
+
+- name: Restart TPC-DS benchmark service (if needed)
+  become: yes
+  systemd:
+    name: tpcds-benchmark
+    state: restarted
+
+- name: Print result log of TPC-DS benchmark
+  become: yes
+  shell: cat /opt/tpcds-benchmark/result.log
+  register: tpcds_benchmark_output
+
+- name: Debug TPC-DS benchmark log
+  debug:
+    var: tpcds_benchmark_output.stdout_lines
