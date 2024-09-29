@@ -4,7 +4,7 @@
   tasks:
     - name: Execute TPC-DS benchmark script
       shell: |
-        sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > /opt/tpcds-benchmark/result.log 2>&1
+        sudo -i run-spark.sh true true true true > result.log 2>&1
       args:
         chdir: /opt/tpcds-benchmark  # 确保当前工作目录是脚本所在目录
       register: tpcds_benchmark_output
