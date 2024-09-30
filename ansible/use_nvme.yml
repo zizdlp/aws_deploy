@@ -13,7 +13,7 @@
               filesystem:
                 fstype: xfs
                 dev: "/dev/nvme{{ item }}n1"
-              loop: "{{ range(1, driver_disk_cnt + 1) | list }}"
+              loop: "{{ range(1, driver_disk_cnt + 1) | list }}" # [1,driver_disk_cnt+1)
 
             - name: Mount the last disk for Hadoop
               mount:
@@ -25,12 +25,12 @@
               when: driver_disk_cnt > 1
             - name: Mount other driver disks to /metadata
               mount:
-                path: "/metadata{{ item }}"
-                src: "/dev/nvme{{ item + 1 }}n1"
+                path: "/metadata{{ item-1 }}"
+                src: "/dev/nvme{{ item }}n1"
                 fstype: xfs
                 opts: defaults
                 state: mounted
-              loop: "{{ range(1, driver_disk_cnt + 1) | list }}"
+              loop: "{{ range(1, driver_disk_cnt + 1) | list }}" #[1,driver_disk_cnt+1)
               when: item < driver_disk_cnt or driver_disk_cnt <= 1
           when: "'master' in group_names"
 
@@ -38,7 +38,7 @@
           lineinfile:
             path: /etc/fstab
             line: "/dev/nvme{{ item }}n1 /metadata{{ item - 1  }} xfs defaults 0 0"
-          loop: "{{ range(1, driver_disk_cnt) | list }}"
+          loop: "{{ range(1, driver_disk_cnt+1) | list }}"
           when: 
             - "'master' in group_names"
             - item < driver_disk_cnt or driver_disk_cnt <= 1
@@ -54,13 +54,13 @@
 
     - name: Format and mount NVMe disks for worker nodes
       block:
-        - name: Format and mount driver disk for master node
+        - name: Format and mount driver disk for worker node
           block:
             - name: Format the NVMe disk to xfs
               filesystem:
                 fstype: xfs
                 dev: "/dev/nvme{{ item }}n1"
-              loop: "{{ range(1, driver_disk_cnt + 1) | list }}"
+              loop: "{{ range(1, driver_disk_cnt + 1) | list }}" # [1,driver_disk_cnt+1)
 
             - name: Mount the last disk for Hadoop
               mount:
@@ -72,12 +72,12 @@
               when: driver_disk_cnt > 1
             - name: Mount other driver disks to /data
               mount:
-                path: "/data{{ item }}"
-                src: "/dev/nvme{{ item + 1 }}n1"
+                path: "/data{{ item-1 }}"
+                src: "/dev/nvme{{ item }}n1"
                 fstype: xfs
                 opts: defaults
                 state: mounted
-              loop: "{{ range(1, driver_disk_cnt + 1) | list }}"
+              loop: "{{ range(1, driver_disk_cnt + 1) | list }}" #[1,driver_disk_cnt+1)
               when: item < driver_disk_cnt or driver_disk_cnt <= 1
           when: "'worker' in group_names"
 
@@ -85,7 +85,7 @@
           lineinfile:
             path: /etc/fstab
             line: "/dev/nvme{{ item }}n1 /data{{ item - 1  }} xfs defaults 0 0"
-          loop: "{{ range(1, driver_disk_cnt) | list }}"
+          loop: "{{ range(1, driver_disk_cnt+1) | list }}"
           when: 
             - "'worker' in group_names"
             - item < driver_disk_cnt or driver_disk_cnt <= 1
@@ -97,3 +97,4 @@
           when: 
             - "'worker' in group_names"
             - driver_disk_cnt > 1
+       
