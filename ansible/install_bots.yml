@@ -1,0 +1,35 @@
+- name: Install and Configure deps
+  hosts: all
+  become: yes
+  vars:
+    spark_version: "3.4.3"  # Adjust Spark version as needed
+    hive_version: "4.0.0"    # Update as needed
+    hive_home: "/usr/local/hive"
+    spark_home: "/usr/local/spark"
+    java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
+    mysql_host: "{{ groups['master'][0] }}"  # 主节点地址
+    mysql_database: "hive"
+    mysql_user: "hiveuser"
+    mysql_password: "your_password"
+  tasks:
+    - name: Ensure Python 3 is installed
+      apt:
+        name: python3
+        state: present
+      become: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Ensure Python 3 pip is installed
+      apt:
+        name: python3-pip
+        state: present
+      become: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Ensure boto3 and botocore are installed
+      pip:
+        name:
+          - boto3
+          - botocore
+        extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
+      become: yes

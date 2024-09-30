@@ -206,25 +206,3 @@
           export CLASSPATH=.:${JAVA_HOME}/lib
           export PATH=$PATH:$JAVA_HOME/bin
         mode: '0644'
-
-    - name: Ensure Python 3 is installed
-      apt:
-        name: python3
-        state: present
-      become: yes
-      when: ansible_os_family == 'Debian'
-
-    - name: Ensure Python 3 pip is installed
-      apt:
-        name: python3-pip
-        state: present
-      become: yes
-      when: ansible_os_family == 'Debian'
-
-    - name: Ensure boto3 and botocore are installed
-      pip:
-        name:
-          - boto3
-          - botocore
-        extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
-      become: yes

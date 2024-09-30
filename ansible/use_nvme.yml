@@ -1,0 +1,68 @@
+- name: Mount NVMe disks and format if necessary
+  hosts: all
+  become: yes
+  vars:
+    driver_disk_cnt: 1  # 主节点的磁盘数量
+    disk_cnt: 1         # 工作节点的磁盘数量
+  tasks:
+    - name: Format and mount NVMe disks for master node
+      block:
+        - name: Format and mount driver disk for master node
+          block:
+            - name: Format the NVMe disk to xfs
+              filesystem:
+                fstype: xfs
+                dev: "/dev/nvme{{ item }}n1"
+              loop: "{{ range(1, driver_disk_cnt + 1) | list }}"
+              when: driver_disk_cnt > 0
+            - name: Mount the disk for Hadoop
+              mount:
+                path: "/opt"
+                src: "/dev/nvme{{ driver_disk_cnt }}n1"
+                fstype: xfs
+                opts: defaults
+                state: mounted
+              when: driver_disk_cnt > 1
+            - name: Mount other driver disks to /metadata
+              mount:
+                path: "/metadata{{ item }}"
+                src: "/dev/nvme{{ item + 1 }}n1"
+                fstype: xfs
+                opts: defaults
+                state: mounted
+              loop: "{{ range(1, driver_disk_cnt) | list }}"
+              when: item < driver_disk_cnt - 1
+          when: "'master' in group_names"
+        - name: Add mount entries to /etc/fstab for master node
+          lineinfile:
+            path: /etc/fstab
+            line: "/dev/nvme{{ item }}n1 /metadata{{ item }} xfs defaults 0 0"
+          loop: "{{ range(1, driver_disk_cnt) | list }}"
+          when: "'master' in group_names"
+
+    - name: Format and mount NVMe disks for worker nodes
+      block:
+        - name: Format the NVMe disk to xfs
+          filesystem:
+            fstype: xfs
+            dev: "/dev/nvme{{ item }}n1"
+          loop: "{{ range(1, disk_cnt + 1) | list }}"
+          when: disk_cnt > 0
+        - name: Mount the disk for Hadoop on worker nodes
+          mount:
+            path: "/opt"
+            src: "/dev/nvme{{ disk_cnt }}n1"
+            fstype: xfs
+            opts: defaults
+            state: mounted
+          when: disk_cnt > 1
+        - name: Mount other disks to /data on worker nodes
+          mount:
+            path: "/data{{ item }}"
+            src: "/dev/nvme{{ item + 1 }}n1"
+            fstype: xfs
+            opts: defaults
+            state: mounted
+          loop: "{{ range(1, disk_cnt) | list }}"
+          when: item < disk_cnt - 1
+      when: "'worker' in group_names"
