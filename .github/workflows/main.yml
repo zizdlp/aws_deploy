@@ -97,15 +97,15 @@ jobs:
         echo "KNOWN_HOSTS_CONTENT<<EOF" >> $GITHUB_ENV
         cat ~/.ssh/known_hosts >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
-  
-    - name: install bots
+
+    # Step 10: 使用 Ansible 安装依赖
+    - name: Install java & deps to nodes
       uses: dawidd6/action-ansible-playbook@v2
       with:
-        playbook: ./ansible/install_bots.yml
+        playbook: ./ansible/install_deps.yml
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-
     # Step 15: 使用 Ansible 部署 tpcds
     - name: use nvme
       uses: dawidd6/action-ansible-playbook@v2
@@ -116,15 +116,6 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
 
-
-    # # Step 10: 使用 Ansible 安装依赖
-    # - name: Install java & deps to nodes
-    #   uses: dawidd6/action-ansible-playbook@v2
-    #   with:
-    #     playbook: ./ansible/install_deps.yml
-    #     inventory: ${{ env.INVENTORY_CONTENT }}
-    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # # Step 15: 使用 Ansible 部署 sbt
     # - name: install sbt
     #   uses: dawidd6/action-ansible-playbook@v2
