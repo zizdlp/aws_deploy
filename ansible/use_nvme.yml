@@ -2,74 +2,26 @@
   hosts: all
   become: yes
   vars:
-    driver_disk_cnt: 1  # 主节点的磁盘数量
-    disk_cnt: 1         # 工作节点的磁盘数量
+    disk_cnt: 1         # 节点的磁盘数量
   tasks:
-    - name: Format and mount NVMe disks for master node
+    - name: Format and mount NVMe disks for nodes
       block:
-        - name: Format and mount driver disk for master node
+        - name: Format and mount driver disk for node
           block:
             - name: Format the NVMe disk to xfs
               filesystem:
                 fstype: xfs
                 dev: "/dev/nvme{{ item }}n1"
-              loop: "{{ range(1, driver_disk_cnt + 1) | list }}" # [1,driver_disk_cnt+1)
+              loop: "{{ range(1, disk_cnt + 1) | list }}" # [1,disk_cnt+1)
 
             - name: Mount the last disk for Hadoop
               mount:
                 path: "/opt"
-                src: "/dev/nvme{{ driver_disk_cnt }}n1"
+                src: "/dev/nvme{{ disk_cnt }}n1"
                 fstype: xfs
                 opts: defaults
                 state: mounted
-              when: driver_disk_cnt > 1
-            - name: Mount other driver disks to /metadata
-              mount:
-                path: "/metadata{{ item-1 }}"
-                src: "/dev/nvme{{ item }}n1"
-                fstype: xfs
-                opts: defaults
-                state: mounted
-              loop: "{{ range(1, driver_disk_cnt + 1) | list }}" #[1,driver_disk_cnt+1)
-              when: item < driver_disk_cnt or driver_disk_cnt <= 1
-          when: "'master' in group_names"
-
-        - name: Add mount entries to /etc/fstab for master node /metadata
-          lineinfile:
-            path: /etc/fstab
-            line: "/dev/nvme{{ item }}n1 /metadata{{ item - 1  }} xfs defaults 0 0"
-          loop: "{{ range(1, driver_disk_cnt+1) | list }}"
-          when: 
-            - "'master' in group_names"
-            - item < driver_disk_cnt or driver_disk_cnt <= 1
-
-        - name: Add mount entries to /etc/fstab for master node /opt
-          lineinfile:
-            path: /etc/fstab
-            line: "/dev/nvme{{ driver_disk_cnt }}n1 /opt xfs defaults 0 0"
-          when: 
-            - "'master' in group_names"
-            - driver_disk_cnt > 1
-       
-
-    - name: Format and mount NVMe disks for worker nodes
-      block:
-        - name: Format and mount driver disk for worker node
-          block:
-            - name: Format the NVMe disk to xfs
-              filesystem:
-                fstype: xfs
-                dev: "/dev/nvme{{ item }}n1"
-              loop: "{{ range(1, driver_disk_cnt + 1) | list }}" # [1,driver_disk_cnt+1)
-
-            - name: Mount the last disk for Hadoop
-              mount:
-                path: "/opt"
-                src: "/dev/nvme{{ driver_disk_cnt }}n1"
-                fstype: xfs
-                opts: defaults
-                state: mounted
-              when: driver_disk_cnt > 1
+              when: disk_cnt > 1
             - name: Mount other driver disks to /data
               mount:
                 path: "/data{{ item-1 }}"
@@ -77,24 +29,19 @@
                 fstype: xfs
                 opts: defaults
                 state: mounted
-              loop: "{{ range(1, driver_disk_cnt + 1) | list }}" #[1,driver_disk_cnt+1)
-              when: item < driver_disk_cnt or driver_disk_cnt <= 1
-          when: "'worker' in group_names"
+              loop: "{{ range(1, disk_cnt + 1) | list }}" #[1,driver_disk_cnt+1)
+              when: item < disk_cnt or disk_cnt <= 1
 
         - name: Add mount entries to /etc/fstab for worker node /data
           lineinfile:
             path: /etc/fstab
             line: "/dev/nvme{{ item }}n1 /data{{ item - 1  }} xfs defaults 0 0"
-          loop: "{{ range(1, driver_disk_cnt+1) | list }}"
-          when: 
-            - "'worker' in group_names"
-            - item < driver_disk_cnt or driver_disk_cnt <= 1
+          loop: "{{ range(1, disk_cnt+1) | list }}"
+          when: item < disk_cnt or disk_cnt <= 1
 
         - name: Add mount entries to /etc/fstab for worker node /opt
           lineinfile:
             path: /etc/fstab
-            line: "/dev/nvme{{ driver_disk_cnt }}n1 /opt xfs defaults 0 0"
-          when: 
-            - "'worker' in group_names"
-            - driver_disk_cnt > 1
+            line: "/dev/nvme{{ disk_cnt }}n1 /opt xfs defaults 0 0"
+          when: disk_cnt > 1
        
