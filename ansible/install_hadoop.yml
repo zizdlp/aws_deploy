@@ -74,6 +74,12 @@
         - mapred-site.xml
         - workers
         - yarn-site.xml
+    - name: Create directories for hadoop
+      shell: |
+        sudo -i mkdir /data0/namenode
+        sudo -i mkdir /data0/datanode
+        sudo -i mkdir /data0/tmp
+      when: "'master' in group_names"
     - name: Format HDFS on master node
       command: sudo -i hadoop namenode -format
       become: true   # 提升为 root 用户执行（如果需要）

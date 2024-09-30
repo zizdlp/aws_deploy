@@ -15,4 +15,13 @@
     <name>dfs.domain.socket.path</name>
     <value>/opt/dn_socket</value>
     </property>
+    <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>/data0</value>
+    </property>
+
+    <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>/data0</value>
+    </property>
 </configuration>
