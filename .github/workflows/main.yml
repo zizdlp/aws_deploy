@@ -3,7 +3,7 @@ name: Deploy and Test Spark Cluster on AWS
 on:
   push:
     branches:
-      - main  # 当推送到主分支时触发
+      - feature/debug2  # 当推送到主分支时触发
 
 jobs:
   deploy-and-test:
