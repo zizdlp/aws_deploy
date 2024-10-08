@@ -152,11 +152,12 @@
       register: upgrade_result
       retries: 3
       delay: 10
-      until: upgrade_result is succeeded
+      until: upgrade_result.rc == 0  # 检查返回码，0 表示成功
       become: yes
+
     - name: Install necessary software
       apt:
-        name: 
+        name:
           # - tmux
           # - unzip
           # - git
@@ -192,7 +193,7 @@
       register: install_result
       retries: 3
       delay: 15
-      until: install_result is succeeded
+      until: install_result.rc == 0  # 检查返回码
 
 
 
