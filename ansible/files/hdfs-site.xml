@@ -17,11 +17,11 @@
     </property>
     <property>
     <name>dfs.namenode.name.dir</name>
-    <value>/data0</value>
+    <value>/data0/namenode</value>
     </property>
 
     <property>
     <name>dfs.datanode.data.dir</name>
-    <value>/data0</value>
+    <value>/data0/datanode</value>
     </property>
 </configuration>
