@@ -81,7 +81,7 @@
         sudo -i mkdir /data0/tmp
       when: "'master' in group_names"
     - name: Format HDFS on master node
-      command: echo Y | sudo -i hadoop namenode -format
+      command: sudo -i hadoop namenode -format
       become: true   # 提升为 root 用户执行（如果需要）
       when: "'master' in group_names"
     - name: start hadoop service
