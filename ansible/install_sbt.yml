@@ -31,11 +31,3 @@
         path: /usr/local/bin/sbt
         mode: '0755'
       timeout: 30   # 设置超时时间为 30 秒
-    - name: Check SBT version
-      command: sbt --version
-      register: sbt_version
-      timeout: 30   # 设置超时时间为 30 秒
-    - name: Display SBT version
-      debug:
-        var: sbt_version.stdout
-      timeout: 30   # 设置超时时间为 30 秒
