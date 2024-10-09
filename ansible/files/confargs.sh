@@ -21,7 +21,8 @@ CONF_ARGS="--deploy-mode client \
 --conf spark.scheduler.minRegisteredResourcesRatio=1.0 \
 --conf spark.memory.offHeap.enabled=false \
 --conf spark.memory.offHeap.size=${offsize} \
---conf spark.driver.memory=10g \
+--conf spark.executor.memoryOverhead=${overhead} \
+--conf spark.driver.memory=4g \
 --conf spark.default.parallelism=${parallelism} "
 
 GLUTEN_CONF_ARGS="--deploy-mode client \
@@ -40,6 +41,8 @@ GLUTEN_CONF_ARGS="--deploy-mode client \
 --conf spark.plugins=io.glutenproject.GlutenPlugin \
 --conf spark.driver.extraClassPath=${GLUTEN_JAR} \
 --conf spark.executor.extraClassPath=${GLUTEN_JAR} \
+--conf spark.executor.memoryOverhead=${overhead} \
+--conf spark.driver.memory=4g \
 --conf spark.gluten.sql.columnar.forceShuffledHashJoin=true \
 --conf spark.shuffle.manager=org.apache.spark.shuffle.sort.ColumnarShuffleManager \
 --conf spark.executorEnv.LIBHDFS3_CONF=/opt/gluten/hdfs-client.xml "
@@ -57,6 +60,8 @@ BYR_CONF_ARGS="--deploy-mode client \
 --conf spark.scheduler.minRegisteredResourcesRatio=1.0 \
 --conf spark.memory.offHeap.enabled=true \
 --conf spark.memory.offHeap.size=${offsize} \
+--conf spark.executor.memoryOverhead=${overhead} \
+--conf spark.driver.memory=4g \
 --jars ${BYR_JAR} "
 
 BYR_GLUTEN_CONF_ARGS="--deploy-mode client \
@@ -76,6 +81,8 @@ BYR_GLUTEN_CONF_ARGS="--deploy-mode client \
 --conf spark.driver.extraClassPath=${GLUTEN_JAR}:${BYR_JAR} \
 --conf spark.executor.extraClassPath=${GLUTEN_JAR}:${BYR_JAR} \
 --conf spark.gluten.sql.columnar.forceShuffledHashJoin=true \
+--conf spark.executor.memoryOverhead=${overhead} \
+--conf spark.driver.memory=4g \
 --conf spark.shuffle.manager=org.apache.spark.shuffle.sort.ColumnarShuffleManager "
 
 CHUKONU_CONF_ARGS="--deploy-mode client \

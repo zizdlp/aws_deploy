@@ -24,6 +24,7 @@ numexecutors=3
 executorcores=12
 executormemory="90g"
 offsize="0g"
+overhead="4g"
 parallelism=1000
 
 format="delta"
