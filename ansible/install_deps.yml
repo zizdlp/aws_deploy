@@ -78,7 +78,7 @@
       become_user: root
 
     - name: Add host key for all nodes to known_hosts
-      shell: ssh-keyscan -H "{{ item.value }}" >> /root/.ssh/known_hosts
+      shell: ssh-keyscan -H "{{ item.key }}" >> /root/.ssh/known_hosts
       become: yes
       become_user: root
       loop: "{{ nodes_ip_map_parsed | dict2items }}"
