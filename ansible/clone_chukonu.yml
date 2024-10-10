@@ -26,8 +26,11 @@
     - name: Add github.com to known_hosts on master
       shell: |
         ssh-keyscan -H "github.com" | sed "s/$/ github.com/" >> /root/.ssh/known_hosts
-      args:
-        creates: /root/.ssh/known_hosts
+      become: yes
+      become_user: root
+
+
+
 
     # 创建 SSH 配置文件，指定使用 deploy_key 作为 github.com 的私钥
     - name: Configure SSH to use custom deploy_key for github.com
