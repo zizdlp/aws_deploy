@@ -30,11 +30,8 @@ jobs:
         chmod 400 ~/.ssh/local_test.pem  
 
     # Step 3.1: 设置 chukonu 的deploy key
-    - name: Set up SSH key from secret
-      run: |
-        echo "${{ secrets.DEPLOY_KEY }}" > deploy_key
-        chmod 600 deploy_key
-
+    - name: Set environment variable for deploy key
+      run: echo "DEPLOY_KEY=${{ secrets.DEPLOY_KEY }}" >> $GITHUB_ENV
 
     # Step 4: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
