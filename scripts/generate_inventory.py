@@ -1,5 +1,4 @@
 import json
-import os
 
 # 读取节点信息
 nodes_info = []
@@ -15,9 +14,6 @@ worker_nodes = [node for node in nodes_info if not node.startswith('node0')]
 # 获取 master 和 worker 的 DNS 和 IP 信息
 master_index, master_public_dns, master_private_ip = master_node.split()
 worker_details = [node.split() for node in worker_nodes]
-
-# 从环境变量读取 deploy_key（假设在 GitHub Actions 中设置了 DEPLOY_KEY）
-deploy_key = os.getenv('DEPLOY_KEY')
 
 # 生成 inventory.ini 文件内容
 inventory_content = f"""[master]
@@ -35,7 +31,7 @@ for node in nodes_info:
     index, _, private_ip = node.split()
     nodes_ip_map[f"{index}"] = private_ip
 
-# 添加 [all:vars] 部分，包含节点 IP 映射变量和 deploy_key
+# 添加 [all:vars] 部分，包含节点 IP 映射变量
 inventory_content += """
 [all:vars]
 ansible_user=ubuntu
@@ -43,10 +39,6 @@ ansible_ssh_private_key_file=/home/runner/.ssh/local_test.pem
 nodes_ip_map='"""
 # 将字典转换为 JSON 字符串
 inventory_content += json.dumps(nodes_ip_map)
-inventory_content += """'
-deploy_key='"""
-# 将 deploy_key 添加到文件中
-inventory_content += deploy_key.replace('\n', '\\n')  # 处理换行符
 inventory_content += """'
 """
 
