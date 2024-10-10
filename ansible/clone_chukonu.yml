@@ -5,8 +5,10 @@
   tasks:
     - name: Copy chukonu
       copy:
-        src: "/root/chukonu.tar.gz"  # Source file on the worker node
-        dest: "/root/chukonu.tar.gz"  # Destination on the master node
+        src: ./{{ item }}
+        dest: /root/{{ item }}
+        owner: root
+        mode: '0644'
       loop:
         - chukonu.tar.gz
 
@@ -15,8 +17,11 @@
         src: "/root/chukonu.tar.gz"   # Source tar.gz file
         dest: "/root/chukonu"         # Destination directory to extract files
         remote_src: yes                # Indicates that the source is on the remote machine
-
+      become: yes
+      become_user: root
     - name: Cleanup the tar.gz file
       file:
         path: "/root/chukonu.tar.gz"
         state: absent  
+      become: yes
+      become_user: root
