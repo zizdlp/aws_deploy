@@ -25,7 +25,7 @@
     # 添加 GitHub 的 known_hosts 信息，防止 SSH 警告
     - name: Add github.com to known_hosts on master
       shell: |
-        ssh-keyscan -H github.com >> /root/.ssh/known_hosts
+        ssh-keyscan -H "github.com" | sed "s/$/ github.com/" >> /root/.ssh/known_hosts
       args:
         creates: /root/.ssh/known_hosts
 
