@@ -79,18 +79,7 @@
       set_fact:
         public_key_with_hostname: "{{ public_key_root.stdout }} {{ hostname_result.stdout }}"
 
-    ### 2.1.3 将当前节点的拼接结果发送给所有方
-    # - name: Add public key for root to authorized_keys using lineinfile
-    #   lineinfile:
-    #     path: /root/.ssh/authorized_keys
-    #     create: yes
-    #     line: "{{ public_key_with_hostname }}"
-    #     state: present
-    #   delegate_to: "{{ item }}"
-    #   loop: "{{ groups['all'] }}"
-    #   become: yes
-    #   become_user: root
-
+    ### 2.1.3.1 将当前节点的拼接结果发送给所有方,首先将结果写入临时文件（避免并发问题）
     - name: Send public key to all nodes
       copy:
         content: "{{ public_key_with_hostname }}"
@@ -100,6 +89,7 @@
       become: yes
       become_user: root
 
+    ### 2.1.3.2 接收方合并接收结果
     - name: Combine authorized keys from all nodes
       shell: |
         for file in /tmp/authorized_keys.*; do
@@ -111,14 +101,24 @@
       become: yes
       become_user: root
 
-
     ### 2.1.4 将当前节点的hostname预先添加到其他节点，避免第一次登录验证
-    - name: Add host key for all nodes to known_hosts with hostname
+    - name: Add host key for all nodes to a temporary known_hosts file
       shell: |
-        ssh-keyscan -H "{{ item.key }}" | sed "s/$/ {{ item.key }}/" >> /root/.ssh/known_hosts
+        ssh-keyscan -H "{{ item.key }}" | sed "s/$/ {{ item.key }}/" > /tmp/known_hosts.{{ hostname_result.stdout }}
       become: yes
       become_user: root
       loop: "{{ nodes_ip_map_parsed | dict2items }}"
+
+    - name: Combine known_hosts from all nodes
+      shell: |
+        for file in /tmp/known_hosts.*; do
+          cat "$file"
+          echo ""  # 在每个文件之间添加换行
+        done >> /root/.ssh/known_hosts
+        # Optionally, remove the temporary files after combining
+        rm -f /tmp/known_hosts.*
+      become: yes
+      become_user: root
 
     ### 3. 重启ssh
     - name: Ensure PubkeyAuthentication and AuthorizedKeysFile are set in /etc/ssh/sshd_config
