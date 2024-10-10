@@ -40,12 +40,12 @@ jobs:
     # Step 3.1.1: Clone the private repository
     - name: Clone the private repository
       run: |
-        git clone git@github.com:chukonu-team/chukonu.git /root/chukonu
+        git clone git@github.com:chukonu-team/chukonu.git chukonu
 
     # Step 3.1.2: Compress the cloned repository into a tar.gz file
     - name: Compress the cloned repository into a tar.gz file
       run: |
-        tar -czf ./ansible/files/chukonu.tar.gz -C /root chukonu
+        tar -czf ./ansible/files/chukonu.tar.gz -C ./ chukonu
 
 
     # Step 4: 使用 deps.yml 安装依赖
