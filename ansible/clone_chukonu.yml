@@ -1,0 +1,27 @@
+---
+- name: copy chukonu repo
+  hosts: master
+  become: yes
+  tasks:
+    - name: Copy chukonu
+      copy:
+        src: ./{{ item }}
+        dest: /root/{{ item }}
+        owner: root
+        mode: '0644'
+      loop:
+        - chukonu.tar.gz
+
+    - name: Extract chukonu.tar.gz
+      unarchive:
+        src: "/root/chukonu.tar.gz"   # Source tar.gz file
+        dest: "/root"         # Destination directory to extract files
+        remote_src: yes                # Indicates that the source is on the remote machine
+      become: yes
+      become_user: root
+    - name: Cleanup the tar.gz file
+      file:
+        path: "/root/chukonu.tar.gz"
+        state: absent  
+      become: yes
+      become_user: root
