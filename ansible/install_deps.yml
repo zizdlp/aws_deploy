@@ -40,6 +40,11 @@
       when: ansible_facts['distribution'] == 'Ubuntu'
       tags:
         - setup
+    - name: Restart networking service
+      service:
+        name: networking
+        state: restarted
+      when: ansible_facts['distribution'] == 'Ubuntu'
 
     ### 2. 设置免密登录（为root用户）
     - name: Ensure .ssh directory exists for root
