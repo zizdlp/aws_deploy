@@ -99,13 +99,14 @@
         mode: '0444'
       become: yes
 
-    - name: Ensure all public keys are in authorized_keys
+    - name: Add public key for root to authorized_keys using lineinfile
       lineinfile:
         path: /root/.ssh/authorized_keys
         create: yes
-        line: "{{ item }}"
+        line: "{{ public_key_with_hostname }}"
         state: present
-      loop: "{{ ansible_public_keys }}"
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['all'] }}"
       become: yes
       become_user: root
 
