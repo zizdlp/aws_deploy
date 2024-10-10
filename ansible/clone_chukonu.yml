@@ -15,7 +15,7 @@
     - name: Extract chukonu.tar.gz
       unarchive:
         src: "/root/chukonu.tar.gz"   # Source tar.gz file
-        dest: "/root/chukonu"         # Destination directory to extract files
+        dest: "/root"         # Destination directory to extract files
         remote_src: yes                # Indicates that the source is on the remote machine
       become: yes
       become_user: root
