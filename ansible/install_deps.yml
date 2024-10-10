@@ -91,31 +91,22 @@
     #   become: yes
     #   become_user: root
 
-
-    - name: Create lock file
-      file:
-        path: /tmp/authorized_keys.lock
-        state: touch
-        mode: '0444'
-      become: yes
-
-    - name: Add public key for root to authorized_keys using lineinfile
-      lineinfile:
-        path: /root/.ssh/authorized_keys
-        create: yes
-        line: "{{ public_key_with_hostname }}"
-        state: present
+    - name: Send public key to all nodes
+      copy:
+        content: "{{ public_key_with_hostname }}"
+        dest: "/tmp/authorized_keys.{{ hostname_result.stdout }}"
       delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
       become: yes
       become_user: root
 
-    - name: Remove lock file
-      file:
-        path: /tmp/authorized_keys.lock
-        state: absent
+    - name: Combine authorized keys from all nodes
+      shell: |
+        cat /tmp/authorized_keys.* >> /root/.ssh/authorized_keys
+        # Optionally, remove the temporary files after combining
+        rm -f /tmp/authorized_keys.*
       become: yes
-
+      become_user: root
 
 
 
