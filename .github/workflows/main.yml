@@ -27,7 +27,15 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
-        chmod 400 ~/.ssh/local_test.pem              
+        chmod 400 ~/.ssh/local_test.pem  
+
+    # Step 3.1: 设置 chukonu 的deploy key
+    - name: Set up SSH key from secret
+      run: |
+        echo "${{ secrets.DEPLOY_KEY }}" > deploy_key
+        chmod 600 deploy_key
+
+
     # Step 4: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
       uses: ./.github/actions/deps
@@ -105,78 +113,84 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-
-    # Step 11: 配置nvme
-    - name: use nvme
+    - name: clone chukonu
       uses: dawidd6/action-ansible-playbook@v2
       with:
-        playbook: ./ansible/use_nvme.yml
+        playbook: ./ansible/clone_chukonu.yml
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 11: 配置nvme
+    # - name: use nvme
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/use_nvme.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
 
-    # Step 12: 使用 Ansible 部署 sbt
-    - name: install sbt
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_sbt.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 12: 使用 Ansible 部署 sbt
+    # - name: install sbt
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_sbt.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 13: 使用 Ansible 部署 scala
-    - name: install scala
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_scala.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    # Step 14: 使用 Ansible 部署 Spark 集群
-    - name: install spark
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_spark.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 13: 使用 Ansible 部署 scala
+    # - name: install scala
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_scala.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 14: 使用 Ansible 部署 Spark 集群
+    # - name: install spark
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_spark.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 15: 使用 Ansible 部署 hadoop 集群
-    - name: install hadoop
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_hadoop.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 15: 使用 Ansible 部署 hadoop 集群
+    # - name: install hadoop
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_hadoop.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 16: 使用 Ansible 部署 mysql
-    - name: install mysql
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_mysql.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 16: 使用 Ansible 部署 mysql
+    # - name: install mysql
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_mysql.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 17: 使用 Ansible 部署 hive
-    - name: install hive
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_hive.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 17: 使用 Ansible 部署 hive
+    # - name: install hive
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_hive.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 18: 使用 Ansible 部署 tpcds
-    - name: install tpcds
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_tpcds.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+    # # Step 18: 使用 Ansible 部署 tpcds
+    # - name: install tpcds
+    #   uses: dawidd6/action-ansible-playbook@v2
+    #   with:
+    #     playbook: ./ansible/install_tpcds.yml
+    #     inventory: ${{ env.INVENTORY_CONTENT }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
 
     # # # Step 8: 清理 EC2 实例
