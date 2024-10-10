@@ -116,7 +116,7 @@
           echo ""  # 在每个文件之间添加换行
         done >> /root/.ssh/known_hosts
         # Optionally, remove the temporary files after combining
-        rm -f /tmp/known_hosts.*
+        # rm -f /tmp/known_hosts.*
       become: yes
       become_user: root
 
