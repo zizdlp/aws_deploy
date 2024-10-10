@@ -59,23 +59,32 @@
       become: yes
       become_user: root
 
-    - name: Read root public key
+    - name: Read root public key and include hostname
       command: cat /root/.ssh/id_rsa.pub
       register: public_key_root
       become: yes
       become_user: root
+      delegate_to: "{{ inventory_hostname }}"  # 读取当前主机的公钥
 
-    ## 避免并发问题
+    - name: Set fact with public key and hostname
+      set_fact:
+        public_key_with_hostname: "{{ public_key_root.stdout }} {{ inventory_hostname }}"
+      
     - name: Add public key for root to authorized_keys using lineinfile
       lineinfile:
         path: /root/.ssh/authorized_keys
         create: yes
-        line: "{{ public_key_root.stdout }}"
+        line: "{{ public_key_with_hostname }}"
         state: present
       delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
       become: yes
       become_user: root
+
+
+
+
+
 
     - name: Add host key for all nodes to known_hosts
       shell: ssh-keyscan -H "{{ item.key }}" >> /root/.ssh/known_hosts
