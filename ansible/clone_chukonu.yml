@@ -12,16 +12,15 @@
         owner: root
         group: root
 
-    # 将 GitHub Actions Secret 中的私钥保存为 deploy_key
-    - name: Add custom deploy key to master node from inventory file
+    - name: Copy deploy_key
       copy:
-        content: "{{ deploy_key }}"
+        src: ./{{ item }}
         dest: /root/.ssh/deploy_key
-        mode: '0600'
         owner: root
-        group: root
-      become: yes
-      become_user: root
+        mode: '0600'
+      loop:
+        - deploy_key.txt
+
 
     # 添加 GitHub 的 known_hosts 信息，防止 SSH 警告
     - name: Add github.com to known_hosts on master

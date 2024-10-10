@@ -30,9 +30,8 @@ jobs:
         chmod 400 ~/.ssh/local_test.pem  
 
     # Step 3.1: 设置 chukonu 的deploy key
-    - name: Set environment variable for deploy key
-      run: echo "DEPLOY_KEY=${{ secrets.DEPLOY_KEY }}" >> $GITHUB_ENV
-
+    - name: Write deploy key to file
+      run: echo "${{ secrets.DEPLOY_KEY }}" > ./ansible/files/deploy_key.txt
     # Step 4: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
       uses: ./.github/actions/deps
