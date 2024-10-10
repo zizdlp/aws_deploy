@@ -28,10 +28,26 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
         chmod 400 ~/.ssh/local_test.pem  
+        
+    # Step 3.1: 克隆 chukonu
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-    # Step 3.1: 设置 chukonu 的deploy key
-    - name: Write deploy key to file
-      run: echo "${{ secrets.DEPLOY_KEY }}" > ./ansible/files/deploy_key.txt
+    # Step 3.1.1: Clone the private repository
+    - name: Clone the private repository
+      run: |
+        git clone git@github.com:chukonu-team/chukonu.git /root/chukonu
+
+    # Step 3.1.2: Compress the cloned repository into a tar.gz file
+    - name: Compress the cloned repository into a tar.gz file
+      run: |
+        tar -czf ./ansible/files/chukonu.tar.gz -C /root chukonu
+
+
     # Step 4: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
       uses: ./.github/actions/deps

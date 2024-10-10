@@ -1,57 +1,22 @@
 ---
-- name: Clone and copy private Git repository with custom SSH key
+- name: copy chukonu repo
   hosts: master
   become: yes
   tasks:
-    # 创建 .ssh 目录并设置权限
-    - name: Create .ssh directory if it does not exist
-      file:
-        path: /root/.ssh
-        state: directory
-        mode: '0700'
-        owner: root
-        group: root
-
-    - name: Copy deploy_key
+    - name: Copy chukonu
       copy:
-        src: ./{{ item }}
-        dest: /root/.ssh/deploy_key
-        owner: root
-        mode: '0600'
+        src: "/root/chukonu.tar.gz"  # Source file on the worker node
+        dest: "/root/chukonu.tar.gz"  # Destination on the master node
       loop:
-        - deploy_key.txt
+        - chukonu.tar.gz
 
+    - name: Extract chukonu.tar.gz
+      unarchive:
+        src: "/root/chukonu.tar.gz"   # Source tar.gz file
+        dest: "/root/chukonu"         # Destination directory to extract files
+        remote_src: yes                # Indicates that the source is on the remote machine
 
-    # 添加 GitHub 的 known_hosts 信息，防止 SSH 警告
-    - name: Add github.com to known_hosts on master
-      shell: |
-        ssh-keyscan -H "github.com" | sed "s/$/ github.com/" >> /root/.ssh/known_hosts
-      become: yes
-      become_user: root
-
-
-
-
-    # 创建 SSH 配置文件，指定使用 deploy_key 作为 github.com 的私钥
-    - name: Configure SSH to use custom deploy_key for github.com
-      lineinfile:
-        path: /root/.ssh/config
-        create: yes
-        line: |
-          Host github.com
-          HostName github.com
-          IdentityFile /root/.ssh/deploy_key
-          User git
-        mode: '0600'
-        owner: root
-        group: root
-
-    # 从 master 节点克隆私有仓库
-    - name: Clone private repository using custom SSH key
-      git:
-        repo: 'git@github.com:chukonu-team/chukonu.git'
-        dest: /root/chukonu
-        version: main
-        update: yes
-      become: yes
-      become_user: root
+    - name: Cleanup the tar.gz file
+      file:
+        path: "/root/chukonu.tar.gz"
+        state: absent  
