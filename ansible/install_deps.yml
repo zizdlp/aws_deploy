@@ -40,11 +40,6 @@
       when: ansible_facts['distribution'] == 'Ubuntu'
       tags:
         - setup
-    - name: Restart networking service
-      service:
-        name: networking
-        state: restarted
-      when: ansible_facts['distribution'] == 'Ubuntu'
 
     ### 2. 设置免密登录（为root用户）
     - name: Ensure .ssh directory exists for root
@@ -70,13 +65,15 @@
       become: yes
       become_user: root
 
-    - name: Add public key for root to authorized_keys
-      authorized_key:
-        user: root
+    ## 避免并发问题
+    - name: Add public key for root to authorized_keys using lineinfile
+      lineinfile:
+        path: /root/.ssh/authorized_keys
+        create: yes
+        line: "{{ public_key_root.stdout }}"
         state: present
-        key: "{{ public_key_root.stdout }}"
-      delegate_to: "{{ item.key }}"
-      loop: "{{ nodes_ip_map_parsed | dict2items }}"
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['all'] }}"
       become: yes
       become_user: root
 
