@@ -70,20 +70,16 @@
         user: root
         state: present
         key: "{{ public_key_root.stdout }}"
-      delegate_to: "{{ item }}"
-      loop: "{{ groups['all'] }}"
+      delegate_to: "{{ item.key }}"
+      loop: "{{ nodes_ip_map_parsed | dict2items }}"
       become: yes
       become_user: root
 
-    ### 2.1 Add known hosts for all nodes
     - name: Add host key for all nodes to known_hosts
-      known_hosts:
-        path: /root/.ssh/known_hosts
-        name: "{{ item }}"
-        key: "{{ lookup('pipe', 'ssh-keyscan -H ' + item) }}"
+      shell: ssh-keyscan -H "{{ item.value }}" >> /root/.ssh/known_hosts
       become: yes
       become_user: root
-      loop: "{{ groups['all'] }}"
+      loop: "{{ nodes_ip_map_parsed | dict2items }}"
 
     ### 3. 重启ssh
     - name: Ensure PubkeyAuthentication and AuthorizedKeysFile are set in /etc/ssh/sshd_config
