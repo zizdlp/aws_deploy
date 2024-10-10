@@ -22,9 +22,10 @@ JAR=${TPCDSBENCHMARK}"/target/scala-2.12/tpcds-benchmark_2.12-0.1.0-SNAPSHOT.jar
 MASTER="yarn"
 numexecutors=3
 executorcores=12
-executormemory="30g"
+executormemory="90g"
 offsize="0g"
-parallelism=100
+overhead="4g"
+parallelism=1000
 
 format="delta"
 # format="parquet"

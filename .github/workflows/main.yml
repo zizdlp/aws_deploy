@@ -3,7 +3,7 @@ name: Deploy and Test Spark Cluster on AWS
 on:
   push:
     branches:
-      - main  # 当推送到主分支时触发
+      - feature/profile  # 当推送到主分支时触发
 
 jobs:
   deploy-and-test:
@@ -28,7 +28,6 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
         chmod 400 ~/.ssh/local_test.pem              
-        ls -la ~/.ssh/  # 查看文件列表和权限
     # Step 4: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
       uses: ./.github/actions/deps
@@ -68,7 +67,7 @@ jobs:
           retry_ssh_keyscan $WORKER
         done
 
-     # Step 7: 测试dns 联通
+    # Step 7: 测试dns 联通
     - name: Test SSH connection to master
       run: |
         ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS 'hostname'
@@ -106,7 +105,8 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    # Step 15: 使用 Ansible 部署 tpcds
+
+    # Step 11: 配置nvme
     - name: use nvme
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -116,7 +116,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
 
-    # Step 15: 使用 Ansible 部署 sbt
+    # Step 12: 使用 Ansible 部署 sbt
     - name: install sbt
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -124,7 +124,8 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    # Step 12: 使用 Ansible 部署 scala
+
+    # Step 13: 使用 Ansible 部署 scala
     - name: install scala
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -132,7 +133,7 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    # Step 10: 使用 Ansible 部署 Spark 集群
+    # Step 14: 使用 Ansible 部署 Spark 集群
     - name: install spark
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -141,7 +142,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 11: 使用 Ansible 部署 hadoop 集群
+    # Step 15: 使用 Ansible 部署 hadoop 集群
     - name: install hadoop
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -150,7 +151,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 11: 使用 Ansible 部署 mysql
+    # Step 16: 使用 Ansible 部署 mysql
     - name: install mysql
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -158,7 +159,8 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    # Step 11: 使用 Ansible 部署 hive
+
+    # Step 17: 使用 Ansible 部署 hive
     - name: install hive
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -167,7 +169,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 15: 使用 Ansible 部署 tpcds
+    # Step 18: 使用 Ansible 部署 tpcds
     - name: install tpcds
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -177,46 +179,6 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
 
-    # # Step 13: 运行 Spark 测试
-    # - name: Extract Master DNS
-    #   id: extract_master_dns
-    #   run: |
-    #     MASTER_DNS=$(grep '^[master]' ./ansible/inventory.ini | head -n 1)
-    #     echo "MASTER_DNS=$MASTER_DNS" >> $GITHUB_ENV
-
-    # # Step 14: Copy 测试文件到master
-    # - name: Create directory on master
-    #   run: |
-    #     MASTER_DNS=${{ env.MASTER_DNS }}
-    #     ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS 'mkdir -p /home/ubuntu/tests'
-
-    # - name: Copy Test cases
-    #   run: |
-    #     MASTER_DNS=${{ env.MASTER_DNS }}
-    #     scp -i ~/.ssh/local_test.pem ./tests/case0.py ubuntu@${MASTER_DNS}:/home/ubuntu/tests/case0.py
-
-    # # Step 15: 测试
-    # - name: Run Spark Test
-    #   run: |
-    #     MASTER_DNS=${{ env.MASTER_DNS }}
-    #     ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-    #     "export SPARK_HOME=/usr/local/spark; export PATH=\$PATH:\$SPARK_HOME/bin; spark-submit --master spark://$MASTER_DNS:7077 ~/tests/case0.py"
-    # Step 15: 测试
-    # - name: Run Spark Test
-    #   run: |
-    #     ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-    #     "sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > result.log 2>&1"
-    # - name: Run Spark Test
-    #   run: |
-    #     ssh -i ~/.ssh/local_test.pem ubuntu@${{ env.MASTER_DNS }} \
-    #     "sudo -i /opt/tpcds-benchmark/run-spark.sh true true true true > result.log 2>&1"
-    # - name: run tpcds
-    #   uses: dawidd6/action-ansible-playbook@v2
-    #   with:
-    #     playbook: ./ansible/run_tpcds.yml
-    #     inventory: ${{ env.INVENTORY_CONTENT }}
-    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # # # Step 8: 清理 EC2 实例
     # - name: Terminate EC2 instances
     #   if: always()

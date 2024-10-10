@@ -2,16 +2,16 @@
   hosts: all
   become: yes
   vars:
-    spark_version: "3.4.3"  # Adjust Spark version as needed
-    hive_version: "4.0.0"    # Update as needed
+    spark_version: "3.4.3"
+    hive_version: "4.0.0"
     hive_home: "/usr/local/hive"
     spark_home: "/usr/local/spark"
     java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
-    mysql_host: "{{ groups['master'][0] }}"  # 主节点地址
+    mysql_host: "{{ groups['master'][0] }}"
     mysql_database: "hive"
     mysql_user: "hiveuser"
     mysql_password: "your_password"
-  # Define handlers for restarting the SSH service
+
   handlers:
     - name: Restart SSH
       service:
@@ -24,11 +24,13 @@
         name: ssh
         state: restarted
       when: ansible_service_mgr != 'systemd'
+
   tasks:
     ### 1. 设置hostname && host ip
     - name: Parse nodes_ip_map from JSON string
       set_fact:
         nodes_ip_map_parsed: "{{ nodes_ip_map | from_json }}"
+        
     - name: Write nodes IPs to /etc/hosts
       lineinfile:
         path: /etc/hosts
@@ -49,82 +51,98 @@
       become_user: root
 
     - name: Generate SSH key pair for root if not present
-      command: ssh-keygen -t rsa -b 2048 -f /root/.ssh/id_rsa -N ''
-      args:
-        creates: /root/.ssh/id_rsa
+      openssh_keypair:
+        path: /root/.ssh/id_rsa
+        type: rsa
+        size: 2048
+        state: present
       become: yes
       become_user: root
 
-    - name: Read root public key
+    ### 2.1.0 获取当前node 的pubkey
+    - name: Read root public key and include hostname
       command: cat /root/.ssh/id_rsa.pub
       register: public_key_root
       become: yes
       become_user: root
+      delegate_to: "{{ inventory_hostname }}"  # 读取当前主机的公钥
 
-    # - name: Share root public key with all other nodes
-    #   authorized_key:
-    #     user: root
-    #     state: present
-    #     key: "{{ public_key_root.stdout }}"
-    #   delegate_to: "{{ item }}"
-    #   loop: "{{ groups['all'] }}"
+    ### 2.1.1 获取当前node hostname
+    - name: Get hostname
+      command: hostname
+      register: hostname_result
+      become: yes
 
-    ## 避免并发问题
-    - name: Add public key for root to authorized_keys using lineinfile
-      lineinfile:
-        path: /root/.ssh/authorized_keys
-        create: yes
-        line: "{{ public_key_root.stdout }}"
-        state: present
+
+    ### 2.1.2 拼接pubkey 和hostname 便于识别
+    - name: Set fact with public key and hostname
+      set_fact:
+        public_key_with_hostname: "{{ public_key_root.stdout }} {{ hostname_result.stdout }}"
+
+    ### 2.1.3.1 将当前节点的拼接结果发送给所有方,首先将结果写入临时文件（避免并发问题）
+    - name: Send public key to all nodes
+      copy:
+        content: "{{ public_key_with_hostname }}"
+        dest: "/tmp/authorized_keys.{{ hostname_result.stdout }}"
       delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
       become: yes
       become_user: root
 
-    ## 2.1 Add known hosts for all nodes
-    - name: Add host key for all nodes to known_hosts
-      shell: ssh-keyscan -H "{{ item }}" >> /root/.ssh/known_hosts
+    ### 2.1.3.2 接收方合并接收结果
+    - name: Combine authorized keys from all nodes
+      shell: |
+        for file in /tmp/authorized_keys.*; do
+          cat "$file"
+          echo ""  # 在每个文件之间添加换行
+        done >> /root/.ssh/authorized_keys
+        # Optionally, remove the temporary files after combining
+        rm -f /tmp/authorized_keys.*
       become: yes
       become_user: root
-      loop: "{{ groups['all'] }}"
+
+    ### 2.1.4 将各个节点的hostname预先添加到knownhost，避免第一次登录验证
+    - name: Add host key for all nodes to known_hosts with hostname
+      shell: |
+        ssh-keyscan -H "{{ item.key }}" | sed "s/$/ {{ item.key }}/" >> /root/.ssh/known_hosts
+      become: yes
+      become_user: root
+      loop: "{{ nodes_ip_map_parsed | dict2items }}"
 
     ### 3. 重启ssh
     - name: Ensure PubkeyAuthentication and AuthorizedKeysFile are set in /etc/ssh/sshd_config
       blockinfile:
         path: /etc/ssh/sshd_config
         block: |
-          # Ensure public key authentication is enabled
           PubkeyAuthentication yes
-
-          # Specify additional authorized keys file
           AuthorizedKeysFile      .ssh/authorized_keys .ssh/authorized_keys2
         create: yes
         backup: yes
       notify: Restart SSH
 
-    # ## 4 install deps
-    # - name: Update package list
-    #   apt:
-    #     update_cache: yes
-    #   register: update_result
-    #   retries: 3
-    #   delay: 10
-    #   until: update_result is succeeded
+    ### 4 install deps
+    - name: Update package list
+      apt:
+        update_cache: yes
+      register: update_result
+      retries: 3
+      delay: 10
+      until: update_result is succeeded
 
-    # - name: Upgrade all packages
-    #   apt:
-    #     upgrade: dist
-    #   register: upgrade_result
-    #   retries: 3
-    #   delay: 10
-    #   until: upgrade_result is succeeded
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+      register: upgrade_result
+      retries: 3
+      delay: 10
+      until: upgrade_result is succeeded
 
-    ## 1. 备份 sources.list
+    ## 4.1. 备份 sources.list
     - name: Backup existing sources.list
       command: cp /etc/apt/sources.list /etc/apt/sources.list.bak
       become: yes
 
-    ## 2. 替换为阿里云镜像源 (Ubuntu 22.04)
+    ## 4.2. 替换为阿里云镜像源 (Ubuntu 22.04)
     - name: Set Aliyun apt source list for Ubuntu 22.04
       blockinfile:
         path: /etc/apt/sources.list
@@ -136,7 +154,7 @@
           deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
       become: yes
 
-    ## 3. 更新包列表并升级
+    ## 4.3. 更新包列表并升级
     - name: Update package list
       apt:
         update_cache: yes
