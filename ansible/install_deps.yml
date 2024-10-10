@@ -59,28 +59,27 @@
       become: yes
       become_user: root
 
+    ### 2.1.0 获取当前node 的pubkey
     - name: Read root public key and include hostname
       command: cat /root/.ssh/id_rsa.pub
       register: public_key_root
       become: yes
       become_user: root
       delegate_to: "{{ inventory_hostname }}"  # 读取当前主机的公钥
+
+    ### 2.1.1 获取当前node hostname
     - name: Get hostname
       command: hostname
       register: hostname_result
       become: yes
 
-    - name: Read root public key and include hostname
-      command: cat /root/.ssh/id_rsa.pub
-      register: public_key_root
-      become: yes
-      become_user: root
-      delegate_to: "{{ inventory_hostname }}"  # 读取当前主机的公钥
 
+    ### 2.1.2 拼接pubkey 和hostname 便于识别
     - name: Set fact with public key and hostname
       set_fact:
         public_key_with_hostname: "{{ public_key_root.stdout }} {{ hostname_result.stdout }}"
 
+    ### 2.1.3 将当前节点的拼接结果发送给所有方
     - name: Add public key for root to authorized_keys using lineinfile
       lineinfile:
         path: /root/.ssh/authorized_keys
@@ -92,12 +91,10 @@
       become: yes
       become_user: root
 
-
-
-
-
-    - name: Add host key for all nodes to known_hosts
-      shell: ssh-keyscan -H "{{ item.key }}" >> /root/.ssh/known_hosts
+    ### 2.1.4 将当前节点的hostname预先添加到其他节点，避免第一次登录验证
+    - name: Add host key for all nodes to known_hosts with hostname
+      shell: |
+        ssh-keyscan -H "{{ item.key }}" | sed "s/$/ {{ item.key }}/" >> /root/.ssh/known_hosts
       become: yes
       become_user: root
       loop: "{{ nodes_ip_map_parsed | dict2items }}"
