@@ -102,12 +102,14 @@
 
     - name: Combine authorized keys from all nodes
       shell: |
-        cat /tmp/authorized_keys.* >> /root/.ssh/authorized_keys
+        for file in /tmp/authorized_keys.*; do
+          cat "$file"
+          echo ""  # 在每个文件之间添加换行
+        done >> /root/.ssh/authorized_keys
         # Optionally, remove the temporary files after combining
         rm -f /tmp/authorized_keys.*
       become: yes
       become_user: root
-
 
 
     ### 2.1.4 将当前节点的hostname预先添加到其他节点，避免第一次登录验证
