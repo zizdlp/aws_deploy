@@ -35,7 +35,6 @@
           - g++
           - g++-9
           - g++-10
-          - sbt
         state: present
         update_cache: yes
 
