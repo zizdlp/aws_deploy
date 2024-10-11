@@ -125,13 +125,6 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    - name: clone chukonu
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/clone_chukonu.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     # Step 11: 配置nvme
     - name: use nvme
       uses: dawidd6/action-ansible-playbook@v2
@@ -203,7 +196,13 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-
+    - name: clone chukonu
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/clone_chukonu.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     # # # Step 8: 清理 EC2 实例
     # - name: Terminate EC2 instances
