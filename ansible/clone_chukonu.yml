@@ -65,62 +65,62 @@
         path: /opt/chukonu_install/chukonu/build
         state: directory
 
-    - name: Run CMake
-      command: >
-        CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF
-        -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF
-        -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF
-        -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
-      args:
-        chdir: /opt/chukonu_install/chukonu/build
+    # - name: Run CMake
+    #   command: >
+    #     CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF
+    #     -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF
+    #     -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF
+    #     -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
+    #   args:
+    #     chdir: /opt/chukonu_install/chukonu/build
 
-    - name: Build Chukonu
-      command: make -j8
-      args:
-        chdir: /opt/chukonu_install/chukonu/build
+    # - name: Build Chukonu
+    #   command: make -j8
+    #   args:
+    #     chdir: /opt/chukonu_install/chukonu/build
 
-    - name: Package Scala project
-      command: sbt +package
-      args:
-        chdir: /opt/chukonu_install/chukonu/scala
+    # - name: Package Scala project
+    #   command: sbt +package
+    #   args:
+    #     chdir: /opt/chukonu_install/chukonu/scala
 
-    - name: Install Chukonu
-      command: make install
-      args:
-        chdir: /opt/chukonu_install/chukonu/build
+    # - name: Install Chukonu
+    #   command: make install
+    #   args:
+    #     chdir: /opt/chukonu_install/chukonu/build
 
-    - name: Copy JAR to all_jars directory
-      copy:
-        src: /opt/chukonu_install/jar/chukonu_2.12-0.5.1.jar
-        dest: /opt/all_jars/
+    # - name: Copy JAR to all_jars directory
+    #   copy:
+    #     src: /opt/chukonu_install/jar/chukonu_2.12-0.5.1.jar
+    #     dest: /opt/all_jars/
 
-    - name: Create cache and staging directories
-      file:
-        path: "{{ item }}"
-        state: directory
-      loop:
-        - /opt/chukonu_cache
-        - /opt/chukonu_staging
+    # - name: Create cache and staging directories
+    #   file:
+    #     path: "{{ item }}"
+    #     state: directory
+    #   loop:
+    #     - /opt/chukonu_cache
+    #     - /opt/chukonu_staging
 
-    - name: Configure NFS exports
-      lineinfile:
-        path: /etc/exports
-        line: '/opt/chukonu_cache/ *(rw,insecure,sync,no_subtree_check,no_root_squash)'
-        state: present
+    # - name: Configure NFS exports
+    #   lineinfile:
+    #     path: /etc/exports
+    #     line: '/opt/chukonu_cache/ *(rw,insecure,sync,no_subtree_check,no_root_squash)'
+    #     state: present
 
-    - name: Export NFS shares
-      command: exportfs -a
+    # - name: Export NFS shares
+    #   command: exportfs -a
 
-    - name: Start NFS server
-      service:
-        name: nfs-kernel-server
-        state: started
-        enabled: true
+    # - name: Start NFS server
+    #   service:
+    #     name: nfs-kernel-server
+    #     state: started
+    #     enabled: true
 
-    - name: Check NFS server status
-      command: systemctl status nfs-kernel-server
-      register: nfs_status
+    # - name: Check NFS server status
+    #   command: systemctl status nfs-kernel-server
+    #   register: nfs_status
 
-    - name: Display NFS server status
-      debug:
-        var: nfs_status.stdout
+    # - name: Display NFS server status
+    #   debug:
+    #     var: nfs_status.stdout
