@@ -35,6 +35,7 @@
           - g++
           - g++-9
           - g++-10
+          - libbenchmark-dev
         state: present
         update_cache: yes
 
@@ -62,45 +63,55 @@
 
     - name: Create build directory
       file:
-        path: /opt/chukonu_install/chukonu/build
+        path: /opt/chukonu/build
         state: directory
 
-    # - name: Run CMake
-    #   command: >
-    #     CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF
-    #     -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF
-    #     -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF
-    #     -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
-    #   args:
-    #     chdir: /opt/chukonu_install/chukonu/build
+    - name: Create chukonu_cache directory
+      file:
+        path: /opt/chukonu_cache
+        state: directory
+    - name: Create chukonu_staging directory
+      file:
+        path: /opt/chukonu_staging
+        state: directory
+    - name: Create /opt/all_jars directory
+      file:
+        path: /opt/all_jars
+        state: directory
+    - name: Build Chukonu by sbt assembly
+      command: sbt assembly
+      args:
+        chdir: /opt/chukonu/scala
 
-    # - name: Build Chukonu
-    #   command: make -j8
-    #   args:
-    #     chdir: /opt/chukonu_install/chukonu/build
+    - name: Run CMake
+      command: >
+        CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF
+        -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF
+        -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF
+        -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
+      args:
+        chdir: /opt/chukonu/build
 
-    # - name: Package Scala project
-    #   command: sbt +package
-    #   args:
-    #     chdir: /opt/chukonu_install/chukonu/scala
+    - name: Build Chukonu
+      command: make -j8
+      args:
+        chdir: /opt/chukonu/build
 
-    # - name: Install Chukonu
-    #   command: make install
-    #   args:
-    #     chdir: /opt/chukonu_install/chukonu/build
+    - name: Package Scala project
+      command: sbt +package
+      args:
+        chdir: /opt/chukonu/scala
 
-    # - name: Copy JAR to all_jars directory
-    #   copy:
-    #     src: /opt/chukonu_install/jar/chukonu_2.12-0.5.1.jar
-    #     dest: /opt/all_jars/
+    - name: Install Chukonu
+      command: make install
+      args:
+        chdir: /opt/chukonu/build
 
-    # - name: Create cache and staging directories
-    #   file:
-    #     path: "{{ item }}"
-    #     state: directory
-    #   loop:
-    #     - /opt/chukonu_cache
-    #     - /opt/chukonu_staging
+    - name: Copy JAR to all_jars directory
+      copy:
+        src: /opt/chukonu_install/jar/chukonu_2.12-0.5.1.jar
+        dest: /opt/all_jars/
+
 
     # - name: Configure NFS exports
     #   lineinfile:

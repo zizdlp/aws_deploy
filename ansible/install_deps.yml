@@ -207,6 +207,9 @@
           - libgtest-dev
           - nfs-common
           - nfs-kernel-server
+          - pkg-config
+
+
         state: present
       register: install_result
       retries: 3
