@@ -176,37 +176,37 @@
     - name: Install necessary software
       apt:
         name:
-          # - tmux
-          # - unzip
-          # - git
-          # - byacc
-          # - flex
-          # - bison
-          # - locales
-          # - tzdata
-          # - ccache
-          # - cmake
-          # - ninja-build
-          # - build-essential
-          # - llvm-11-dev
-          # - clang-11
-          # - libiberty-dev
-          # - libdwarf-dev
-          # - libre2-dev
-          # - libz-dev
-          # - libssl-dev
-          # - libboost-all-dev
-          # - libcurl4-openssl-dev
+          - tmux
+          - unzip
+          - git
+          - byacc
+          - flex
+          - bison
+          - locales
+          - tzdata
+          - ccache
+          - cmake
+          - ninja-build
+          - build-essential
+          - llvm-11-dev
+          - clang-11
+          - libiberty-dev
+          - libdwarf-dev
+          - libre2-dev
+          - libz-dev
+          - libssl-dev
+          - libboost-all-dev
+          - libcurl4-openssl-dev
           - openjdk-11-jdk
-          # - maven
-          # - libtbb-dev
-          # - libjemalloc-dev
-          # - libspdlog-dev
-          # - g++-10
-          # - libmsgsl-dev
-          # - libgtest-dev
-          # - nfs-common
-          # - nfs-kernel-server
+          - maven
+          - libtbb-dev
+          - libjemalloc-dev
+          - libspdlog-dev
+          - g++-10
+          - libmsgsl-dev
+          - libgtest-dev
+          - nfs-common
+          - nfs-kernel-server
         state: present
       register: install_result
       retries: 3
