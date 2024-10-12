@@ -66,10 +66,6 @@
         path: /opt/chukonu/build
         state: directory
 
-    - name: Create chukonu_cache directory
-      file:
-        path: /opt/chukonu_cache
-        state: directory
     - name: Create chukonu_staging directory
       file:
         path: /opt/chukonu_staging
@@ -113,26 +109,3 @@
         dest: /opt/all_jars/
         remote_src: yes
       become: true
-
-    # - name: Configure NFS exports
-    #   lineinfile:
-    #     path: /etc/exports
-    #     line: '/opt/chukonu_cache/ *(rw,insecure,sync,no_subtree_check,no_root_squash)'
-    #     state: present
-
-    # - name: Export NFS shares
-    #   command: exportfs -a
-
-    # - name: Start NFS server
-    #   service:
-    #     name: nfs-kernel-server
-    #     state: started
-    #     enabled: true
-
-    # - name: Check NFS server status
-    #   command: systemctl status nfs-kernel-server
-    #   register: nfs_status
-
-    # - name: Display NFS server status
-    #   debug:
-    #     var: nfs_status.stdout
