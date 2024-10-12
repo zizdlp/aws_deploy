@@ -95,6 +95,7 @@
       environment:
         CC: gcc
         CXX: g++
+        JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
       become: true
     - name: Build Chukonu
       command: make -j8
