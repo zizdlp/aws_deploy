@@ -83,11 +83,6 @@
       args:
         chdir: /opt/chukonu/scala
 
-    # - name: Run CMake
-    #   command: >
-    #     CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
-    #   args:
-    #     chdir: /opt/chukonu/build
     - name: Run cmake build
       ansible.builtin.command:
         cmd: cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
@@ -115,7 +110,7 @@
     - name: Ensure chukonu jar exists on the remote
       ansible.builtin.copy:
         src: /opt/chukonu_install/jar/chukonu_2.12-0.5.1.jar
-        dest: /some/destination/path/
+        dest: /opt/all_jars/
         remote_src: yes
       become: true
 

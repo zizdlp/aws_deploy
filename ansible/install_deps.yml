@@ -249,7 +249,10 @@
         extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
       become: yes
 
-
+    - name: Create chukonu_cache directory
+      file:
+        path: /opt/chukonu_cache
+        state: directory
     - name: Configure NFS exports
       lineinfile:
         path: /etc/exports
