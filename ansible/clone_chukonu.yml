@@ -1,5 +1,5 @@
 ---
-- name: copy chukonu repo
+- name: install chukonu
   hosts: master
   become: yes
   tasks:
@@ -15,8 +15,8 @@
     - name: Extract chukonu.tar.gz
       unarchive:
         src: "/root/chukonu.tar.gz"   # Source tar.gz file
-        dest: "/root"         # Destination directory to extract files
-        remote_src: yes                # Indicates that the source is on the remote machine
+        dest: "/opt"                  # Destination directory to extract files
+        remote_src: yes               # Indicates that the source is on the remote machine
       become: yes
       become_user: root
     - name: Cleanup the tar.gz file
@@ -25,3 +25,110 @@
         state: absent  
       become: yes
       become_user: root
+
+    - name: Install required packages
+      apt:
+        name:
+          - nfs-kernel-server
+          - git
+          - cmake
+          - g++
+          - g++-9
+          - g++-10
+          - libbenchmark-dev
+        state: present
+        update_cache: yes
+
+    - name: Set g++ alternatives
+      command: >
+        update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+      ignore_errors: yes
+
+    - name: Set g++ alternatives for g++-9
+      command: >
+        update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10
+      ignore_errors: yes
+
+    - name: Set g++ to g++-10
+      command: update-alternatives --set g++ /usr/bin/g++-10
+
+    - name: Verify g++ version
+      command: g++ --version
+      register: gpp_version
+
+    - name: Create installation directory
+      file:
+        path: /opt/chukonu_install
+        state: directory
+
+    - name: Create build directory
+      file:
+        path: /opt/chukonu/build
+        state: directory
+
+    - name: Create chukonu_cache directory
+      file:
+        path: /opt/chukonu_cache
+        state: directory
+    - name: Create chukonu_staging directory
+      file:
+        path: /opt/chukonu_staging
+        state: directory
+    - name: Create /opt/all_jars directory
+      file:
+        path: /opt/all_jars
+        state: directory
+    - name: Build Chukonu by sbt assembly
+      command: sbt assembly
+      args:
+        chdir: /opt/chukonu/scala
+
+    - name: Run CMake
+      command: >
+        CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
+      args:
+        chdir: /opt/chukonu/build
+
+    - name: Build Chukonu
+      command: make -j8
+      args:
+        chdir: /opt/chukonu/build
+
+    - name: Package Scala project
+      command: sbt +package
+      args:
+        chdir: /opt/chukonu/scala
+
+    - name: Install Chukonu
+      command: make install
+      args:
+        chdir: /opt/chukonu/build
+
+    - name: Copy JAR to all_jars directory
+      copy:
+        src: /opt/chukonu_install/jar/chukonu_2.12-0.5.1.jar
+        dest: /opt/all_jars/
+
+
+    # - name: Configure NFS exports
+    #   lineinfile:
+    #     path: /etc/exports
+    #     line: '/opt/chukonu_cache/ *(rw,insecure,sync,no_subtree_check,no_root_squash)'
+    #     state: present
+
+    # - name: Export NFS shares
+    #   command: exportfs -a
+
+    # - name: Start NFS server
+    #   service:
+    #     name: nfs-kernel-server
+    #     state: started
+    #     enabled: true
+
+    # - name: Check NFS server status
+    #   command: systemctl status nfs-kernel-server
+    #   register: nfs_status
+
+    # - name: Display NFS server status
+    #   debug:
+    #     var: nfs_status.stdout
