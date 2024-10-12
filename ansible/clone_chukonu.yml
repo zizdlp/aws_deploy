@@ -112,11 +112,12 @@
       args:
         chdir: /opt/chukonu/build
 
-    - name: Copy JAR to all_jars directory
-      copy:
+    - name: Ensure chukonu jar exists on the remote
+      ansible.builtin.copy:
         src: /opt/chukonu_install/jar/chukonu_2.12-0.5.1.jar
-        dest: /opt/all_jars/
-
+        dest: /some/destination/path/
+        remote_src: yes
+      become: true
 
     # - name: Configure NFS exports
     #   lineinfile:
