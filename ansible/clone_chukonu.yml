@@ -65,7 +65,10 @@
       file:
         path: /opt/chukonu/build
         state: directory
-
+    - name: Create build directory
+      file:
+        path: /opt/tmp_chukonu
+        state: directory
     - name: Create chukonu_staging directory
       file:
         path: /opt/chukonu_staging
