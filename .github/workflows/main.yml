@@ -228,7 +228,7 @@ jobs:
         export SCALA_HOME=/usr/local/scala && \
         export PATH=$PATH:$SCALA_HOME/bin && \
         export PATH=$PATH:$SPARK_HOME/bin && \
-        cd /opt/tpcds-benchmark && ./run-spark.sh true true false false"
+        cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false"
     # # # Step 8: 清理 EC2 实例
     - name: Terminate EC2 instances
       if: always()
