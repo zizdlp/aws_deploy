@@ -47,12 +47,12 @@
       command: "/bin/bash /opt/tpcds-benchmark/prepare.sh"
       args:
         chdir: "/opt/tpcds-benchmark"
-    - name: Copy var.sh
+    - name: Copy var.sh and other scripts
       copy:
         src: ./{{ item }}
         dest: /opt/tpcds-benchmark/{{ item }}
         owner: root
-        mode: '0644'
+        mode: "{{ '0755' if item.startswith('run-') else '0644' }}"
       loop:
         - var.sh
         - confargs.sh
