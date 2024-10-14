@@ -1,0 +1,56 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Install necessary software on host
+      apt:
+        name:
+          - tmux
+          - unzip
+          - git
+          - byacc
+          - flex
+          - bison
+          - locales
+          - tzdata
+          - ccache
+          - cmake
+          - ninja-build
+          - build-essential
+          - llvm-11-dev
+          - clang-11
+          - libiberty-dev
+          - libdwarf-dev
+          - libre2-dev
+          - libz-dev
+          - libssl-dev
+          - libboost-all-dev
+          - libcurl4-openssl-dev
+          - openjdk-11-jdk
+          - maven
+          - libtbb-dev
+          - libjemalloc-dev
+          - libspdlog-dev
+          - g++-10
+          - libmsgsl-dev
+          - libgtest-dev
+          - nfs-common
+          - nfs-kernel-server
+          - pkg-config
+        state: present
+      register: install_result
+      retries: 3
+      delay: 15
+      until: install_result.failed == false  # 检查任务是否成功
+
+- hosts: all
+  become: yes
+  tasks:
+    - name: Copy necessary files from host to each node
+      synchronize:
+        src: /usr/  # 宿主机的安装路径
+        dest: /usr/  # 目标节点的安装路径
+        recursive: yes
+        delete: no  # 确保目标机器上已有文件不会被删除
+
+    - name: Update shared libraries cache on nodes
+      command: ldconfig
