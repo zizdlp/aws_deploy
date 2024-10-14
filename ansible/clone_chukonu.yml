@@ -65,10 +65,9 @@
       file:
         path: /opt/chukonu/build
         state: directory
-
-    - name: Create chukonu_cache directory
+    - name: Create build directory
       file:
-        path: /opt/chukonu_cache
+        path: /opt/tmp_chukonu
         state: directory
     - name: Create chukonu_staging directory
       file:
@@ -83,12 +82,15 @@
       args:
         chdir: /opt/chukonu/scala
 
-    - name: Run CMake
-      command: >
-        CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
-      args:
+    - name: Run cmake build
+      ansible.builtin.command:
+        cmd: cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
         chdir: /opt/chukonu/build
-
+      environment:
+        CC: gcc
+        CXX: g++
+        JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+      become: true
     - name: Build Chukonu
       command: make -j8
       args:
@@ -104,31 +106,9 @@
       args:
         chdir: /opt/chukonu/build
 
-    - name: Copy JAR to all_jars directory
-      copy:
+    - name: Ensure chukonu jar exists on the remote
+      ansible.builtin.copy:
         src: /opt/chukonu_install/jar/chukonu_2.12-0.5.1.jar
         dest: /opt/all_jars/
-
-
-    # - name: Configure NFS exports
-    #   lineinfile:
-    #     path: /etc/exports
-    #     line: '/opt/chukonu_cache/ *(rw,insecure,sync,no_subtree_check,no_root_squash)'
-    #     state: present
-
-    # - name: Export NFS shares
-    #   command: exportfs -a
-
-    # - name: Start NFS server
-    #   service:
-    #     name: nfs-kernel-server
-    #     state: started
-    #     enabled: true
-
-    # - name: Check NFS server status
-    #   command: systemctl status nfs-kernel-server
-    #   register: nfs_status
-
-    # - name: Display NFS server status
-    #   debug:
-    #     var: nfs_status.stdout
+        remote_src: yes
+      become: true

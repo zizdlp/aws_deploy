@@ -56,3 +56,5 @@
       loop:
         - var.sh
         - confargs.sh
+        - run-spark.sh
+        - run-chukonu.sh

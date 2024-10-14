@@ -248,3 +248,64 @@
           - botocore
         extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
       become: yes
+    - name: Create chukonu_cache directory
+      file:
+        path: /opt/chukonu_cache
+        state: directory
+- name: start NFS on master
+  hosts: master
+  become: true
+  tasks:
+    - name: Configure NFS exports
+      lineinfile:
+        path: /etc/exports
+        line: '/opt/chukonu_cache/ *(rw,insecure,sync,no_subtree_check,no_root_squash)'
+        state: present
+
+    - name: Export NFS shares
+      command: exportfs -a
+
+    - name: Start NFS server
+      service:
+        name: nfs-kernel-server
+        state: started
+        enabled: true
+
+    - name: Check NFS server status
+      command: systemctl status nfs-kernel-server
+      register: nfs_status
+
+    - name: Display NFS server status
+      debug:
+        var: nfs_status.stdout
+
+- name: Mount NFS on worker nodes
+  hosts: worker
+  become: true
+  tasks:
+    - name: Ensure NFS is installed
+      ansible.builtin.package:
+        name: nfs-common
+        state: present
+
+    - name: Create mount point directory
+      ansible.builtin.file:
+        path: /opt/chukonu_cache
+        state: directory
+        mode: '0755'
+
+    - name: Mount NFS share
+      ansible.builtin.mount:
+        src: "node0:/opt/chukonu_cache"
+        path: /opt/chukonu_cache
+        fstype: nfs
+        opts: nolock
+        state: mounted
+
+    - name: Add NFS entry to /etc/fstab for persistence
+      ansible.builtin.mount:
+        src: "node0:/opt/chukonu_cache"
+        path: /opt/chukonu_cache
+        fstype: nfs
+        opts: nolock
+        state: present
