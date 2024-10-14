@@ -19,7 +19,7 @@ def create_instance(index):
     '''.format(index)
     
     instance = ec2.create_instances(
-        ImageId='ami-063dbdfa885edce48',  # Replace with your AMI ID
+        ImageId='ami-092169ca69a0bfc8a',  # Replace with your AMI ID #私有： ami-092169ca69a0bfc8a from ami-063dbdfa885edce48
         MinCount=1,
         MaxCount=1,
         InstanceType='i4i.4xlarge',  # Choose instance type

@@ -26,19 +26,6 @@
       become: yes
       become_user: root
 
-    - name: Install required packages
-      apt:
-        name:
-          - nfs-kernel-server
-          - git
-          - cmake
-          - g++
-          - g++-9
-          - g++-10
-          - libbenchmark-dev
-        state: present
-        update_cache: yes
-
     - name: Set g++ alternatives
       command: >
         update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
