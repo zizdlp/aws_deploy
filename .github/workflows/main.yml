@@ -3,7 +3,7 @@ name: Deploy and Test Spark Cluster on AWS
 on:
   push:
     branches:
-      - feature/chu
+      - main
 
 jobs:
   deploy-and-test:
