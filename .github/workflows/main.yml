@@ -121,6 +121,16 @@ jobs:
     - name: Install java & deps to nodes
       uses: dawidd6/action-ansible-playbook@v2
       with:
+        playbook: ./ansible/install_apt.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+
+
+    # Step 10: 使用 Ansible 安装依赖
+    - name: Install java & deps to nodes
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
         playbook: ./ansible/install_deps.yml
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
