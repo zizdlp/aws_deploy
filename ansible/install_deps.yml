@@ -251,19 +251,33 @@
     #       - botocore
     #     extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
     #   become: yes
-    - name: Create chukonu_cache directory
+    - name: Create necessary directories
       file:
-        path: /opt/chukonu_cache
+        path: "/opt/{{ item }}"
         state: directory
-- name: start NFS on master
+      loop:
+        - chukonu_cache
+        - chukonu_install
+        - chukonu/build
+        - tmp_chukonu
+        - chukonu_staging
+        - all_jars
+- name: Start NFS on master
   hosts: master
   become: true
   tasks:
     - name: Configure NFS exports
       lineinfile:
         path: /etc/exports
-        line: '/opt/chukonu_cache/ *(rw,insecure,sync,no_subtree_check,no_root_squash)'
+        line: "/opt/{{ item }}/ *(rw,insecure,sync,no_subtree_check,no_root_squash)"
         state: present
+      loop:
+        - chukonu_cache
+        - chukonu_install
+        - chukonu/build
+        - tmp_chukonu
+        - chukonu_staging
+        - all_jars
 
     - name: Export NFS shares
       command: exportfs -a
@@ -291,24 +305,32 @@
         name: nfs-common
         state: present
 
-    - name: Create mount point directory
-      ansible.builtin.file:
-        path: /opt/chukonu_cache
-        state: directory
-        mode: '0755'
-
-    - name: Mount NFS share
+    - name: Create and mount directories
       ansible.builtin.mount:
-        src: "node0:/opt/chukonu_cache"
-        path: /opt/chukonu_cache
+        src: "node0:/opt/{{ item }}"
+        path: "/opt/{{ item }}"
         fstype: nfs
         opts: nolock
         state: mounted
+      loop:
+        - chukonu_cache
+        - chukonu_install
+        - chukonu/build
+        - tmp_chukonu
+        - chukonu_staging
+        - all_jars
 
-    - name: Add NFS entry to /etc/fstab for persistence
+    - name: Add NFS entries to /etc/fstab for persistence
       ansible.builtin.mount:
-        src: "node0:/opt/chukonu_cache"
-        path: /opt/chukonu_cache
+        src: "node0:/opt/{{ item }}"
+        path: "/opt/{{ item }}"
         fstype: nfs
         opts: nolock
         state: present
+      loop:
+        - chukonu_cache
+        - chukonu_install
+        - chukonu/build
+        - tmp_chukonu
+        - chukonu_staging
+        - all_jars
