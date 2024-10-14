@@ -40,7 +40,7 @@ jobs:
     # Step 3.1.1: Clone the private repository
     - name: Clone the private repository
       run: |
-        git clone --recurse-submodules --branch v0.2.0 git@github.com:chukonu-team/chukonu.git chukonu
+        git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
     # Step 3.1.2: Compress the cloned repository into a tar.gz file
     - name: Compress the cloned repository into a tar.gz file
       run: |
@@ -195,10 +195,10 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    - name: clone chukonu
+    - name: install chukonu
       uses: dawidd6/action-ansible-playbook@v2
       with:
-        playbook: ./ansible/clone_chukonu.yml
+        playbook: ./ansible/install_chukonu.yml
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
