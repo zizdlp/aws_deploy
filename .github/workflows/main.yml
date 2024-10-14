@@ -118,7 +118,7 @@ jobs:
         echo "EOF" >> $GITHUB_ENV
 
     # Step 10: 使用 Ansible 安装依赖
-    - name: Install java & deps to nodes
+    - name: Install apt & copy to nodes
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_apt.yml

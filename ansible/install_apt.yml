@@ -45,12 +45,26 @@
 - hosts: all
   become: yes
   tasks:
-    - name: Copy necessary files from host to each node
+    - name: Copy necessary binaries from host to each node
       synchronize:
-        src: /usr/  # 宿主机的安装路径
-        dest: /usr/  # 目标节点的安装路径
+        src: /usr/bin/  # 只复制可执行文件
+        dest: /usr/bin/
         recursive: yes
-        delete: no  # 确保目标机器上已有文件不会被删除
+        delete: no
+
+    - name: Copy necessary libraries from host to each node
+      synchronize:
+        src: /usr/lib/  # 只复制库文件
+        dest: /usr/lib/
+        recursive: yes
+        delete: no
+
+    - name: Copy necessary include files from host to each node
+      synchronize:
+        src: /usr/include/  # 复制头文件
+        dest: /usr/include/
+        recursive: yes
+        delete: no
 
     - name: Update shared libraries cache on nodes
       command: ldconfig
