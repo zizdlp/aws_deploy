@@ -2,6 +2,7 @@ set -x
 source var.sh
 
 ALLJARS=/opt/all_jars/
+LD_PRELOAD=$CHUKONU_INSTALL/lib/libchukonu_preloaded.so:/lib/x86_64-linux-gnu/libjemalloc.so.2
 GLUTEN_JAR=${ALLJARS}/gluten-velox-bundle-spark3.4_2.12-ubuntu_20.04-1.1.0-SNAPSHOT.jar
 BYR_JAR=${ALLJARS}/learnoptimizeskewed_2.12-0.1.0-SNAPSHOT.jar
 CHUKONU_JAR=${ALLJARS}/chukonu_2.12-0.5.1.jar
