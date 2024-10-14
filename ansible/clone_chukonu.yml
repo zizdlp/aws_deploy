@@ -43,27 +43,6 @@
       command: g++ --version
       register: gpp_version
 
-    - name: Create installation directory
-      file:
-        path: /opt/chukonu_install
-        state: directory
-
-    - name: Create build directory
-      file:
-        path: /opt/chukonu/build
-        state: directory
-    - name: Create build directory
-      file:
-        path: /opt/tmp_chukonu
-        state: directory
-    - name: Create chukonu_staging directory
-      file:
-        path: /opt/chukonu_staging
-        state: directory
-    - name: Create /opt/all_jars directory
-      file:
-        path: /opt/all_jars
-        state: directory
     - name: Build Chukonu by sbt assembly
       command: sbt assembly
       args:
