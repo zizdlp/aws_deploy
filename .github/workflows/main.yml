@@ -202,10 +202,11 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+
     - name: Run Spark Test
       run: |
-        ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-        "sudo -i /opt/tpcds-benchmark/run-spark.sh true true false false > /tmp/spark_test.log 2>&1 && tail -n 20 /tmp/spark_test.log"
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        "cd /opt/tpcds-benchmark && sudo -i ./run-spark.sh true true false false"
     # # # Step 8: 清理 EC2 实例
     # - name: Terminate EC2 instances
     #   if: always()
