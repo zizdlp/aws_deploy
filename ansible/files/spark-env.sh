@@ -2,6 +2,7 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 export HADOOP_HOME=/usr/local/hadoop
 export SCALA_HOME=/usr/local/scala
 export SPARK_HOME=/usr/local/spark
+export PATH=$HADOOP_HOME/bin:$PATH
 export YARN_CONF_DIR=${HADOOP_HOME}/etc/hadoop/
 export SPARK_DIST_CLASSPATH=$(hadoop classpath)
 export SPARK_MASTER_IP=node0
