@@ -13,8 +13,6 @@ CONF_ARGS="--deploy-mode client \
 --packages com.github.scopt:scopt_2.12:3.7.1,io.delta:delta-core_2.12:2.4.0 \
 --conf spark.executorEnv.LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
 --conf spark.yarn.appMasterEnv.LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
---conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
---conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
 --num-executors ${spark_numexecutors} --executor-cores ${spark_executorcores} --executor-memory ${spark_executormemory} \
 --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
 --conf spark.shuffle.service.enabled=true \
@@ -32,8 +30,6 @@ CHUKONU_CONF_ARGS="--deploy-mode client \
 --conf spark.yarn.appMasterEnv.JAVA_HOME=${JAVA11} \
 --conf spark.executorEnv.LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
 --conf spark.yarn.appMasterEnv.LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
---conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
---conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
 --num-executors ${chukonu_numexecutors} --executor-cores ${chukonu_executorcores} --executor-memory ${chukonu_executormemory} \
 --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
 --conf spark.shuffle.service.enabled=true \
