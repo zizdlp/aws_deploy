@@ -20,12 +20,19 @@ SPARKSQL="spark-sql"
 SBT="sbt"
 JAR=${TPCDSBENCHMARK}"/target/scala-2.12/tpcds-benchmark_2.12-0.1.0-SNAPSHOT.jar"
 MASTER="yarn"
-numexecutors=3
-executorcores=12
-executormemory="90g"
-offsize="0g"
-overhead="4g"
 parallelism=1000
+
+spark_numexecutors=3
+spark_executorcores=12
+spark_executormemory="90g"
+spark_offsize="0g"
+spark_overhead="6g"
+
+chukonu_numexecutors=3
+chukonu_executorcores=12
+chukonu_executormemory="47g"
+chukonu_offsize="1g"
+chukonu_overhead="48g"
 
 format="delta"
 # format="parquet"
