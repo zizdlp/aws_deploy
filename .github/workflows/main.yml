@@ -128,7 +128,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
         "cat /etc/hosts"
-    Step 11: 配置nvme
+    #Step 11: 配置nvme
     - name: use nvme
       uses: dawidd6/action-ansible-playbook@v2
       with:
