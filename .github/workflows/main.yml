@@ -207,6 +207,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
         "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && \
+        export SPARK_HOME=/usr/local/spark && \
         export CLASSPATH=.:${JAVA_HOME}/lib && \
         export PATH=$PATH:$JAVA_HOME/bin && \
         export HADOOP_HOME=/usr/local/hadoop && \
@@ -230,7 +231,7 @@ jobs:
         export PATH=$PATH:$SPARK_HOME/bin && \
         cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false"
     # # # Step 8: 清理 EC2 实例
-    - name: Terminate EC2 instances
-      if: always()
-      run: |
-        python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    # - name: Terminate EC2 instances
+    #   if: always()
+    #   run: |
+    #     python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
