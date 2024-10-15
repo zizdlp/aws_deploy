@@ -232,6 +232,11 @@ jobs:
         export PATH=$PATH:$SCALA_HOME/bin && \
         export PATH=$PATH:$SPARK_HOME/bin && \
         cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false"
+
+    # - name: check spark test result
+    #     run: |
+    #       ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+    #       "cat /opt/tmp_spark/"
     - name: Run chuknou first Test
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
@@ -260,7 +265,7 @@ jobs:
         export SCALA_HOME=/usr/local/scala && \
         export PATH=$PATH:$SCALA_HOME/bin && \
         export PATH=$PATH:$SPARK_HOME/bin && \
-        cd /opt/tpcds-benchmark && sudo ./run-chuknou.sh true true false false"
+        cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
     - name: Run chuknou second Test
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
@@ -289,7 +294,7 @@ jobs:
         export SCALA_HOME=/usr/local/scala && \
         export PATH=$PATH:$SCALA_HOME/bin && \
         export PATH=$PATH:$SPARK_HOME/bin && \
-        cd /opt/tpcds-benchmark && sudo ./run-chuknou.sh true true false false"
+        cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
     # # # Step 8: 清理 EC2 实例
     # - name: Terminate EC2 instances
     #   if: always()
