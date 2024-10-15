@@ -124,10 +124,6 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    - name: check spark test result
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-        "cat /etc/hosts"
     #Step 11: 配置nvme
     - name: use nvme
       uses: dawidd6/action-ansible-playbook@v2
@@ -236,11 +232,10 @@ jobs:
         export PATH=$PATH:$SCALA_HOME/bin && \
         export PATH=$PATH:$SPARK_HOME/bin && \
         cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false"
-
-    # - name: check spark test result
-    #     run: |
-    #       ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-    #       "cat /opt/tmp_spark/"
+    - name: check spark test result
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        "cat /opt/tmp_spark/LoadRuntimes.csv"
     - name: Run chuknou first Test
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
@@ -259,6 +254,8 @@ jobs:
         export HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_HOME}/lib/native && \
         export HADOOP_OPTS="-Djava.library.path=${HADOOP_HOME}/lib/native" && \
         export LD_LIBRARY_PATH=$HADOOP_COMMON_LIB_NATIVE_DIR:$LD_LIBRARY_PATH && \
+        export LD_PRELOAD=/opt/chukonu_install/lib/libchukonu_preloaded.so:/lib/x86_64-linux-gnu/libjemalloc.so.2 && \
+        export LD_LIBRARY_PATH=/opt/chukonu_install/lib:${LD_LIBRARY_PATH}:/opt/chukonu_cache && \
         export HDFS_NAMENODE_USER=ubuntu && \
         export HDFS_DATANODE_USER=ubuntu && \
         export HDFS_SECONDARYNAMENODE_USER=ubuntu && \
@@ -270,6 +267,10 @@ jobs:
         export PATH=$PATH:$SCALA_HOME/bin && \
         export PATH=$PATH:$SPARK_HOME/bin && \
         cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
+    - name: check chuknou test first result
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        "cat /opt/tmp_chuknou/LoadRuntimes.csv"
     - name: Run chuknou second Test
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
@@ -288,6 +289,8 @@ jobs:
         export HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_HOME}/lib/native && \
         export HADOOP_OPTS="-Djava.library.path=${HADOOP_HOME}/lib/native" && \
         export LD_LIBRARY_PATH=$HADOOP_COMMON_LIB_NATIVE_DIR:$LD_LIBRARY_PATH && \
+        export LD_PRELOAD=/opt/chukonu_install/lib/libchukonu_preloaded.so:/lib/x86_64-linux-gnu/libjemalloc.so.2 && \
+        export LD_LIBRARY_PATH=/opt/chukonu_install/lib:${LD_LIBRARY_PATH}:/opt/chukonu_cache && \
         export HDFS_NAMENODE_USER=ubuntu && \
         export HDFS_DATANODE_USER=ubuntu && \
         export HDFS_SECONDARYNAMENODE_USER=ubuntu && \
@@ -299,6 +302,10 @@ jobs:
         export PATH=$PATH:$SCALA_HOME/bin && \
         export PATH=$PATH:$SPARK_HOME/bin && \
         cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
+    - name: check chuknou test second result
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        "cat /opt/tmp_chuknou/LoadRuntimes.csv"
     # # # Step 8: 清理 EC2 实例
     - name: Terminate EC2 instances
       if: always()
