@@ -1,7 +1,7 @@
 LOCAL_DIR=/opt
 queriesDir=${LOCAL_DIR}/tpcds-queries
 dsdgenDir=${LOCAL_DIR}/tpcds-kit/tools
-scaleFactor=1000
+scaleFactor=100
 LOCAL_MT_DATA_DIR=${queriesDir}/mt-data-dir
 LOCAL_MT_SQL_DIR=${queriesDir}/mt-sql-dir
 HDFS_DIR="hdfs://node0:9898/user/byr23/"
