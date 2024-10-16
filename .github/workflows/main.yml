@@ -8,11 +8,10 @@ on:
 jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
-
     steps:
-    # Step 1: 检出代码
-    - name: Checkout code
-      uses: actions/checkout@v3
+    # Step 1: 安装依赖
+    - name: Install deps for worker
+      uses: ./.github/actions/install_deps
 
     # Step 2: 创建aws集群
     - name: Deploy EC2 Instances

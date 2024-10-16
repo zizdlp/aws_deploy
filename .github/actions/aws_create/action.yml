@@ -20,33 +20,19 @@ runs:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-
-    - name: Install Boto3
-      run: |
-        python -m pip install --upgrade pip
-        pip install boto3
-      shell: bash  # 添加 shell 指定属性
-
-
-
-    # Step 1. 创建aws集群
+    # Step 2. 创建aws集群
     - name: Launch EC2 instances
       run: |
         python ./scripts/create_ec2_instances.py
       shell: bash  # 添加 shell 指定属性
 
-    # Step 2. 获取各个节点dns和ip，并存入文件
+    # Step 3. 获取各个节点dns和ip，并存入文件
     - name: Wait for EC2 instances
       run: |
         python ./scripts/get_instance_dns.py
       shell: bash  # 添加 shell 指定属性
 
-    # Step 3: 根据./scripts/nodes_info.txt 生成动态 inventory.ini 文件
+    # Step 4: 根据./scripts/nodes_info.txt 生成动态 inventory.ini 文件
     - name: Generate inventory.ini
       run: |
         python ./scripts/generate_inventory.py  # 根据实例信息生成 inventory.ini 文件
