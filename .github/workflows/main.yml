@@ -4,99 +4,62 @@ on:
   push:
     branches:
       - main
-
+env:  # Define environment variables here
+  NUM_INSTANCES: 4  # Set the number of instances here
+  INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
+  SCALE_FACTOR: 1000
+  SPARK_NUM_EXECUTORS: 3
+  SPARK_EXECUTOR_CORES: 12
+  SPARK_EXECUTOR_MEMORY: 90g
+  SPARK_OFFSIZE: 0g
+  SPARK_OVERHEAD: 6g
+  CHUKONU_NUM_EXECUTORS: 3
+  CHUKONU_EXECUTOR_CORES: 12
+  CHUKONU_EXECUTOR_MEMORY: 47g
+  CHUKONU_OFFSIZE: 1g
+  CHUKONU_OVERHEAD: 48g
+  NODEMANAGER_MEMORY_MB: 102400
+  MAXIMUM_ALLOCATION_MB: 307200
+  MINIMUM_ALLOCATION_MB: 2048
+  MAXIMUM_ALLOCATION_VCORES: 45
 jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
-
     steps:
     # Step 1: 检出代码
     - name: Checkout code
       uses: actions/checkout@v3
-
-    # Step 2: 配置 AWS 凭据
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+    # Step 2: 安装依赖
+    - name: Install deps for worker
+      uses: ./.github/actions/install_deps
+    # Step 3: 创建aws集群
+    - name: Deploy EC2 Instances
+      uses: ./.github/actions/aws_create
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: cn-northwest-1  # 根据你的实际需求修改
-
-    # Step 3: 添加 SSH 密钥
-    - name: Ensure .ssh directory exists
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
-        chmod 400 ~/.ssh/local_test.pem  
-        
-    # Step 3.1: 克隆 chukonu
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-    # Step 3.1.1: Clone the private repository
-    - name: Clone the private repository
-      run: |
-        git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
-    # Step 3.1.2: Compress the cloned repository into a tar.gz file
-    - name: Compress the cloned repository into a tar.gz file
-      run: |
-        tar -czf ./ansible/files/chukonu.tar.gz -C ./ chukonu
-
-
-    # Step 4: 使用 deps.yml 安装依赖
-    - name: Set up Python and Install Boto3
-      uses: ./.github/actions/deps
-  
-    # Step 5: 调用复合操作来创建 EC2 实例
-    - name: Deploy EC2 Instances
-      uses: ./.github/actions/aws_create
-
-    # Step 6: 从 inventory.ini 文件提取 DNS
-    - name: Do Extract all nodes from inventory.ini
-      id: extract_nodes
-      run: |
-        # 提取 master 节点的 DNS
-        MASTER_DNS=$(grep -A 1 "\[master\]" ./ansible/inventory.ini | tail -n 1 | awk '{print $1}')
-    
-        # 提取 worker 节点的 DNS
-        WORKER_DNS=$(awk '/^\[worker\]/ {flag=1; next} /^\[/{flag=0} flag' ./ansible/inventory.ini | awk '{print $1}' | paste -sd "," -)
-    
-        echo "Master DNS: $MASTER_DNS"
-        echo "Worker DNS: $WORKER_DNS"
-    
-        # 设置 GitHub Actions 输出变量到环境文件
-        echo "MASTER_DNS=$MASTER_DNS" >> $GITHUB_ENV
-        echo "WORKER_DNS=$WORKER_DNS" >> $GITHUB_ENV
-    
-        # 将所有节点的 DNS 添加到 known_hosts，增加重试逻辑
-        retry_ssh_keyscan() {
-          for i in {1..5}; do
-            ssh-keyscan -H $1 >> ~/.ssh/known_hosts && break || sleep 5
-          done
-        }
-    
-        retry_ssh_keyscan $MASTER_DNS
-
-        IFS=',' read -ra ADDR <<< "$WORKER_DNS"
-        for WORKER in "${ADDR[@]}"; do
-          retry_ssh_keyscan $WORKER
-        done
-
-    # Step 7: 测试dns 联通
+        num-instances: ${{ env.NUM_INSTANCES }}
+        instance-type: ${{ env.INSTANCE_TYPE }}
+    # Step 4: 配置ssh & 克隆诸葛弩仓库
+    - name: Clone and Compress Repo
+      uses: ./.github/actions/clone_and_compress
+      with:
+        ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        deploy_key: ${{ secrets.DEPLOY_KEY }}
+    # Step 5: 测试dns 联通
     - name: Test SSH connection to master
       run: |
-        ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS 'hostname'
-
-    - name: Test SSH connection to workers
+        ssh -i ~/.ssh/local_test.pem ubuntu@node0 'hostname'
+    # Step 6: 打印环境变量
+    - name: Print Environment Variables
       run: |
-        IFS=',' read -ra ADDR <<< "$WORKER_DNS"
-        for WORKER in "${ADDR[@]}"; do
-          ssh -i ~/.ssh/local_test.pem ubuntu@$WORKER 'hostname'
-        done
+        echo "NUM_INSTANCES: $NUM_INSTANCES"
+        echo "INSTANCE_TYPE: $INSTANCE_TYPE"
+
+    # Step 7: 使用上面定义的env覆盖变量
+    - name: Update var.sh with SCALE_FACTOR
+      run: |
+        python3 ./scripts/update_var.py  # 运行 Python 脚本更新 scaleFactor
 
     # Step 8: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content
@@ -205,29 +168,29 @@ jobs:
 
     - name: Run spark Test
       run: |
-        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false"
     - name: check spark test result
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cat /opt/tmp_spark/PowerRuntimes.csv"
     - name: Run chuknou first Test
       run: |
-        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
     - name: check chuknou test first result
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-        "cat /opt/tmp_chuknou/PowerRuntimes.csv"
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
+        "cat /opt/tmp_chukonu/PowerRuntimes.csv"
     - name: Run chuknou second Test
       run: |
-        timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
     - name: check chuknou test second result
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-        "cat /opt/tmp_chuknou/PowerRuntimes.csv"
-    # # # Step 8: 清理 EC2 实例
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
+        "cat /opt/tmp_chukonu/PowerRuntimes.csv"
+    # # # # Step 8: 清理 EC2 实例
     - name: Terminate EC2 instances
       if: always()
       run: |

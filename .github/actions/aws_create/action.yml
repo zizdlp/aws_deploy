@@ -1,23 +1,42 @@
 name: Deploy EC2 Instances
 description: Creates and manages EC2 instances
-
+inputs:
+  aws-access-key-id:
+    description: 'SSH Private Key for SSH access'
+    required: true
+  aws-secret-access-key:
+    description: 'Deploy key for cloning the repository'
+    required: true
+  num-instances:
+    description: 'number of instances'
+    required: true
+  instance-type:
+    description: 'instance type,e.g i4i.large'
+    required: true
 runs:
   using: 'composite'
   steps:
-    # Step 1. 创建aws集群
+    # Step 1: 配置 AWS 凭据
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: cn-northwest-1
+    # Step 2. 创建aws集群
     - name: Launch EC2 instances
       run: |
         python ./scripts/create_ec2_instances.py
       shell: bash  # 添加 shell 指定属性
 
-    # Step 2. 获取各个节点dns和ip，并存入文件
+    # Step 3. 获取各个节点dns和ip，并存入文件
     - name: Wait for EC2 instances
       run: |
         python ./scripts/get_instance_dns.py
       shell: bash  # 添加 shell 指定属性
 
-    # Step 3: 根据./scripts/nodes_info.txt 生成动态 inventory.ini 文件
+    # Step 4: 根据./scripts/nodes_info.txt 生成动态 inventory.ini 文件
     - name: Generate inventory.ini
       run: |
-        python ./scripts/generate_inventory.py  # 根据实例信息生成 inventory.ini 文件
+        python ./scripts/generate_inventory.py --num-instances ${{ inputs.num-instances }} --instance-type ${{ inputs.instance-type }}
       shell: bash  # 添加 shell 指定属性

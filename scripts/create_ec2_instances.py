@@ -1,5 +1,6 @@
 import boto3
 import subprocess
+import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Initialize EC2 client
@@ -10,7 +11,7 @@ def get_commit_hash():
     commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode('utf-8')
     return commit_hash
 
-def create_instance(index):
+def create_instance(index, instance_type):
     commit_hash = get_commit_hash()  # Get current commit hash
 
     user_data_script = '''#!/bin/bash
@@ -19,10 +20,10 @@ def create_instance(index):
     '''.format(index)
     
     instance = ec2.create_instances(
-        ImageId='ami-092169ca69a0bfc8a',  # Replace with your AMI ID #私有： ami-092169ca69a0bfc8a from ami-063dbdfa885edce48
+        ImageId='ami-092169ca69a0bfc8a',  # Replace with your AMI ID
         MinCount=1,
         MaxCount=1,
-        InstanceType='i4i.4xlarge',  # Choose instance type
+        InstanceType=instance_type,  # Pass instance type from the command line
         KeyName='local_test',  # Your EC2 key pair
         SecurityGroupIds=['sg-01afc3b646b79f84b'],  # Replace with your security group ID
         SubnetId='subnet-09117acf49a3d9a6b',  # Replace with your subnet ID
@@ -63,11 +64,11 @@ def create_instance(index):
     return instance
 
 # Function to manage parallel instance creation
-def parallel_create_instances(num_instances):
+def parallel_create_instances(num_instances, instance_type):
     instances = []
     with ThreadPoolExecutor(max_workers=num_instances) as executor:
         # Submit tasks for parallel execution
-        future_to_index = {executor.submit(create_instance, index): index for index in range(num_instances)}
+        future_to_index = {executor.submit(create_instance, index, instance_type): index for index in range(num_instances)}
         
         # Process results as they complete
         for future in as_completed(future_to_index):
@@ -81,5 +82,13 @@ def parallel_create_instances(num_instances):
     
     return instances
 
-# Launch 4 instances in parallel
-instances = parallel_create_instances(4)
+# Main function to parse command line arguments
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Launch EC2 instances.')
+    parser.add_argument('--num-instances', type=int, default=4, help='Number of instances to launch')
+    parser.add_argument('--instance-type', type=str, default='i4i.4xlarge', help='EC2 instance type')
+    
+    args = parser.parse_args()
+    
+    # Launch instances based on command line inputs
+    instances = parallel_create_instances(args.num_instances, args.instance_type)
