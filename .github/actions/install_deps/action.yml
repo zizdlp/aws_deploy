@@ -3,15 +3,12 @@ description: Install deps for worker
 runs:
   using: 'composite'
   steps:
-    # Step 1: 检出代码
-    - name: Checkout code
-      uses: actions/checkout@v3
-    # Step 2: 配置python
+    # Step 1: 配置python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
-    # Step 3: 安装 pip依赖
+    # Step 2: 安装 pip依赖
     - name: Install Boto3
       run: |
         python -m pip install --upgrade pip
