@@ -29,13 +29,13 @@ worker_details = [node.split() for node in worker_nodes]
 
 # 生成 inventory.ini 文件内容
 inventory_content = f"""[master]
-{master_public_dns}
+node0
 
 [worker]
 """
 for worker in worker_details:
-    _, worker_public_dns, _, worker_public_ip = worker
-    inventory_content += f"{worker_public_dns}\n"
+    index, worker_public_dns, _, worker_public_ip = worker
+    inventory_content += f"{index}\n"
 
 # 生成节点 Private IP 映射（nodes_ip_map 仍然保存 Private IP）
 nodes_ip_map = {}
@@ -82,3 +82,16 @@ for hostname in nodes_ip_map.keys():
         print(f'Error adding {hostname} to known_hosts: {e}')
 
 print('All nodes (by hostname) have been added to ~/.ssh/known_hosts.')
+
+
+# 生成 ./ansible/files/workers 文件
+workers_file_path = './ansible/files/workers'
+
+# 确保目标目录存在
+os.makedirs(os.path.dirname(workers_file_path), exist_ok=True)
+
+with open(workers_file_path, 'w') as workers_file:
+    for i in range(1, len(worker_nodes) + 1):
+        workers_file.write(f'node{i}\n')
+
+print(f'Workers file has been generated at {workers_file_path}')
