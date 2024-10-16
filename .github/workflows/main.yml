@@ -7,6 +7,7 @@ on:
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
+  SCALE_FACTOR: 100
 jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
@@ -40,6 +41,8 @@ jobs:
       run: |
         echo "NUM_INSTANCES: $NUM_INSTANCES"
         echo "INSTANCE_TYPE: $INSTANCE_TYPE"
+        echo "SCALE_FACTOR: $SCALE_FACTOR"
+    
     # Step 8: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content
       id: read_inventory

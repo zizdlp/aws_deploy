@@ -1,6 +1,7 @@
 import json
 import subprocess
 import os
+import time
 
 # 确保 ~/.ssh 目录存在
 ssh_dir = os.path.expanduser("~/.ssh")
@@ -16,7 +17,8 @@ if not os.path.exists(known_hosts_path):
 nodes_info = []
 with open('./scripts/nodes_info.txt', 'r') as f:
     nodes_info = [line.strip() for line in f]
-    print(f"nodes_info is:{nodes_info}")
+    print(f"nodes_info is: {nodes_info}")
+
 # 查找 node0 作为 master 节点
 master_node = next(node for node in nodes_info if node.startswith('node0'))
 
@@ -73,16 +75,25 @@ for node in nodes_info:
 print('/etc/hosts has been updated with node Public IP mappings.')
 
 # 使用 ssh-keyscan 将节点主机名添加到 known_hosts
+def add_to_known_hosts(hostname, retries=5, delay=5):
+    for attempt in range(retries):
+        try:
+            # 执行 ssh-keyscan 命令并追加到 known_hosts 文件
+            subprocess.run(f'ssh-keyscan -H {hostname} >> {known_hosts_path}', shell=True, check=True)
+            print(f'Added {hostname} to known_hosts.')
+            return  # 成功后退出函数
+        except subprocess.CalledProcessError as e:
+            print(f'Error adding {hostname} to known_hosts: {e}')
+            if attempt < retries - 1:  # 如果不是最后一次尝试
+                print(f'Retrying in {delay} seconds...')
+                time.sleep(delay)  # 等待指定的时间后重试
+    print(f'Failed to add {hostname} to known_hosts after {retries} attempts.')
+
+# 遍历所有节点并添加到 known_hosts
 for hostname in nodes_ip_map.keys():
-    try:
-        # 执行 ssh-keyscan 命令并追加到 known_hosts 文件
-        subprocess.run(f'ssh-keyscan -H {hostname} >> {known_hosts_path}', shell=True, check=True)
-        print(f'Added {hostname} to known_hosts.')
-    except subprocess.CalledProcessError as e:
-        print(f'Error adding {hostname} to known_hosts: {e}')
+    add_to_known_hosts(hostname)
 
 print('All nodes (by hostname) have been added to ~/.ssh/known_hosts.')
-
 
 # 生成 ./ansible/files/workers 文件
 workers_file_path = './ansible/files/workers'
