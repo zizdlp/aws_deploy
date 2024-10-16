@@ -29,13 +29,13 @@ worker_details = [node.split() for node in worker_nodes]
 
 # 生成 inventory.ini 文件内容
 inventory_content = f"""[master]
-node0
+{master_public_dns}
 
 [worker]
 """
 for worker in worker_details:
     index, worker_public_dns, _, worker_public_ip = worker
-    inventory_content += f"{index}\n"
+    inventory_content += f"{worker_public_dns}\n"
 
 # 生成节点 Private IP 映射（nodes_ip_map 仍然保存 Private IP）
 nodes_ip_map = {}
