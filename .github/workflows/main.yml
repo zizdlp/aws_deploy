@@ -43,11 +43,10 @@ jobs:
         echo "INSTANCE_TYPE: $INSTANCE_TYPE"
         echo "SCALE_FACTOR: $SCALE_FACTOR"
     # Step 7: 使用上面定义的env覆盖变量
-    - name: Run var.sh
+    - name: Update var.sh with SCALE_FACTOR
       run: |
-        chmod +x ./ansible/files/var.sh
-        ./ansible/files/var.sh
-        cat ./ansible/files/var.sh
+        python3 ./scripts/update_var.py  # 运行 Python 脚本更新 scaleFactor
+
     # Step 8: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content
       id: read_inventory
