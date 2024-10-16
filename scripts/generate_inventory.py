@@ -16,7 +16,7 @@ if not os.path.exists(known_hosts_path):
 nodes_info = []
 with open('./scripts/nodes_info.txt', 'r') as f:
     nodes_info = [line.strip() for line in f]
-
+    print(f"nodes_info is:{nodes_info}")
 # 查找 node0 作为 master 节点
 master_node = next(node for node in nodes_info if node.startswith('node0'))
 

@@ -35,7 +35,11 @@ jobs:
     - name: Test SSH connection to master
       run: |
         ssh -i ~/.ssh/local_test.pem ubuntu@node0 'hostname'
-
+    # Step 6: 打印环境变量
+    - name: Print Environment Variables
+      run: |
+        echo "NUM_INSTANCES: $NUM_INSTANCES"
+        echo "INSTANCE_TYPE: $INSTANCE_TYPE"
     # Step 8: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content
       id: read_inventory
@@ -156,7 +160,7 @@ jobs:
     - name: check chuknou test first result
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cat /opt/tmp_chuknou/PowerRuntimes.csv"
+        "cat /opt/tmp_chukonu/PowerRuntimes.csv"
     - name: Run chuknou second Test
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
@@ -164,7 +168,7 @@ jobs:
     - name: check chuknou test second result
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cat /opt/tmp_chuknou/PowerRuntimes.csv"
+        "cat /opt/tmp_chukonu/PowerRuntimes.csv"
     # # # # Step 8: 清理 EC2 实例
     - name: Terminate EC2 instances
       if: always()
