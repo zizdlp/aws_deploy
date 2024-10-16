@@ -205,7 +205,7 @@ jobs:
 
     - name: Run spark Test
       run: |
-        timeout 2h  ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
         "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false"
     - name: check spark test result
       run: |
@@ -213,7 +213,7 @@ jobs:
         "cat /opt/tmp_spark/LoadRuntimes.csv"
     - name: Run chuknou first Test
       run: |
-        timeout 2h  ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
     - name: check chuknou test first result
       run: |
@@ -221,7 +221,7 @@ jobs:
         "cat /opt/tmp_chuknou/LoadRuntimes.csv"
     - name: Run chuknou second Test
       run: |
-        timeout 2h ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
+        timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
     - name: check chuknou test second result
       run: |
