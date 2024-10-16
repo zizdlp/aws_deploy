@@ -12,7 +12,6 @@ jobs:
     # Step 1: 安装依赖
     - name: Install deps for worker
       uses: ./.github/actions/install_deps
-
     # Step 2: 创建aws集群
     - name: Deploy EC2 Instances
       uses: ./.github/actions/aws_create
