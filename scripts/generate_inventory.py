@@ -1,5 +1,16 @@
 import json
 import subprocess
+import os
+
+# 确保 ~/.ssh 目录存在
+ssh_dir = os.path.expanduser("~/.ssh")
+os.makedirs(ssh_dir, exist_ok=True)
+
+# 确保 known_hosts 文件存在
+known_hosts_path = os.path.join(ssh_dir, "known_hosts")
+if not os.path.exists(known_hosts_path):
+    with open(known_hosts_path, 'w') as f:
+        pass  # 创建空文件
 
 # 读取节点信息
 nodes_info = []
@@ -58,14 +69,14 @@ for node in nodes_info:
         print(f'Added {index} ({public_ip}) to /etc/hosts.')
     except subprocess.CalledProcessError as e:
         print(f'Error adding {index} to /etc/hosts: {e}')
-        
+
 print('/etc/hosts has been updated with node Public IP mappings.')
 
 # 使用 ssh-keyscan 将节点主机名添加到 known_hosts
 for hostname in nodes_ip_map.keys():
     try:
         # 执行 ssh-keyscan 命令并追加到 known_hosts 文件
-        subprocess.run(f'ssh-keyscan -H {hostname} >> ~/.ssh/known_hosts', shell=True, check=True)
+        subprocess.run(f'ssh-keyscan -H {hostname} >> {known_hosts_path}', shell=True, check=True)
         print(f'Added {hostname} to known_hosts.')
     except subprocess.CalledProcessError as e:
         print(f'Error adding {hostname} to known_hosts: {e}')
