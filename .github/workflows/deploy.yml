@@ -14,7 +14,4 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: cn-northwest-1
-
-      - name: Deploy EC2 Instances
-        uses: ./.github/actions/aws_create
+          aws-region: cn-northwest-1  # 根据你的实际需求修改

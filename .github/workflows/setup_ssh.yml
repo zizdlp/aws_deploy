@@ -6,21 +6,27 @@ jobs:
   ssh_setup:
     runs-on: ubuntu-latest
     steps:
-        # Step 1: 添加 SSH 密钥,用于宿主worker连接aws各个节点
-        # Step 3.1: 克隆 chukonu
-        - name: Setup SSH
-            run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                ssh-keyscan github.com >> ~/.ssh/known_hosts
+      # Step 1: 添加 SSH 密钥,用于宿主worker连接aws各个节点
+      - name: Ensure .ssh directory exists
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
+          chmod 400 ~/.ssh/local_test.pem  
+          
+      # Step 2: 添加 chukonu deploy key,用于克隆仓库
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-        # Step 3.1.1: Clone the private repository
-        - name: Clone the private repository
-            run: |
-                git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
-        # Step 3.1.2: Compress the cloned repository into a tar.gz file
-        - name: Compress the cloned repository into a tar.gz file
-            run: |
-                tar -czf ./ansible/files/chukonu.tar.gz -C ./ chukonu
+      # Step 3: Clone the private repository
+      - name: Clone the private repository
+        run: |
+          git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
 
+      # Step 4: Compress the cloned repository into a tar.gz file
+      - name: Compress the cloned repository into a tar.gz file
+        run: |
+          tar -czf ./ansible/files/chukonu.tar.gz -C ./ chukonu
