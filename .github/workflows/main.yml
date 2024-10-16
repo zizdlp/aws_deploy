@@ -28,10 +28,6 @@ jobs:
         ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
         deploy_key: ${{ secrets.DEPLOY_KEY }}
 
-    # Step 4: 使用 deps.yml 安装依赖
-    - name: Set up Python and Install Boto3
-      uses: ./.github/actions/deps
-
     # Step 6: 从 inventory.ini 文件提取 DNS
     - name: Do Extract all nodes from inventory.ini
       id: extract_nodes
