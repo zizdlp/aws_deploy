@@ -1,4 +1,4 @@
-name: Setup SSH
+name: Setup SSH & Clone chukonu
 
 on: [workflow_call]
 
