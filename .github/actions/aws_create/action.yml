@@ -1,9 +1,25 @@
 name: Deploy EC2 Instances
 description: Creates and manages EC2 instances
-
+inputs:
+  aws-access-key-id:
+    description: 'SSH Private Key for SSH access'
+    required: true
+  aws-secret-access-key:
+    description: 'Deploy key for cloning the repository'
+    required: true
+  aws-region:
+    description: 'Deploy key for cloning the repository'
+    required: true
 runs:
   using: 'composite'
   steps:
+    # Step 1: 配置 AWS 凭据
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
     # Step 1. 创建aws集群
     - name: Launch EC2 instances
       run: |

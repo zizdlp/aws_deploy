@@ -14,14 +14,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Step 2: 配置 AWS 凭据
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+    # Step 2: 创建aws集群
+    - name: Deploy EC2 Instances
+      uses: ./.github/actions/aws_create
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: cn-northwest-1  # 根据你的实际需求修改
-
     # Step 3: 配置ssh & 克隆诸葛弩仓库
     - name: Clone and Compress Repo
       uses: ./.github/actions/clone_and_compress
@@ -32,10 +31,6 @@ jobs:
     # Step 4: 使用 deps.yml 安装依赖
     - name: Set up Python and Install Boto3
       uses: ./.github/actions/deps
-  
-    # Step 5: 调用复合操作来创建 EC2 实例
-    - name: Deploy EC2 Instances
-      uses: ./.github/actions/aws_create
 
     # Step 6: 从 inventory.ini 文件提取 DNS
     - name: Do Extract all nodes from inventory.ini
