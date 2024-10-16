@@ -205,7 +205,7 @@ jobs:
     #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
     #     "cat /opt/tmp_chuknou/PowerRuntimes.csv"
     # # # # Step 8: 清理 EC2 实例
-    # - name: Terminate EC2 instances
-    #   if: always()
-    #   run: |
-    #     python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    - name: Terminate EC2 instances
+      if: always()
+      run: |
+        python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
