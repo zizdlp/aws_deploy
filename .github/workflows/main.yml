@@ -8,6 +8,20 @@ env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
   SCALE_FACTOR: 1000
+  SPARK_NUM_EXECUTORS: 3
+  SPARK_EXECUTOR_CORES: 12
+  SPARK_EXECUTOR_MEMORY: 90g
+  SPARK_OFFSIZE: 0g
+  SPARK_OVERHEAD: 6g
+  CHUKONU_NUM_EXECUTORS: 3
+  CHUKONU_EXECUTOR_CORES: 12
+  CHUKONU_EXECUTOR_MEMORY: 47g
+  CHUKONU_OFFSIZE: 1g
+  CHUKONU_OVERHEAD: 48g
+  NODEMANAGER_MEMORY_MB: 102400
+  MAXIMUM_ALLOCATION_MB: 307200
+  MINIMUM_ALLOCATION_MB: 2048
+  MAXIMUM_ALLOCATION_VCORES: 45
 jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
@@ -41,7 +55,7 @@ jobs:
       run: |
         echo "NUM_INSTANCES: $NUM_INSTANCES"
         echo "INSTANCE_TYPE: $INSTANCE_TYPE"
-        echo "SCALE_FACTOR: $SCALE_FACTOR"
+
     # Step 7: 使用上面定义的env覆盖变量
     - name: Update var.sh with SCALE_FACTOR
       run: |
