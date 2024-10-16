@@ -7,7 +7,7 @@ on:
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
-  SCALE_FACTOR: 100
+  SCALE_FACTOR: 1000
 jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
@@ -42,7 +42,12 @@ jobs:
         echo "NUM_INSTANCES: $NUM_INSTANCES"
         echo "INSTANCE_TYPE: $INSTANCE_TYPE"
         echo "SCALE_FACTOR: $SCALE_FACTOR"
-    
+    # Step 7: 使用上面定义的env覆盖变量
+    - name: Run var.sh
+      run: |
+        chmod +x ./ansible/files/var.sh
+        ./ansible/files/var.sh
+        cat ./ansible/files/var.sh
     # Step 8: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content
       id: read_inventory
