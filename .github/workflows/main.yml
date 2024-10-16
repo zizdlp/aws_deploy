@@ -56,10 +56,10 @@ jobs:
         echo "NUM_INSTANCES: $NUM_INSTANCES"
         echo "INSTANCE_TYPE: $INSTANCE_TYPE"
 
-    # # Step 7: 使用上面定义的env覆盖变量
-    # - name: Update vars with env
-    #   run: |
-    #     python3 ./scripts/update_var.py 
+    # Step 7: 使用上面定义的env覆盖变量
+    - name: Update vars with env
+      run: |
+        python3 ./scripts/update_var.py 
 
     # Step 8: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content

@@ -1,6 +1,8 @@
 import os
+import stat
 import xml.etree.ElementTree as ET
-# 定义要替换的变量及其默认值
+
+# 定义要追加的变量及其默认值
 variables = {
     "scaleFactor": os.environ.get("SCALE_FACTOR", 100),  # 从环境变量中获取
     "spark_numexecutors": os.environ.get("SPARK_NUM_EXECUTORS", 3),
@@ -15,17 +17,20 @@ variables = {
     "chukonu_overhead": os.environ.get("CHUKONU_OVERHEAD", "48g"),
 }
 
-# 更新 var.sh 文件
+# 追加写入 var.sh 文件
 var_file_path = './ansible/files/var.sh'
 
-with open(var_file_path, 'w') as var_file:
+with open(var_file_path, 'a') as var_file:  # 使用 'a' 模式以追加内容
     for var_name, var_value in variables.items():
         var_file.write(f"{var_name}={var_value}\n")
-        print(f'Updated {var_name} to {var_value} in {var_file_path}.')
-print(f'Updated {var_file_path} with dynamic variables.')
+        print(f'Appended {var_name} with value {var_value} to {var_file_path}.')
 
+# 确保 var.sh 文件具有可执行权限
+st = os.stat(var_file_path)
+os.chmod(var_file_path, st.st_mode | stat.S_IEXEC)  # 添加执行权限
+print(f'Set {var_file_path} as an executable.')
 
-# 定义要替换的属性及其默认值
+# 定义要替换的 YARN 配置属性及其默认值
 yarn_config_updates = {
     "yarn.nodemanager.resource.memory-mb": os.environ.get("NODEMANAGER_MEMORY_MB", 102400),
     "yarn.scheduler.maximum-allocation-mb": os.environ.get("MAXIMUM_ALLOCATION_MB", 307200),
