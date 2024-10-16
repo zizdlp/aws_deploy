@@ -12,8 +12,8 @@ master_node = next(node for node in nodes_info if node.startswith('node0'))
 # 解析剩下的节点作为 worker 节点
 worker_nodes = [node for node in nodes_info if not node.startswith('node0')]
 
-# 获取 master 和 worker 的 DNS 和 IP 信息
-master_index, master_public_dns, master_private_ip = master_node.split()
+# 获取 master 和 worker 的 DNS、Private IP 和 Public IP 信息
+master_index, master_public_dns, master_private_ip, master_public_ip = master_node.split()
 worker_details = [node.split() for node in worker_nodes]
 
 # 生成 inventory.ini 文件内容
@@ -23,16 +23,16 @@ inventory_content = f"""[master]
 [worker]
 """
 for worker in worker_details:
-    _, worker_public_dns, _ = worker
+    _, worker_public_dns, _, worker_public_ip = worker
     inventory_content += f"{worker_public_dns}\n"
 
-# 生成节点 IP 映射
+# 生成节点 Private IP 映射（nodes_ip_map 仍然保存 Private IP）
 nodes_ip_map = {}
 for node in nodes_info:
-    index, _, private_ip = node.split()
+    index, _, private_ip, _ = node.split()  # 这里依旧存储的是 Private IP
     nodes_ip_map[f"{index}"] = private_ip
 
-# 添加 [all:vars] 部分，包含节点 IP 映射变量
+# 添加 [all:vars] 部分，包含节点 Private IP 映射变量
 inventory_content += """
 [all:vars]
 ansible_user=ubuntu
@@ -49,21 +49,19 @@ with open('./ansible/inventory.ini', 'w') as f:
 
 print('Inventory file has been generated at ./ansible/inventory.ini')
 
-
-
-# 直接追加 IP 映射到 /etc/hosts
-
-# 直接使用 subprocess 调用 sudo 来修改 /etc/hosts
-for index, private_ip in nodes_ip_map.items():
-    command = f"echo '{private_ip} {index}' | sudo tee -a /etc/hosts"
+# 直接追加 Public IP 映射到 /etc/hosts
+for node in nodes_info:
+    index, _, _, public_ip = node.split()  # 使用 Public IP 追加到 /etc/hosts
+    command = f"echo '{public_ip} {index}' | sudo tee -a /etc/hosts"
     try:
         subprocess.run(command, shell=True, check=True)
-        print(f'Added {index} ({private_ip}) to /etc/hosts.')
+        print(f'Added {index} ({public_ip}) to /etc/hosts.')
     except subprocess.CalledProcessError as e:
         print(f'Error adding {index} to /etc/hosts: {e}')
         
-print('/etc/hosts has been updated with node IP mappings.')
+print('/etc/hosts has been updated with node Public IP mappings.')
 
+# 使用 ssh-keyscan 将节点主机名添加到 known_hosts
 for hostname in nodes_ip_map.keys():
     try:
         # 执行 ssh-keyscan 命令并追加到 known_hosts 文件
