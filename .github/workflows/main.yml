@@ -210,7 +210,7 @@ jobs:
     - name: check spark test result
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-        "cat /opt/tmp_spark/LoadRuntimes.csv"
+        "cat /opt/tmp_spark/PowerRuntimes.csv"
     - name: Run chuknou first Test
       run: |
         timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
@@ -218,7 +218,7 @@ jobs:
     - name: check chuknou test first result
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-        "cat /opt/tmp_chuknou/LoadRuntimes.csv"
+        "cat /opt/tmp_chuknou/PowerRuntimes.csv"
     - name: Run chuknou second Test
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
@@ -226,9 +226,9 @@ jobs:
     - name: check chuknou test second result
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS \
-        "cat /opt/tmp_chuknou/LoadRuntimes.csv"
+        "cat /opt/tmp_chuknou/PowerRuntimes.csv"
     # # # Step 8: 清理 EC2 实例
-    # - name: Terminate EC2 instances
-    #   if: always()
-    #   run: |
-    #     python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    - name: Terminate EC2 instances
+      if: always()
+      run: |
+        python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
