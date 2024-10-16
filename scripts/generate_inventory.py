@@ -52,10 +52,16 @@ print('Inventory file has been generated at ./ansible/inventory.ini')
 
 
 # 直接追加 IP 映射到 /etc/hosts
-with open('/etc/hosts', 'a') as hosts_file:
-    for index, private_ip in nodes_ip_map.items():
-        hosts_file.write(f"{private_ip} {index}\n")
 
+# 直接使用 subprocess 调用 sudo 来修改 /etc/hosts
+for index, private_ip in nodes_ip_map.items():
+    command = f"echo '{private_ip} {index}' | sudo tee -a /etc/hosts"
+    try:
+        subprocess.run(command, shell=True, check=True)
+        print(f'Added {index} ({private_ip}) to /etc/hosts.')
+    except subprocess.CalledProcessError as e:
+        print(f'Error adding {index} to /etc/hosts: {e}')
+        
 print('/etc/hosts has been updated with node IP mappings.')
 
 for hostname in nodes_ip_map.keys():
