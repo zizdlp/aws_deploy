@@ -1,3 +1,4 @@
+# .github/actions/clone_and_compress/action.yml
 name: Clone and Compress Repo
 description: Clone a private repository and compress it into a tar.gz file
 inputs:
@@ -12,12 +13,14 @@ runs:
   using: "composite"
   steps:
     - name: Ensure .ssh directory exists
+      shell: bash  # Add shell
       run: |
         mkdir -p ~/.ssh
         echo "${{ inputs.ssh_private_key }}" > ~/.ssh/local_test.pem
         chmod 400 ~/.ssh/local_test.pem  
 
     - name: Setup SSH
+      shell: bash  # Add shell
       run: |
         mkdir -p ~/.ssh
         echo "${{ inputs.deploy_key }}" > ~/.ssh/id_rsa
@@ -25,9 +28,11 @@ runs:
         ssh-keyscan github.com >> ~/.ssh/known_hosts
 
     - name: Clone the private repository
+      shell: bash  # Add shell
       run: |
         git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
 
     - name: Compress the cloned repository into a tar.gz file
+      shell: bash  # Add shell
       run: |
         tar -czf ./ansible/files/chukonu.tar.gz -C ./ chukonu
