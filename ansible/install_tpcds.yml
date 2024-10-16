@@ -52,7 +52,7 @@
         src: ./{{ item }}
         dest: /opt/tpcds-benchmark/{{ item }}
         owner: root
-        mode: "{{ '0755' if item.startswith('run-') else '0644' }}"
+        mode: 0755
       loop:
         - var.sh
         - confargs.sh
