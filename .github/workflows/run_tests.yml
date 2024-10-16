@@ -1,0 +1,19 @@
+name: Run Tests
+
+on: [workflow_call]
+
+jobs:
+  run_spark_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Spark Test
+        run: |
+          ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false"
+
+      - name: Check Spark Test Result
+        run: |
+          ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS "cat /opt/tmp_spark/LoadRuntimes.csv"
+
+      - name: Run Chukonu Tests
+        run: |
+          ssh -i ~/.ssh/local_test.pem ubuntu@$MASTER_DNS "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"

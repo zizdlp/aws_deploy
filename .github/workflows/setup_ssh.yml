@@ -1,0 +1,21 @@
+name: Setup SSH
+
+on: [workflow_call]
+
+jobs:
+  ssh_setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
+          chmod 400 ~/.ssh/local_test.pem
+
+      - name: Clone the private repository
+        run: |
+          git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
+
+      - name: Compress the cloned repository
+        run: |
+          tar -czf ./ansible/files/chukonu.tar.gz -C ./ chukonu

@@ -1,0 +1,11 @@
+name: Terminate EC2 Instances
+
+on: [workflow_call]
+
+jobs:
+  terminate_instances:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Terminate EC2 instances
+        run: |
+          python ./scripts/terminate_ec2_instances.py

@@ -1,0 +1,25 @@
+name: Install Dependencies on EC2
+
+on: [workflow_call]
+
+jobs:
+  install_deps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract DNS from inventory.ini
+        run: |
+          # Logic to extract DNS from inventory.ini
+
+      - name: Install dependencies
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: ./ansible/install_deps.yml
+          inventory: ${{ env.INVENTORY_CONTENT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+
+      - name: Install Spark, Hadoop, MySQL, etc.
+        run: |
+          ansible-playbook -i inventory.ini install_spark.yml
+          ansible-playbook -i inventory.ini install_hadoop.yml
+          ansible-playbook -i inventory.ini install_mysql.yml
