@@ -21,8 +21,8 @@ var_file_path = './ansible/files/var.sh'
 with open(var_file_path, 'w') as var_file:
     for var_name, var_value in variables.items():
         var_file.write(f"{var_name}={var_value}\n")
-
-print(f'Updated {var_file_path} with dynamic variables:{variables}')
+        print(f'Updated {var_name} to {var_value} in {var_file_path}.')
+print(f'Updated {var_file_path} with dynamic variables.')
 
 
 # 定义要替换的属性及其默认值
@@ -51,4 +51,4 @@ for property_name, property_value in yarn_config_updates.items():
 # 写回更新后的 XML 文件
 tree.write(yarn_file_path, xml_declaration=True, encoding='utf-8')
 
-print(f'Updated {yarn_file_path} with new YARN configuration values.:{yarn_config_updates}')
+print(f'Updated {yarn_file_path} with new YARN configuration values.')
