@@ -22,29 +22,35 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: cn-northwest-1  # 根据你的实际需求修改
 
-    # Step 3: 添加 SSH 密钥
-    - name: Ensure .ssh directory exists
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
-        chmod 400 ~/.ssh/local_test.pem  
+    # Step 3: Use the composite action to clone and compress the repository
+    - name: Clone and Compress Repo
+      uses: ./.github/actions/clone_and_compress
+      with:
+        ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+        deploy_key: ${{ secrets.DEPLOY_KEY }}
+    # # Step 3: 添加 SSH 密钥
+    # - name: Ensure .ssh directory exists
+    #   run: |
+    #     mkdir -p ~/.ssh
+    #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/local_test.pem
+    #     chmod 400 ~/.ssh/local_test.pem  
         
-    # Step 3.1: 克隆 chukonu
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan github.com >> ~/.ssh/known_hosts
+    # # Step 3.1: 克隆 chukonu
+    # - name: Setup SSH
+    #   run: |
+    #     mkdir -p ~/.ssh
+    #     echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+    #     chmod 600 ~/.ssh/id_rsa
+    #     ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-    # Step 3.1.1: Clone the private repository
-    - name: Clone the private repository
-      run: |
-        git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
-    # Step 3.1.2: Compress the cloned repository into a tar.gz file
-    - name: Compress the cloned repository into a tar.gz file
-      run: |
-        tar -czf ./ansible/files/chukonu.tar.gz -C ./ chukonu
+    # # Step 3.1.1: Clone the private repository
+    # - name: Clone the private repository
+    #   run: |
+    #     git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
+    # # Step 3.1.2: Compress the cloned repository into a tar.gz file
+    # - name: Compress the cloned repository into a tar.gz file
+    #   run: |
+    #     tar -czf ./ansible/files/chukonu.tar.gz -C ./ chukonu
 
 
     # Step 4: 使用 deps.yml 安装依赖
