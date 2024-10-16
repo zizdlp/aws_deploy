@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 # 读取节点信息
 nodes_info = []
@@ -47,3 +48,22 @@ with open('./ansible/inventory.ini', 'w') as f:
     f.write(inventory_content)
 
 print('Inventory file has been generated at ./ansible/inventory.ini')
+
+
+
+# 直接追加 IP 映射到 /etc/hosts
+with open('/etc/hosts', 'a') as hosts_file:
+    for index, private_ip in nodes_ip_map.items():
+        hosts_file.write(f"{private_ip} {index}\n")
+
+print('/etc/hosts has been updated with node IP mappings.')
+
+for hostname in nodes_ip_map.keys():
+    try:
+        # 执行 ssh-keyscan 命令并追加到 known_hosts 文件
+        subprocess.run(f'ssh-keyscan -H {hostname} >> ~/.ssh/known_hosts', shell=True, check=True)
+        print(f'Added {hostname} to known_hosts.')
+    except subprocess.CalledProcessError as e:
+        print(f'Error adding {hostname} to known_hosts: {e}')
+
+print('All nodes (by hostname) have been added to ~/.ssh/known_hosts.')
