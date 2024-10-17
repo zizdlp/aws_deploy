@@ -26,7 +26,7 @@ runs:
     # Step 2. 创建aws集群
     - name: Launch EC2 instances
       run: |
-        python ./scripts/create_ec2_instances.py
+        python ./scripts/create_ec2_instances.py --num-instances ${{ inputs.num-instances }} --instance-type ${{ inputs.instance-type }}
       shell: bash  # 添加 shell 指定属性
 
     # Step 3. 获取各个节点dns和ip，并存入文件
@@ -38,5 +38,5 @@ runs:
     # Step 4: 根据./scripts/nodes_info.txt 生成动态 inventory.ini 文件
     - name: Generate inventory.ini
       run: |
-        python ./scripts/generate_inventory.py --num-instances ${{ inputs.num-instances }} --instance-type ${{ inputs.instance-type }}
+        python ./scripts/generate_inventory.py
       shell: bash  # 添加 shell 指定属性
