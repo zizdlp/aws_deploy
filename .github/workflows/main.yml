@@ -198,8 +198,8 @@ jobs:
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_chukonu/PowerRuntimes.csv chukonu_result.csv
     # 执行 compare.py 比较脚本
     - name: compare test results
-     run: |
-       python3 ./scripts/compare.py
+      run: |
+        python3 ./scripts/compare.py
 
 
     # # # # Step 8: 清理 EC2 实例
