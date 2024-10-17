@@ -2,7 +2,7 @@ import os
 import stat
 import xml.etree.ElementTree as ET
 
-# 定义要追加的变量及其默认值
+# 定义要匹配并替换/追加的变量及其默认值
 variables = {
     "scaleFactor": os.environ.get("SCALE_FACTOR", 100),  # 从环境变量中获取
     "spark_numexecutors": os.environ.get("SPARK_NUM_EXECUTORS", 3),
@@ -17,18 +17,49 @@ variables = {
     "chukonu_overhead": os.environ.get("CHUKONU_OVERHEAD", "48g"),
 }
 
-# 追加写入 var.sh 文件
+# 读取现有的 var.sh 文件内容
 var_file_path = './ansible/files/var.sh'
 
-with open(var_file_path, 'a') as var_file:  # 使用 'a' 模式以追加内容
+# 用于存储新的文件内容
+new_lines = []
+
+# 读取文件中的现有行
+if os.path.exists(var_file_path):
+    with open(var_file_path, 'r') as var_file:
+        existing_lines = var_file.readlines()
+else:
+    existing_lines = []
+
+# 标记哪些变量已匹配
+updated_vars = {var: False for var in variables}
+
+# 逐行检查并更新现有行
+for line in existing_lines:
+    updated = False
     for var_name, var_value in variables.items():
-        var_file.write(f"{var_name}={var_value}\n")
-        print(f'Appended {var_name} with value {var_value} to {var_file_path}.')
+        if line.startswith(f"{var_name}="):  # 匹配到以变量名开头的行
+            new_lines.append(f"{var_name}={var_value}\n")  # 用新的值替换
+            updated_vars[var_name] = True  # 标记为已更新
+            updated = True
+            print(f"Updated {var_name} to {var_value}")
+            break
+    if not updated:
+        new_lines.append(line)  # 保留未匹配到的行
+
+# 追加未匹配到的变量（新变量）
+for var_name, var_value in variables.items():
+    if not updated_vars[var_name]:
+        new_lines.append(f"{var_name}={var_value}\n")
+        print(f"Appended {var_name} with value {var_value}")
+
+# 写回 var.sh 文件
+with open(var_file_path, 'w') as var_file:
+    var_file.writelines(new_lines)
 
 # 确保 var.sh 文件具有可执行权限
 st = os.stat(var_file_path)
 os.chmod(var_file_path, st.st_mode | stat.S_IEXEC)  # 添加执行权限
-print(f'Set {var_file_path} as an executable.')
+print(f"Set {var_file_path} as an executable.")
 
 # 定义要替换的 YARN 配置属性及其默认值
 yarn_config_updates = {
