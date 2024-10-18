@@ -121,102 +121,102 @@
       notify: Restart SSH
 
     ### info:这里通过替换ami安装
-    # ### 4 install deps
-    # - name: Update package list
-    #   apt:
-    #     update_cache: yes
-    #   register: update_result
-    #   retries: 3
-    #   delay: 10
-    #   until: update_result is succeeded
+    ### 4 install deps
+    - name: Update package list
+      apt:
+        update_cache: yes
+      register: update_result
+      retries: 3
+      delay: 10
+      until: update_result is succeeded
 
-    # - name: Upgrade all packages
-    #   apt:
-    #     upgrade: dist
-    #   register: upgrade_result
-    #   retries: 3
-    #   delay: 10
-    #   until: upgrade_result is succeeded
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+      register: upgrade_result
+      retries: 3
+      delay: 10
+      until: upgrade_result is succeeded
 
-    # ## 4.1. 备份 sources.list
-    # - name: Backup existing sources.list
-    #   command: cp /etc/apt/sources.list /etc/apt/sources.list.bak
-    #   become: yes
+    ## 4.1. 备份 sources.list
+    - name: Backup existing sources.list
+      command: cp /etc/apt/sources.list /etc/apt/sources.list.bak
+      become: yes
 
-    # ## 4.2. 替换为阿里云镜像源 (Ubuntu 22.04)
-    # - name: Set Aliyun apt source list for Ubuntu 22.04
-    #   blockinfile:
-    #     path: /etc/apt/sources.list
-    #     create: yes
-    #     block: |
-    #       deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
-    #       deb http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
-    #       deb http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
-    #       deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
-    #   become: yes
+    ## 4.2. 替换为阿里云镜像源 (Ubuntu 22.04)
+    - name: Set Aliyun apt source list for Ubuntu 22.04
+      blockinfile:
+        path: /etc/apt/sources.list
+        create: yes
+        block: |
+          deb http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+          deb http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
+          deb http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
+          deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
+      become: yes
 
-    # ## 4.3. 更新包列表并升级
-    # - name: Update package list
-    #   apt:
-    #     update_cache: yes
-    #   register: update_result
-    #   retries: 3
-    #   delay: 10
-    #   until: update_result is succeeded
-    #   become: yes
+    ## 4.3. 更新包列表并升级
+    - name: Update package list
+      apt:
+        update_cache: yes
+      register: update_result
+      retries: 3
+      delay: 10
+      until: update_result is succeeded
+      become: yes
 
-    # - name: Upgrade all packages
-    #   apt:
-    #     upgrade: dist
-    #   register: upgrade_result
-    #   retries: 3
-    #   delay: 10
-    #   until: upgrade_result.failed == false  # 检查任务是否成功
-    #   become: yes
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+      register: upgrade_result
+      retries: 3
+      delay: 10
+      until: upgrade_result.failed == false  # 检查任务是否成功
+      become: yes
 
-    # - name: Install necessary software
-    #   apt:
-    #     name:
-    #       - tmux
-    #       - unzip
-    #       - git
-    #       - byacc
-    #       - flex
-    #       - bison
-    #       - locales
-    #       - tzdata
-    #       - ccache
-    #       - cmake
-    #       - ninja-build
-    #       - build-essential
-    #       - llvm-11-dev
-    #       - clang-11
-    #       - libiberty-dev
-    #       - libdwarf-dev
-    #       - libre2-dev
-    #       - libz-dev
-    #       - libssl-dev
-    #       - libboost-all-dev
-    #       - libcurl4-openssl-dev
-    #       - openjdk-11-jdk
-    #       - maven
-    #       - libtbb-dev
-    #       - libjemalloc-dev
-    #       - libspdlog-dev
-    #       - g++
-    #       - g++-9
-    #       - g++-10
-    #       - libmsgsl-dev
-    #       - libgtest-dev
-    #       - nfs-common
-    #       - nfs-kernel-server
-    #       - pkg-config
-    #       - libbenchmark-dev
-    #     state: present
-    #   register: install_result
-    #   retries: 3
-    #   delay: 15
-    #   until: install_result.failed == false  # 检查任务是否成功
+    - name: Install necessary software
+      apt:
+        name:
+          - tmux
+          - unzip
+          - git
+          - byacc
+          - flex
+          - bison
+          - locales
+          - tzdata
+          - ccache
+          - cmake
+          - ninja-build
+          - build-essential
+          - llvm-11-dev
+          - clang-11
+          - libiberty-dev
+          - libdwarf-dev
+          - libre2-dev
+          - libz-dev
+          - libssl-dev
+          - libboost-all-dev
+          - libcurl4-openssl-dev
+          - openjdk-11-jdk
+          - maven
+          - libtbb-dev
+          - libjemalloc-dev
+          - libspdlog-dev
+          - g++
+          - g++-9
+          - g++-10
+          - libmsgsl-dev
+          - libgtest-dev
+          - nfs-common
+          - nfs-kernel-server
+          - pkg-config
+          - libbenchmark-dev
+        state: present
+      register: install_result
+      retries: 3
+      delay: 15
+      until: install_result.failed == false  # 检查任务是否成功
 
 
     ## 5.设置环境变量 java_home
@@ -230,27 +230,27 @@
         mode: '0644'
 
     # preinstall on ami
-    # - name: Ensure Python 3 is installed
-    #   apt:
-    #     name: python3
-    #     state: present
-    #   become: yes
-    #   when: ansible_os_family == 'Debian'
+    - name: Ensure Python 3 is installed
+      apt:
+        name: python3
+        state: present
+      become: yes
+      when: ansible_os_family == 'Debian'
 
-    # - name: Ensure Python 3 pip is installed
-    #   apt:
-    #     name: python3-pip
-    #     state: present
-    #   become: yes
-    #   when: ansible_os_family == 'Debian'
+    - name: Ensure Python 3 pip is installed
+      apt:
+        name: python3-pip
+        state: present
+      become: yes
+      when: ansible_os_family == 'Debian'
 
-    # - name: Ensure boto3 and botocore are installed
-    #   pip:
-    #     name:
-    #       - boto3
-    #       - botocore
-    #     extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
-    #   become: yes
+    - name: Ensure boto3 and botocore are installed
+      pip:
+        name:
+          - boto3
+          - botocore
+        extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
+      become: yes
     - name: Create necessary directories
       file:
         path: "/opt/{{ item }}"

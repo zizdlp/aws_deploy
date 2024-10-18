@@ -1,13 +1,13 @@
 name: Deploy and Test Spark Cluster on AWS
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
-  SCALE_FACTOR: 1000
+  SCALE_FACTOR: 100
   SPARK_NUM_EXECUTORS: 3
   SPARK_EXECUTOR_CORES: 12
   SPARK_EXECUTOR_MEMORY: 90g
@@ -190,6 +190,18 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cat /opt/tmp_chukonu/PowerRuntimes.csv"
+
+    # 使用 scp 将文件从 node0 拷贝到宿主
+    - name: download tpcds result from node0
+      run: |
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_spark/PowerRuntimes.csv spark_result.csv
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_chukonu/PowerRuntimes.csv chukonu_result.csv
+    # 执行 compare.py 比较脚本
+    - name: compare test results
+      run: |
+        python3 ./scripts/compare.py
+
+
     # # # # Step 8: 清理 EC2 实例
     - name: Terminate EC2 instances
       if: always()
