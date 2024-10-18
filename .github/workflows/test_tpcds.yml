@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - test
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
@@ -182,7 +181,7 @@ jobs:
     - name: upload spark test log
       uses: actions/upload-artifact@v3
       with:
-        name: spark_test_log
+        name: spark_test_log_${{ github.run_number }}
         path: spark_test_log.txt
 
     - name: Run chuknou first Test
@@ -197,7 +196,7 @@ jobs:
     - name: upload chuknou test log
       uses: actions/upload-artifact@v3
       with:
-        name: chuknou_test_log
+        name: chuknou_test_log_${{ github.run_number }}
         path: chuknou_test_log.txt
 
 
@@ -218,11 +217,11 @@ jobs:
     - name: Upload comparison results
       uses: actions/upload-artifact@v3
       with:
-        name: tpcds_result
+        name: tpcds_result_${{ github.run_number }}
         path: tpcds_result.csv
 
     # # # # Step 8: 清理 EC2 实例
-    # - name: Terminate EC2 instances
-    #   if: always()
-    #   run: |
-    #     python ./.github/scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    - name: Terminate EC2 instances
+      if: always()
+      run: |
+        python ./.github/scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
