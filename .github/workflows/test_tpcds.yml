@@ -1,4 +1,4 @@
-name: Deploy and Test Spark Cluster on AWS
+name: TEST_TPCDS
 
 on:
   pull_request:
