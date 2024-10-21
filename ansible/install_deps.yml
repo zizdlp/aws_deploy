@@ -262,6 +262,7 @@
         - tmp_chukonu
         - chukonu_staging
         - all_jars
+        - event_logs
 - name: Start NFS on master
   hosts: master
   become: true
@@ -319,7 +320,6 @@
         - tmp_chukonu
         - chukonu_staging
         - all_jars
-        - event_logs
 
     - name: Add NFS entries to /etc/fstab for persistence
       ansible.builtin.mount:
