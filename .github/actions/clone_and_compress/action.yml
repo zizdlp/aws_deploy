@@ -26,12 +26,12 @@ runs:
         echo "${{ inputs.deploy_key }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan github.com >> ~/.ssh/known_hosts
-
     - name: Clone the private repository
       shell: bash  # Add shell
       run: |
         git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
-
+        # cd chukonu
+        # git checkout 81927d9af1a7de5230d5028bdc39e7c0be50e716
     - name: Compress the cloned repository into a tar.gz file
       shell: bash  # Add shell
       run: |

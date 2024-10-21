@@ -19,8 +19,12 @@ df_chukonu_second_half = df_chukonu_clean.iloc[half_index:]
 # 合并数据
 merged_df = pd.merge(df_spark_clean, df_chukonu_second_half, on="Query", suffixes=('_spark', '_chukonu'))
 
-# 添加耗时对比列
-merged_df['Time_Difference'] = merged_df['Runtime_spark'] - merged_df['Runtime_chukonu']
+# 添加耗时对比列（百分比）
+merged_df['Time_Difference_Percentage'] = ((merged_df['Runtime_spark'] - merged_df['Runtime_chukonu']) / merged_df['Runtime_chukonu']) * 100
+
+# 设置打印选项以显示所有行
+pd.set_option('display.max_rows', None)  # None 表示不限制行数
+pd.set_option('display.max_columns', None)  # None 表示不限制列数
 
 # 打印比较结果
 print("Query Comparison Results:")
@@ -28,7 +32,7 @@ print(merged_df)
 
 # 计算总运行时间
 total_runtime_spark = df_spark[df_spark["Query"] == "Power"]["Runtime"].astype(float).values[0]
-total_runtime_chukonu = df_chukonu[df_chukonu["Query"] == "Power"]["Runtime"].astype(float).values[0]
+total_runtime_chukonu = df_chukonu_second_half["Runtime"].sum()  # 使用后半部分的运行时间总和
 
 # 计算差异百分比
 percentage_difference = ((total_runtime_spark - total_runtime_chukonu) / total_runtime_chukonu) * 100

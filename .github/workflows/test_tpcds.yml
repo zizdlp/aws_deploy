@@ -1,13 +1,16 @@
-name: Deploy and Test Spark Cluster on AWS
+name: TEST_TPCDS
 
 on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
-  SCALE_FACTOR: 100
+  SCALE_FACTOR: 1000
   SPARK_NUM_EXECUTORS: 3
   SPARK_EXECUTOR_CORES: 12
   SPARK_EXECUTOR_MEMORY: 90g
@@ -59,7 +62,7 @@ jobs:
     # Step 7: 使用上面定义的env覆盖变量
     - name: Update vars with env
       run: |
-        python3 ./scripts/update_var.py 
+        python3 ./.github/scripts/update_var.py 
 
     # Step 8: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content
@@ -169,27 +172,38 @@ jobs:
     - name: Run spark Test
       run: |
         timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false"
-    - name: check spark test result
+        "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false > ~/spark_test_log.txt 2>&1"
+
+    - name: download spark test log& result from node0
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cat /opt/tmp_spark/PowerRuntimes.csv"
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/spark_test_log.txt spark_test_log.txt
+
+    - name: upload spark test log
+      uses: actions/upload-artifact@v3
+      with:
+        name: spark_test_log_${{ github.run_number }}
+        path: spark_test_log.txt
+
     - name: Run chuknou first Test
       run: |
         timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
-    - name: check chuknou test first result
+        "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false > ~/chuknou_test_log.txt 2>&1"
+
+    - name: download chuknou test log& result from node0
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cat /opt/tmp_chukonu/PowerRuntimes.csv"
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/chuknou_test_log.txt chuknou_test_log.txt
+
+    - name: upload chuknou test log
+      uses: actions/upload-artifact@v3
+      with:
+        name: chuknou_test_log_${{ github.run_number }}
+        path: chuknou_test_log.txt
+
+
     - name: Run chuknou second Test
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
-    - name: check chuknou test second result
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cat /opt/tmp_chukonu/PowerRuntimes.csv"
 
     # 使用 scp 将文件从 node0 拷贝到宿主
     - name: download tpcds result from node0
@@ -199,11 +213,30 @@ jobs:
     # 执行 compare.py 比较脚本
     - name: compare test results
       run: |
-        python3 ./scripts/compare.py
+        python3 ./.github/scripts/compare.py
+    - name: Upload comparison results
+      uses: actions/upload-artifact@v3
+      with:
+        name: tpcds_result_${{ github.run_number }}
+        path: tpcds_result.csv
+    # Step 1: 压缩 node0 上的 /opt/event_logs
+    - name: Compress event_logs on node0
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
 
+    # Step 2: 下载压缩文件到 GitHub Actions runner
+    - name: Download event_logs from node0
+      run: |
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/event_logs.tar.gz event_logs.tar.gz
 
+    # Step 3: 上传压缩的文件作为 artifact
+    - name: Upload event_logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: event_logs_${{ github.run_number }}
+        path: event_logs.tar.gz
     # # # # Step 8: 清理 EC2 实例
     - name: Terminate EC2 instances
       if: always()
       run: |
-        python ./scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+        python ./.github/scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本

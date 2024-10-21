@@ -51,4 +51,5 @@ CHUKONU_CONF_ARGS="--deploy-mode client \
 --conf spark.executorEnv.LD_PRELOAD=${CHUKONU_INSTALL}/lib/libchukonu_preloaded.so:${LD_PRELOAD} \
 --conf spark.yarn.appMasterEnv.LD_PRELOAD=${CHUKONU_INSTALL}/lib/libchukonu_preloaded.so:${LD_PRELOAD} \
 --conf spark.sql.adaptive.maxShuffledHashJoinLocalMapThreshold=512MB \
+--conf spark.eventLog.enabled=true --conf spark.eventLog.dir=/opt/tmp_events \
 --jars ${CHUKONU_JAR} "

@@ -262,6 +262,8 @@
         - tmp_chukonu
         - chukonu_staging
         - all_jars
+        - tmp_events
+
 - name: Start NFS on master
   hosts: master
   become: true
