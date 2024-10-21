@@ -26,14 +26,6 @@ runs:
         echo "${{ inputs.deploy_key }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan github.com >> ~/.ssh/known_hosts
-    - name: Print current branch
-      shell: bash
-      run: |
-        if [ -n "$GITHUB_HEAD_REF" ]; then
-          echo "Current branch: $GITHUB_HEAD_REF"
-        else
-          echo "Current branch: ${GITHUB_REF##*/}"
-        fi
     - name: Clone the private repository
       shell: bash  # Add shell
       run: |
