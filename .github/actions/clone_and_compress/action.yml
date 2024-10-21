@@ -27,6 +27,7 @@ runs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan github.com >> ~/.ssh/known_hosts
     - name: Print current branch
+      shell: bash  # Add shell
       run: |
         echo "Current branch: ${GITHUB_REF##*/}"  # 从 GITHUB_REF 解析出分支名
     - name: Clone the private repository
