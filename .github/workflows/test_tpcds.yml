@@ -10,7 +10,7 @@ on:
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
-  SCALE_FACTOR: 1000
+  SCALE_FACTOR: 100
   SPARK_NUM_EXECUTORS: 3
   SPARK_EXECUTOR_CORES: 12
   SPARK_EXECUTOR_MEMORY: 90g
@@ -219,22 +219,22 @@ jobs:
       with:
         name: tpcds_result_${{ github.run_number }}
         path: tpcds_result.csv
-    # Step 1: 压缩 node0 上的 /opt/event_logs
-    - name: Compress event_logs on node0
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
+    # # Step 1: 压缩 node0 上的 /opt/event_logs
+    # - name: Compress event_logs on node0
+    #   run: |
+    #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
 
-    # Step 2: 下载压缩文件到 GitHub Actions runner
-    - name: Download event_logs from node0
-      run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/event_logs.tar.gz event_logs.tar.gz
+    # # Step 2: 下载压缩文件到 GitHub Actions runner
+    # - name: Download event_logs from node0
+    #   run: |
+    #     scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/event_logs.tar.gz event_logs.tar.gz
 
-    # Step 3: 上传压缩的文件作为 artifact
-    - name: Upload event_logs
-      uses: actions/upload-artifact@v3
-      with:
-        name: event_logs_${{ github.run_number }}
-        path: event_logs.tar.gz
+    # # Step 3: 上传压缩的文件作为 artifact
+    # - name: Upload event_logs
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: event_logs_${{ github.run_number }}
+    #     path: event_logs.tar.gz
     # # # # Step 8: 清理 EC2 实例
     - name: Terminate EC2 instances
       if: always()

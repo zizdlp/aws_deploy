@@ -34,7 +34,7 @@ def create_instance(index, instance_type):
             {
                 'DeviceName': '/dev/sda1',  # Root volume
                 'Ebs': {
-                    'VolumeSize': 100,  # Size in GiB
+                    'VolumeSize': 300,  # Size in GiB
                     'VolumeType': 'gp3',  # Volume type
                     'DeleteOnTermination': True  # Delete volume on instance termination
                 }
