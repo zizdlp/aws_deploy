@@ -319,6 +319,7 @@
         - tmp_chukonu
         - chukonu_staging
         - all_jars
+        - event_logs
 
     - name: Add NFS entries to /etc/fstab for persistence
       ansible.builtin.mount:
