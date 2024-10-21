@@ -10,7 +10,7 @@ on:
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
-  SCALE_FACTOR: 100
+  SCALE_FACTOR: 10
   SPARK_NUM_EXECUTORS: 3
   SPARK_EXECUTOR_CORES: 12
   SPARK_EXECUTOR_MEMORY: 90g
@@ -221,7 +221,7 @@ jobs:
         path: tpcds_result.csv
 
     # # # # Step 8: 清理 EC2 实例
-    - name: Terminate EC2 instances
-      if: always()
-      run: |
-        python ./.github/scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    # - name: Terminate EC2 instances
+    #   if: always()
+    #   run: |
+    #     python ./.github/scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
