@@ -30,8 +30,8 @@ runs:
       shell: bash  # Add shell
       run: |
         git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
-        cd chukonu
-        git checkout 8c230bae66a6ebb30f7abb4ab8e1066684bef56f
+        # cd chukonu
+        # git checkout 8c230bae66a6ebb30f7abb4ab8e1066684bef56f
     - name: Compress the cloned repository into a tar.gz file
       shell: bash  # Add shell
       run: |
