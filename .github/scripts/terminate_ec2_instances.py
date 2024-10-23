@@ -18,16 +18,23 @@ def terminate_instance(instance):
 def terminate_instances():
     commit_hash = get_commit_hash()  # 获取当前 commit hash
     ec2 = boto3.resource('ec2', region_name='cn-northwest-1')
-    
-    # 根据标签过滤实例
+
+    # 先过滤出所有具有 SparkNode- 前缀的实例
     instances = ec2.instances.filter(
-        Filters=[{'Name': 'tag:Name', 'Values': [f'SparkNode-{commit_hash}']}]
+        Filters=[{'Name': 'tag:Name', 'Values': ['SparkNode-*']}]
     )
 
-    instance_list = list(instances)  # 转换为列表以便并行处理
+    instance_list = []
+    
+    # 手动筛选出标签名匹配 SparkNode-{commit_hash} 的实例
+    for instance in instances:
+        for tag in instance.tags:
+            if tag['Key'] == 'Name' and tag['Value'].startswith(f'SparkNode-{commit_hash}'):
+                instance_list.append(instance)
+                break
 
     if not instance_list:
-        print("No instances found with the specified tag.")
+        print("No instances found with the specified tag prefix.")
         return
     
     # 使用 ThreadPoolExecutor 并行终止实例

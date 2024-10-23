@@ -33,7 +33,7 @@ tag_value = f'SparkNode-{commit_hash}'  # 定义要搜索的标签值
 instances = get_instances_by_tag('Name', tag_value)
 
 # 保存节点信息到一个文件，包含 Public IP 地址
-with open('./scripts/nodes_info.txt', 'w') as f:
+with open('./.github/scripts/nodes_info.txt', 'w') as f:
     for instance in instances:
         # 查找标签中的 Index
         tags = {tag['Key']: tag['Value'] for tag in instance.get('Tags', [])}
@@ -47,4 +47,4 @@ with open('./scripts/nodes_info.txt', 'w') as f:
         # 保存节点信息到文件，每一行格式为：node{index} {Public DNS} {Private IP} {Public IP}
         f.write(f'node{index} {public_dns} {private_ip} {public_ip}\n')
 
-print('Node information with Public IPs has been saved to ./scripts/nodes_info.txt')
+print('Node information with Public IPs has been saved to ./.github/scripts/nodes_info.txt')
