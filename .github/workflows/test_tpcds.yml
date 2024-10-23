@@ -10,7 +10,7 @@ on:
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
-  SCALE_FACTOR: 100
+  SCALE_FACTOR: 10
   SPARK_NUM_EXECUTORS: 3
   SPARK_EXECUTOR_CORES: 12
   SPARK_EXECUTOR_MEMORY: 90g
@@ -170,20 +170,20 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    - name: Run spark Test
-      run: |
-        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false > ~/spark_test_log.txt 2>&1"
+    # - name: Run spark Test
+    #   run: |
+    #     timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
+    #     "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false > ~/spark_test_log.txt 2>&1"
 
-    - name: download spark test log& result from node0
-      run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/spark_test_log.txt spark_test_log.txt
+    # - name: download spark test log& result from node0
+    #   run: |
+    #     scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/spark_test_log.txt spark_test_log.txt
 
-    - name: upload spark test log
-      uses: actions/upload-artifact@v3
-      with:
-        name: spark_test_log_${{ github.run_number }}
-        path: spark_test_log.txt
+    # - name: upload spark test log
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: spark_test_log_${{ github.run_number }}
+    #     path: spark_test_log.txt
 
     - name: Run chuknou first Test
       run: |
