@@ -26,17 +26,19 @@ env:  # Define environment variables here
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
 jobs:
-  deploy-and-test:
+  setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 1200  # Set the job timeout to 20 hours
+    timeout-minutes: 1200
+    strategy:
+      matrix:
+        runner: [spark, chuknou]  # Define different runners here
     steps:
-    # Step 1: 检出代码
     - name: Checkout code
       uses: actions/checkout@v3
-    # Step 2: 安装依赖
+
     - name: Install deps for worker
       uses: ./.github/actions/install_deps
-    # Step 3: 创建aws集群
+
     - name: Deploy EC2 Instances
       uses: ./.github/actions/aws_create
       with:
@@ -44,29 +46,27 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         num-instances: ${{ env.NUM_INSTANCES }}
         instance-type: ${{ env.INSTANCE_TYPE }}
-        runner: "spark"
-    # Step 4: 配置ssh & 克隆诸葛弩仓库
+        runner: ${{ matrix.runner }}  # Pass the runner from matrix
+
     - name: Clone and Compress Repo
       uses: ./.github/actions/clone_and_compress
       with:
         ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
         deploy_key: ${{ secrets.DEPLOY_KEY }}
-    # Step 5: 测试dns 联通
+
     - name: Test SSH connection to master
       run: |
         ssh -i ~/.ssh/local_test.pem ubuntu@node0 'hostname'
-    # Step 6: 打印环境变量
+
     - name: Print Environment Variables
       run: |
         echo "NUM_INSTANCES: $NUM_INSTANCES"
         echo "INSTANCE_TYPE: $INSTANCE_TYPE"
 
-    # Step 7: 使用上面定义的env覆盖变量
     - name: Update vars with env
       run: |
         python3 ./.github/scripts/update_var.py 
 
-    # Step 8: 读取 inventory.ini 文件内容
     - name: Read inventory.ini content
       id: read_inventory
       run: |
@@ -75,7 +75,6 @@ jobs:
         cat ./ansible/inventory.ini >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
-    # Step 9: 读取 known_hosts 文件内容并设置为环境变量
     - name: Read known_hosts content
       id: read_known_hosts
       run: |
@@ -84,7 +83,6 @@ jobs:
         cat ~/.ssh/known_hosts >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
-    # Step 10: 使用 Ansible 安装依赖
     - name: set ssh & nfs
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -92,7 +90,7 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    #Step 11: 配置nvme
+
     - name: use nvme
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -101,8 +99,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-
-    # Step 12: 使用 Ansible 部署 sbt
     - name: install sbt
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -111,7 +107,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 13: 使用 Ansible 部署 scala
     - name: install scala
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -119,7 +114,7 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    # Step 14: 使用 Ansible 部署 Spark 集群
+
     - name: install spark
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -128,7 +123,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 15: 使用 Ansible 部署 hadoop 集群
     - name: install hadoop
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -137,7 +131,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 16: 使用 Ansible 部署 mysql
     - name: install mysql
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -146,7 +139,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 17: 使用 Ansible 部署 hive
     - name: install hive
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -155,7 +147,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
-    # Step 18: 使用 Ansible 部署 tpcds
     - name: install tpcds
       uses: dawidd6/action-ansible-playbook@v2
       with:
@@ -163,20 +154,19 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-    - name: install chukonu
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ./ansible/install_chukonu.yml
-        inventory: ${{ env.INVENTORY_CONTENT }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
+  run-spark-test:
+    runs-on: ubuntu-latest
+    needs: setup
+    if: matrix.runner == 'spark'  # Run only if the runner is spark
+    timeout-minutes: 240
+    steps:
     - name: Run spark Test
       run: |
-        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
+        timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false > ~/spark_test_log.txt 2>&1"
 
-    - name: download spark test log& result from node0
+    - name: download spark test log
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/spark_test_log.txt spark_test_log.txt
 
@@ -186,12 +176,25 @@ jobs:
         name: spark_test_log_${{ github.run_number }}
         path: spark_test_log.txt
 
+  run-chuknou-test:
+    runs-on: ubuntu-latest
+    needs: setup
+    if: matrix.runner == 'chuknou'  # Run only if the runner is chuknou
+    timeout-minutes: 240
+    steps:
+    - name: install chukonu
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: ./ansible/install_chukonu.yml
+        inventory: ${{ env.INVENTORY_CONTENT }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     - name: Run chuknou first Test
       run: |
-        timeout 4h  ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
+        timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false > ~/chuknou_test_log.txt 2>&1"
 
-    - name: download chuknou test log& result from node0
+    - name: download chuknou test log
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/chuknou_test_log.txt chuknou_test_log.txt
 
@@ -200,45 +203,45 @@ jobs:
       with:
         name: chuknou_test_log_${{ github.run_number }}
         path: chuknou_test_log.txt
+    # # 使用 scp 将文件从 node0 拷贝到宿主
+    # - name: download tpcds result from node0
+    #   run: |
+    #     scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_spark/PowerRuntimes.csv spark_result.csv
+    #     scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_chukonu/PowerRuntimes.csv chukonu_result.csv
+    # # 执行 compare.py 比较脚本
+    # - name: compare test results
+    #   run: |
+    #     python3 ./.github/scripts/compare.py
+    # - name: Upload comparison results
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: tpcds_result_${{ github.run_number }}
+    #     path: tpcds_result.csv
+    # # Step 1: 压缩 node0 上的 /opt/event_logs
+    # - name: Compress event_logs on node0
+    #   run: |
+    #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
 
+    # # Step 2: 下载压缩文件到 GitHub Actions runner
+    # - name: Download event_logs from node0
+    #   run: |
+    #     scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/event_logs.tar.gz event_logs.tar.gz
 
-    - name: Run chuknou second Test
-      run: |
-        timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
-
-    # 使用 scp 将文件从 node0 拷贝到宿主
-    - name: download tpcds result from node0
-      run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_spark/PowerRuntimes.csv spark_result.csv
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_chukonu/PowerRuntimes.csv chukonu_result.csv
-    # 执行 compare.py 比较脚本
-    - name: compare test results
-      run: |
-        python3 ./.github/scripts/compare.py
-    - name: Upload comparison results
-      uses: actions/upload-artifact@v3
-      with:
-        name: tpcds_result_${{ github.run_number }}
-        path: tpcds_result.csv
-    # Step 1: 压缩 node0 上的 /opt/event_logs
-    - name: Compress event_logs on node0
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
-
-    # Step 2: 下载压缩文件到 GitHub Actions runner
-    - name: Download event_logs from node0
-      run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/event_logs.tar.gz event_logs.tar.gz
-
-    # Step 3: 上传压缩的文件作为 artifact
-    - name: Upload event_logs
-      uses: actions/upload-artifact@v3
-      with:
-        name: event_logs_${{ github.run_number }}
-        path: event_logs.tar.gz
-    # # # # Step 8: 清理 EC2 实例
-    - name: Terminate EC2 instances
-      if: always()
-      run: |
-        python ./.github/scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+    # # Step 3: 上传压缩的文件作为 artifact
+    # - name: Upload event_logs
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: event_logs_${{ github.run_number }}
+    #     path: event_logs.tar.gz
+    # # # # # Step 8: 清理 EC2 实例
+    # - name: Terminate EC2 instances
+    #   if: always()
+    #   run: |
+    #     python ./.github/scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
+  # terminate:
+  #   runs-on: ubuntu-latest
+  #   needs: aggregate-results
+  #   if: always()  # Ensure this runs even if the previous jobs fail
+  #   steps:
+  #     - name: Terminate EC2 Instances
+  #       run: python ./.github/scripts/terminate_ec2_instances.py
