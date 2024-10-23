@@ -35,7 +35,7 @@ runs:
     # Step 3. 获取各个节点dns和ip，并存入文件
     - name: Wait for EC2 instances
       run: |
-        python ./scripts/get_instance_dns.py
+        python ./scripts/get_instance_dns.py --runner ${{ inputs.runner }}
       shell: bash  # 添加 shell 指定属性
 
     # Step 4: 根据./scripts/nodes_info.txt 生成动态 inventory.ini 文件
