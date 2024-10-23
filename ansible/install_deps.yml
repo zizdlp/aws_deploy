@@ -262,7 +262,6 @@
         - tmp_chukonu
         - chukonu_staging
         - all_jars
-        - tmp_events
         - event_logs
 
 - name: Start NFS on master
