@@ -158,7 +158,7 @@ jobs:
   run-spark-test:
     runs-on: ubuntu-latest
     needs: setup
-    if: matrix.runner == 'spark'  # Run only if the runner is spark
+    if: needs.setup.outputs.runner == 'spark'  # Use output from the setup job
     timeout-minutes: 240
     steps:
     - name: Run spark Test
@@ -179,7 +179,7 @@ jobs:
   run-chuknou-test:
     runs-on: ubuntu-latest
     needs: setup
-    if: matrix.runner == 'chuknou'  # Run only if the runner is chuknou
+    if: needs.setup.outputs.runner == 'chuknou'  # Use output from the setup job
     timeout-minutes: 240
     steps:
     - name: install chukonu
