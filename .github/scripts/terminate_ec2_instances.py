@@ -1,7 +1,7 @@
 import boto3
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
+import argparse
 def get_commit_hash():
     # 使用 subprocess 来获取当前 Git commit hash
     commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode('utf-8')
@@ -15,26 +15,19 @@ def terminate_instance(instance):
     print(f'Instance {instance.id} has been terminated.')
     return instance.id
 
-def terminate_instances():
+def terminate_instances(runner):
     commit_hash = get_commit_hash()  # 获取当前 commit hash
     ec2 = boto3.resource('ec2', region_name='cn-northwest-1')
-
-    # 先过滤出所有具有 SparkNode- 前缀的实例
+    
+    # 根据标签过滤实例
     instances = ec2.instances.filter(
-        Filters=[{'Name': 'tag:Name', 'Values': ['SparkNode-*']}]
+        Filters=[{'Name': 'tag:Name', 'Values': [f'SparkNode-{commit_hash}-{runner}']}]
     )
 
-    instance_list = []
-    
-    # 手动筛选出标签名匹配 SparkNode-{commit_hash} 的实例
-    for instance in instances:
-        for tag in instance.tags:
-            if tag['Key'] == 'Name' and tag['Value'].startswith(f'SparkNode-{commit_hash}'):
-                instance_list.append(instance)
-                break
+    instance_list = list(instances)  # 转换为列表以便并行处理
 
     if not instance_list:
-        print("No instances found with the specified tag prefix.")
+        print("No instances found with the specified tag.")
         return
     
     # 使用 ThreadPoolExecutor 并行终止实例
@@ -49,4 +42,12 @@ def terminate_instances():
             except Exception as e:
                 print(f'Error terminating instance: {e}')
 
-terminate_instances()
+
+
+# Main function to parse command line arguments
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Terminate instances.')
+    parser.add_argument('--runner', type=str, default='all', help='runner case for spark or ?')
+    
+    args = parser.parse_args()
+    terminate_instances(args.runner)

@@ -26,14 +26,12 @@ env:  # Define environment variables here
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
 jobs:
-  setup:
+  run-spark-test:
     runs-on: ubuntu-latest
     timeout-minutes: 1200
     strategy:
       matrix:
-        runner: [spark, chuknou]  # Define different runners here
-    outputs:
-      runner: ${{ matrix.runner }}  # Set the runner value as output
+        runner: [spark, chuknou]
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -48,8 +46,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         num-instances: ${{ env.NUM_INSTANCES }}
         instance-type: ${{ env.INSTANCE_TYPE }}
-        runner: ${{ matrix.runner }}  # Pass the runner from matrix
-
+        runner: ${{ matrix.runner }}
     - name: Clone and Compress Repo
       uses: ./.github/actions/clone_and_compress
       with:
@@ -156,94 +153,56 @@ jobs:
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
-
-  run-spark-test:
-    runs-on: ubuntu-latest
-    needs: setup
-    if: needs.setup.outputs.runner == 'spark'  # Use output from the setup job
-    timeout-minutes: 240
-    steps:
-    - name: Run spark Test
-      run: |
-        timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
-        "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false > ~/spark_test_log.txt 2>&1"
-
-    - name: download spark test log
-      run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/spark_test_log.txt spark_test_log.txt
-
-    - name: upload spark test log
-      uses: actions/upload-artifact@v3
-      with:
-        name: spark_test_log_${{ github.run_number }}
-        path: spark_test_log.txt
-
-  run-chuknou-test:
-    runs-on: ubuntu-latest
-    needs: setup
-    if: needs.setup.outputs.runner == 'chuknou'  # Use output from the setup job
-    timeout-minutes: 240
-    steps:
     - name: install chukonu
+      if: matrix.runner == 'chukonu'
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_chukonu.yml
         inventory: ${{ env.INVENTORY_CONTENT }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
+
+    - name: Run spark Test
+      if: matrix.runner == 'spark'
+      run: |
+        timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
+        "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false > ~/spark_test_log.txt 2>&1"
+
+    - name: download spark test log
+      if: matrix.runner == 'spark'
+      run: |
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/spark_test_log.txt spark_test_log.txt
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_spark/PowerRuntimes.csv spark_result.csv
+    - name: upload spark test log
+      if: matrix.runner == 'spark'
+      uses: actions/upload-artifact@v3
+      with:
+        name: spark_test_log_${{ github.run_number }}
+        path: spark_test_log.txt
+    - name: upload spark result
+      if: matrix.runner == 'spark'  
+      uses: actions/upload-artifact@v3
+      with:
+        name: spark_test_log_${{ github.run_number }}
+        path: spark_test_log.txt
+
     - name: Run chuknou first Test
+      if: matrix.runner == 'chukonu'
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false > ~/chuknou_test_log.txt 2>&1"
-
     - name: download chuknou test log
+      if: matrix.runner == 'chukonu'
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/chuknou_test_log.txt chuknou_test_log.txt
 
     - name: upload chuknou test log
+      if: matrix.runner == 'chukonu'
       uses: actions/upload-artifact@v3
       with:
         name: chuknou_test_log_${{ github.run_number }}
         path: chuknou_test_log.txt
-    # # 使用 scp 将文件从 node0 拷贝到宿主
-    # - name: download tpcds result from node0
-    #   run: |
-    #     scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_spark/PowerRuntimes.csv spark_result.csv
-    #     scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_chukonu/PowerRuntimes.csv chukonu_result.csv
-    # # 执行 compare.py 比较脚本
-    # - name: compare test results
-    #   run: |
-    #     python3 ./.github/scripts/compare.py
-    # - name: Upload comparison results
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: tpcds_result_${{ github.run_number }}
-    #     path: tpcds_result.csv
-    # # Step 1: 压缩 node0 上的 /opt/event_logs
-    # - name: Compress event_logs on node0
-    #   run: |
-    #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
-
-    # # Step 2: 下载压缩文件到 GitHub Actions runner
-    # - name: Download event_logs from node0
-    #   run: |
-    #     scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/event_logs.tar.gz event_logs.tar.gz
-
-    # # Step 3: 上传压缩的文件作为 artifact
-    # - name: Upload event_logs
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: event_logs_${{ github.run_number }}
-    #     path: event_logs.tar.gz
-    # # # # # Step 8: 清理 EC2 实例
-    # - name: Terminate EC2 instances
-    #   if: always()
-    #   run: |
-    #     python ./.github/scripts/terminate_ec2_instances.py  # 调用终止实例的 Python 脚本
-  # terminate:
-  #   runs-on: ubuntu-latest
-  #   needs: aggregate-results
-  #   if: always()  # Ensure this runs even if the previous jobs fail
-  #   steps:
-  #     - name: Terminate EC2 Instances
-  #       run: python ./.github/scripts/terminate_ec2_instances.py
+    - name: Terminate EC2 instances
+      if: always()
+      run: |
+        python ./.github/scripts/terminate_ec2_instances.py --runner ${{ matrix.runner }}  # 调用终止实例的 Python 脚本
