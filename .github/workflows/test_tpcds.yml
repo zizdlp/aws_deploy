@@ -31,7 +31,7 @@ jobs:
     timeout-minutes: 1200
     strategy:
       matrix:
-        runner: [all] # all,spark, chukonu
+        runner: [spark, chukonu]
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -154,7 +154,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     - name: install chukonu
-      if: matrix.runner == 'chukonu' || matrix.runner == 'all'
+      if: matrix.runner == 'chukonu' 
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_chukonu.yml
@@ -163,59 +163,59 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: Run spark Test
-      if: matrix.runner == 'spark' || matrix.runner == 'all'
+      if: matrix.runner == 'spark' 
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false > ~/spark_test_log.txt 2>&1"
 
     - name: download spark test log
-      if: matrix.runner == 'spark' || matrix.runner == 'all'
+      if: matrix.runner == 'spark' 
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/spark_test_log.txt spark_test_log.txt
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_spark/PowerRuntimes.csv spark_result.csv
     - name: upload spark test log
-      if: matrix.runner == 'spark' || matrix.runner == 'all'
+      if: matrix.runner == 'spark' 
       uses: actions/upload-artifact@v3
       with:
         name: spark_test_log.txt
         path: spark_test_log.txt
     - name: upload spark result
-      if: matrix.runner == 'spark' || matrix.runner == 'all'
+      if: matrix.runner == 'spark' 
       uses: actions/upload-artifact@v3
       with:
         name: spark_result.csv
         path: spark_result.csv
 
     - name: Run chuknou first Test
-      if: matrix.runner == 'chukonu' || matrix.runner == 'all'
+      if: matrix.runner == 'chukonu' 
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false > ~/chuknou_test_log.txt 2>&1"
     - name: download chuknou test log
-      if: matrix.runner == 'chukonu' || matrix.runner == 'all'
+      if: matrix.runner == 'chukonu' 
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/chuknou_test_log.txt chuknou_test_log.txt
 
     - name: upload chuknou test log
-      if: matrix.runner == 'chukonu' || matrix.runner == 'all'
+      if: matrix.runner == 'chukonu' 
       uses: actions/upload-artifact@v3
       with:
         name: chuknou_test_log.txt
         path: chuknou_test_log.txt
 
     - name: Run chuknou second Test
-      if: matrix.runner == 'chukonu' || matrix.runner == 'all'
+      if: matrix.runner == 'chukonu' 
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
     # 使用 scp 将文件从 node0 拷贝到宿主
     - name: download tpcds result from node0
-      if: matrix.runner == 'chukonu' || matrix.runner == 'all'
+      if: matrix.runner == 'chukonu' 
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_chukonu/PowerRuntimes.csv chukonu_result.csv
 
     - name: upload chukonu result
-      if: matrix.runner == 'chukonu' || matrix.runner == 'all'
+      if: matrix.runner == 'chukonu' 
       uses: actions/upload-artifact@v3
       with:
         name: chukonu_result.csv
