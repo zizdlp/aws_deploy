@@ -11,7 +11,7 @@ def get_commit_hash():
     commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode('utf-8')
     return commit_hash
 
-def create_instance(index, instance_type):
+def create_instance(index, instance_type,runner):
     commit_hash = get_commit_hash()  # Get current commit hash
 
     user_data_script = '''#!/bin/bash
@@ -47,7 +47,7 @@ def create_instance(index, instance_type):
             {
                 'ResourceType': 'instance',
                 'Tags': [
-                        {'Key': 'Name', 'Value': f'SparkNode-{commit_hash}'},
+                        {'Key': 'Name', 'Value': f'SparkNode-{commit_hash}-{runner}'},
                         {'Key': 'Index', 'Value': f'{index}'}
                          ]
             }
@@ -64,11 +64,11 @@ def create_instance(index, instance_type):
     return instance
 
 # Function to manage parallel instance creation
-def parallel_create_instances(num_instances, instance_type):
+def parallel_create_instances(num_instances, instance_type,runner):
     instances = []
     with ThreadPoolExecutor(max_workers=num_instances) as executor:
         # Submit tasks for parallel execution
-        future_to_index = {executor.submit(create_instance, index, instance_type): index for index in range(num_instances)}
+        future_to_index = {executor.submit(create_instance, index, instance_type,runner): index for index in range(num_instances)}
         
         # Process results as they complete
         for future in as_completed(future_to_index):
@@ -87,8 +87,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Launch EC2 instances.')
     parser.add_argument('--num-instances', type=int, default=4, help='Number of instances to launch')
     parser.add_argument('--instance-type', type=str, default='i4i.4xlarge', help='EC2 instance type')
+    parser.add_argument('--runner', type=str, default='all', help='runner case for spark or ?')
     
     args = parser.parse_args()
     
     # Launch instances based on command line inputs
-    instances = parallel_create_instances(args.num_instances, args.instance_type)
+    instances = parallel_create_instances(args.num_instances, args.instance_type,args.runner)
