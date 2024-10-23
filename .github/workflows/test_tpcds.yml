@@ -32,6 +32,8 @@ jobs:
     strategy:
       matrix:
         runner: [spark, chuknou]  # Define different runners here
+    outputs:
+      runner: ${{ matrix.runner }}  # Set the runner value as output
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
