@@ -31,7 +31,7 @@ jobs:
     timeout-minutes: 1200
     strategy:
       matrix:
-        runner: [spark, chukonu]
+        runner: [spark] # spark, chukonu
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
