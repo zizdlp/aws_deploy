@@ -231,6 +231,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      # Step 1: 配置python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      # Step 2: 安装 pip依赖
+      - name: Install Boto3
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas
       # Step 1: 下载并覆盖 /etc/hosts 文件，文件名带后缀
       # - name: Download spark result
       #   uses: actions/download-artifact@v3
