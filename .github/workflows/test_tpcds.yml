@@ -25,13 +25,14 @@ env:  # Define environment variables here
   MAXIMUM_ALLOCATION_MB: 307200
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
+  SPARK_RUNNER: 49 #不是0则意味着使用之前测试的spark，这里只测试诸葛弩，所以对应的下面runner: [chukonu]
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
     timeout-minutes: 1200
     strategy:
       matrix:
-        runner: [spark,chukonu] # spark, chukonu
+        runner: [chukonu] # spark, chukonu
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -240,17 +241,23 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pandas
+      - name: Determine Used Runner
+        run: |
+          if [ "${{ env.SPARK_RUNNER }}" -ne 0 ]; then
+            echo "Using SPARK_RUNNER: ${{ env.SPARK_RUNNER }}"
+          else
+            echo "Using GITHUB_RUN_NUMBER: ${{ github.run_number }}"
+          fi
       # Step 1: 下载并覆盖 /etc/hosts 文件，文件名带后缀
       - name: Download spark result
         uses: actions/download-artifact@v3
         with:
-          name: spark_result_${{ github.run_number }}.csv
-      - name: Download chukonu result
-        uses: actions/download-artifact@v3
-        with:
-          name: chukonu_result${{ github.run_number }}.csv
+          name: spark_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}.csv
+
       - name: Compare Test Results
-        run: python3 ./.github/scripts/compare.py --spark ./spark_result_${{ github.run_number }}.csv --chukonu ./chukonu_result_${{ github.run_number }}.csv
+        run: python3 ./.github/scripts/compare.py \
+          --spark ./spark_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}.csv \
+          --chukonu ./chukonu_result_${{ github.run_number }}.csv
 
       - name: Upload Comparison Results
         uses: actions/upload-artifact@v3
