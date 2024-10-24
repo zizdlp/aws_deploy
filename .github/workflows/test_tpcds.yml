@@ -240,7 +240,8 @@ jobs:
       #   with:
       #     name: chukonu_result.csv
       - name: Compare Test Results
-        run: python3 ./.github/scripts/compare.py --spark ./spark_result.csv --chukonu ./chukonu_result.csv
+        run: python3 ./.github/scripts/compare.py 
+        #--spark ./spark_result.csv --chukonu ./chukonu_result.csv
 
       - name: Upload Comparison Results
         uses: actions/upload-artifact@v3
