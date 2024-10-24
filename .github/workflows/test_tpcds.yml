@@ -229,7 +229,8 @@ jobs:
     runs-on: ubuntu-latest
     # needs: run-spark-test
     steps:
-
+      - name: Checkout code
+        uses: actions/checkout@v3
       # Step 1: 下载并覆盖 /etc/hosts 文件，文件名带后缀
       # - name: Download spark result
       #   uses: actions/download-artifact@v3
