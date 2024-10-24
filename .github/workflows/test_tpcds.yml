@@ -177,13 +177,13 @@ jobs:
       if: matrix.runner == 'spark' 
       uses: actions/upload-artifact@v3
       with:
-        name: spark_test_log.txt
+        name: spark_test_log_${{ github.run_number }}.txt
         path: spark_test_log.txt
     - name: upload spark result
       if: matrix.runner == 'spark' 
       uses: actions/upload-artifact@v3
       with:
-        name: spark_result.csv
+        name: spark_result_${{ github.run_number }}.csv
         path: spark_result.csv
 
     - name: Run chuknou first Test
@@ -200,7 +200,7 @@ jobs:
       if: matrix.runner == 'chukonu' 
       uses: actions/upload-artifact@v3
       with:
-        name: chuknou_test_log.txt
+        name: chuknou_test_log_${{ github.run_number }}.txt
         path: chuknou_test_log.txt
 
     - name: Run chuknou second Test
@@ -213,12 +213,11 @@ jobs:
       if: matrix.runner == 'chukonu' 
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_chukonu/PowerRuntimes.csv chukonu_result.csv
-
     - name: upload chukonu result
       if: matrix.runner == 'chukonu' 
       uses: actions/upload-artifact@v3
       with:
-        name: chukonu_result.csv
+        name: chukonu_result_${{ github.run_number }}.csv
         path: chukonu_result.csv
     - name: Terminate EC2 instances
       if: always()
@@ -245,16 +244,16 @@ jobs:
       - name: Download spark result
         uses: actions/download-artifact@v3
         with:
-          name: spark_result.csv
+          name: spark_result_${{ github.run_number }}.csv
       - name: Download chukonu result
         uses: actions/download-artifact@v3
         with:
-          name: chukonu_result.csv
+          name: chukonu_result${{ github.run_number }}.csv
       - name: Compare Test Results
-        run: python3 ./.github/scripts/compare.py --spark ./spark_result.csv --chukonu ./chukonu_result.csv
+        run: python3 ./.github/scripts/compare.py --spark ./spark_result_${{ github.run_number }}.csv --chukonu ./chukonu_result_${{ github.run_number }}.csv
 
       - name: Upload Comparison Results
         uses: actions/upload-artifact@v3
         with:
-          name: tpcds_result.csv
+          name: tpcds_result_${{ github.run_number }}.csv
           path: tpcds_result.csv
