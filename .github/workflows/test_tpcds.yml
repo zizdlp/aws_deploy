@@ -10,7 +10,7 @@ on:
 env:  # Define environment variables here
   NUM_INSTANCES: 4  # Set the number of instances here
   INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
-  SCALE_FACTOR: 10
+  SCALE_FACTOR: 100
   SPARK_NUM_EXECUTORS: 3
   SPARK_EXECUTOR_CORES: 12
   SPARK_EXECUTOR_MEMORY: 90g
@@ -25,14 +25,14 @@ env:  # Define environment variables here
   MAXIMUM_ALLOCATION_MB: 307200
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
-  SPARK_RUNNER: 49 #不是0则意味着使用之前测试的spark，这里只测试诸葛弩，所以对应的下面runner: [chukonu]
+  SPARK_RUNNER: 0 #不是0则意味着使用之前测试的spark，这里只测试诸葛弩，所以对应的下面runner: [chukonu]
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
     timeout-minutes: 1200
     strategy:
       matrix:
-        runner: [chukonu] # spark, chukonu
+        runner: [spark,chukonu] # spark, chukonu
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -155,7 +155,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     - name: install chukonu
-      if: matrix.runner == 'chukonu' 
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_chukonu.yml
@@ -178,13 +177,13 @@ jobs:
       if: matrix.runner == 'spark' 
       uses: actions/upload-artifact@v3
       with:
-        name: spark_test_log_${{ github.run_number }}.txt
+        name: spark_test_log_${{ github.run_number }}_${{env.SCALE_FACTOR}}.txt
         path: spark_test_log.txt
     - name: upload spark result
       if: matrix.runner == 'spark' 
       uses: actions/upload-artifact@v3
       with:
-        name: spark_result_${{ github.run_number }}.csv
+        name: spark_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
         path: spark_result.csv
 
     - name: Run chuknou first Test
@@ -201,7 +200,7 @@ jobs:
       if: matrix.runner == 'chukonu' 
       uses: actions/upload-artifact@v3
       with:
-        name: chuknou_test_log_${{ github.run_number }}.txt
+        name: chuknou_test_log_${{ github.run_number }}_${{env.SCALE_FACTOR}}.txt
         path: chuknou_test_log.txt
 
     - name: Run chuknou second Test
@@ -218,7 +217,7 @@ jobs:
       if: matrix.runner == 'chukonu' 
       uses: actions/upload-artifact@v3
       with:
-        name: chukonu_result_${{ github.run_number }}.csv
+        name: chukonu_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
         path: chukonu_result.csv
     - name: Terminate EC2 instances
       if: always()
@@ -252,21 +251,21 @@ jobs:
       - name: Download spark result
         uses: actions/download-artifact@v3
         with:
-          name: spark_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}.csv
+          name: spark_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}_${{env.SCALE_FACTOR}}.csv
  
 
       - name: Download chukonu result
         uses: actions/download-artifact@v3
         with:
-          name: chukonu_result_${{ github.run_number }}.csv
+          name: chukonu_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
 
       - name: Compare Test Results
         run: python3 ./.github/scripts/compare.py \
           --spark ./spark_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}.csv \
-          --chukonu ./chukonu_result_${{ github.run_number }}.csv
+          --chukonu ./chukonu_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
 
       - name: Upload Comparison Results
         uses: actions/upload-artifact@v3
         with:
-          name: tpcds_result_${{ github.run_number }}.csv
+          name: tpcds_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
           path: tpcds_result.csv
