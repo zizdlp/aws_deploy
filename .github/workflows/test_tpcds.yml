@@ -231,14 +231,14 @@ jobs:
     steps:
 
       # Step 1: 下载并覆盖 /etc/hosts 文件，文件名带后缀
-      - name: Download spark result
-        uses: actions/download-artifact@v3
-        with:
-          name: spark_result.csv
-      - name: Download chukonu result
-        uses: actions/download-artifact@v3
-        with:
-          name: chukonu_result.csv
+      # - name: Download spark result
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: spark_result.csv
+      # - name: Download chukonu result
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: chukonu_result.csv
       - name: Compare Test Results
         run: python3 ./.github/scripts/compare.py --spark ./spark_result.csv --chukonu ./chukonu_result.csv
 
