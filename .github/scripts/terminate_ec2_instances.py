@@ -15,13 +15,7 @@ def terminate_instance(instance):
     print(f'Instance {instance.id} has been terminated.')
     return instance.id
 
-def terminate_instances(runner,spark,chukonu):
-    if runner=="chukonu" and chukonu!='':
-        print("not run instances for chukonu")
-        return
-    elif runner=="spark" and spark!='':
-        print("not run instances for spark")
-        return
+def terminate_instances(runner):
     commit_hash = get_commit_hash()  # 获取当前 commit hash
     ec2 = boto3.resource('ec2', region_name='cn-northwest-1')
     
@@ -54,8 +48,6 @@ def terminate_instances(runner,spark,chukonu):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Terminate instances.')
     parser.add_argument('--runner', type=str, default='all', help='runner case for spark or ?')
-    # parser.add_argument('--spark', type=str, default='', help='runn spark')
-    # parser.add_argument('--chukonu', type=str, default='', help='run chukonu')
-
-    # args = parser.parse_args()
-    # terminate_instances(args.runner,args.spark,args.chukonu)
+    
+    args = parser.parse_args()
+    terminate_instances(args.runner)
