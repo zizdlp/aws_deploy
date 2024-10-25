@@ -26,7 +26,7 @@ env:  # Define environment variables here
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
   SPARK_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938630"
-  CHUKONU_RESULT: "0" ## 执行
+  CHUKONU_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938627" ## '0' 执行
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
@@ -261,13 +261,13 @@ jobs:
           pip install pandas
 
       - name: Download spark result using actions/download-artifact if SPARK_RESULT is ""
-        if: env.SPARK_RESULT == ''
+        if: env.SPARK_RESULT == '0'
         uses: actions/download-artifact@v3
         with:
           name: spark_result.csv
 
       - name: Download spark result using curl if SPARK_RESULT is not ""
-        if: env.SPARK_RESULT != ''
+        if: env.SPARK_RESULT != '0'
         run: |
           curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
             -o spark_result.zip \
@@ -275,13 +275,13 @@ jobs:
           unzip spark_result.zip
 
       - name: Download CHUKONU_RESULT using actions/download-artifact if CHUKONU_RESULT is ""
-        if: env.CHUKONU_RESULT == ''
+        if: env.CHUKONU_RESULT == '0'
         uses: actions/download-artifact@v3
         with:
           name: chukonu_result.csv
 
       - name: Download CHUKONU_RESULT result using curl if CHUKONU_RESULT is not ""
-        if: env.CHUKONU_RESULT != ''
+        if: env.CHUKONU_RESULT != '0'
         run: |
           curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
             -o chukonu_result.zip \
