@@ -54,8 +54,8 @@ def terminate_instances(runner,spark,chukonu):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Terminate instances.')
     parser.add_argument('--runner', type=str, default='all', help='runner case for spark or ?')
-    parser.add_argument('--spark', type=str, default='', help='runn spark')
-    parser.add_argument('--chukonu', type=str, default='', help='run chukonu')
+    # parser.add_argument('--spark', type=str, default='', help='runn spark')
+    # parser.add_argument('--chukonu', type=str, default='', help='run chukonu')
 
-    args = parser.parse_args()
-    terminate_instances(args.runner,args.spark,args.chukonu)
+    # args = parser.parse_args()
+    # terminate_instances(args.runner,args.spark,args.chukonu)
