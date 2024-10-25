@@ -26,6 +26,7 @@ env:  # Define environment variables here
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
   SPARK_RUNNER: 53 #不是0则意味着使用之前测试的spark，这里只测试诸葛弩，所以对应的下面runner: [chukonu]
+  ARTIFACT_ID: 2101938630
 jobs:
   # run-spark-test:
   #   runs-on: ubuntu-latest
@@ -240,20 +241,21 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pandas
-      - name: Determine Used Runner
-        run: |
-          if [ "${{ env.SPARK_RUNNER }}" -ne 0 ]; then
-            echo "Using SPARK_RUNNER: ${{ env.SPARK_RUNNER }}"
-          else
-            echo "Using GITHUB_RUN_NUMBER: ${{ github.run_number }}"
-          fi
 
-      - name: Download spark result
+      - name: Download spark result using actions/download-artifact if SPARK_RUNNER is 0
+        if: env.SPARK_RUNNER == '0'
         uses: actions/download-artifact@v3
         with:
-          name: spark_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}_${{env.SCALE_FACTOR}}.csv
- 
+          name: spark_result_${{ github.run_number }}_${{ env.SCALE_FACTOR }}.csv
 
+      - name: Download spark result using curl if SPARK_RUNNER is not 0
+        if: env.SPARK_RUNNER != '0'
+        run: |
+          curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
+            -o spark_result_${{ env.SPARK_RUNNER }}_${{ env.SCALE_FACTOR }}.zip \
+            https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/${{env.ARTIFACT_ID}}/zip
+          
+          unzip spark_result_${{ env.SPARK_RUNNER }}_${{ env.SCALE_FACTOR }}.zip -d ./spark_results
       - name: Download chukonu result
         uses: actions/download-artifact@v3
         with:
