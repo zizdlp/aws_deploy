@@ -1,6 +1,13 @@
 name: TEST_TPCDS
 
 on:
+  # Manually trigger the workflow
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "The branch to trigger the workflow on"
+        required: false
+        default: "main"
   pull_request:
     branches:
       - main
@@ -25,10 +32,10 @@ env:  # Define environment variables here
   MAXIMUM_ALLOCATION_MB: 307200
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
-  SPARK_RESULT: '0'
-  CHUKONU_RESULT: '0'
-  # SPARK_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938630"
-  # CHUKONU_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938627" ## '0' 执行
+  # SPARK_RESULT: '0'
+  # CHUKONU_RESULT: '0'
+  SPARK_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938630"
+  CHUKONU_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938627"
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
@@ -262,27 +269,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas
 
-      - name: Download spark result using actions/download-artifact if SPARK_RESULT is ""
+      - name: Download spark result using actions/download-artifact if SPARK_RESULT is "0"
         if: env.SPARK_RESULT == '0'
         uses: actions/download-artifact@v3
         with:
           name: spark_result.csv
 
-      - name: Download spark result using curl if SPARK_RESULT is not ""
+      - name: Download spark result using curl if SPARK_RESULT is not "0"
         if: env.SPARK_RESULT != '0'
         run: |
           curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
             -o spark_result.zip \
-            ${{env.SPARK_RESULT}}
+            ${{env.SPARK_RESULT}}/zip
           unzip spark_result.zip
 
-      - name: Download CHUKONU_RESULT using actions/download-artifact if CHUKONU_RESULT is ""
+      - name: Download CHUKONU_RESULT using actions/download-artifact if CHUKONU_RESULT is "0"
         if: env.CHUKONU_RESULT == '0'
         uses: actions/download-artifact@v3
         with:
           name: chukonu_result.csv
 
-      - name: Download CHUKONU_RESULT result using curl if CHUKONU_RESULT is not ""
+      - name: Download CHUKONU_RESULT result using curl if CHUKONU_RESULT is not "0"
         if: env.CHUKONU_RESULT != '0'
         run: |
           curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
