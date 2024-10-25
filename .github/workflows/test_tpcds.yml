@@ -34,9 +34,8 @@ env:  # Define environment variables here
   MAXIMUM_ALLOCATION_VCORES: 45
   # SPARK_RESULT: '0'
   # CHUKONU_RESULT: '0'
-  
-  SPARK_RESULT: "https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2101938630/zip"
-  CHUKONU_RESULT: "https://github.com/zizdlp/aws_deploy/actions/artifacts/2101938627/zip"
+  SPARK_RESULT: "https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2102496505/zip"
+  CHUKONU_RESULT: "https://github.com/zizdlp/aws_deploy/actions/artifacts/2102496504/zip"
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
