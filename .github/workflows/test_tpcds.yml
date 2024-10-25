@@ -35,7 +35,7 @@ env:  # Define environment variables here
   # SPARK_RESULT: '0'
   # CHUKONU_RESULT: '0'
   SPARK_RESULT: "https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2102496505/zip"
-  CHUKONU_RESULT: "https://github.com/zizdlp/aws_deploy/actions/artifacts/2102496504/zip"
+  CHUKONU_RESULT: "https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2102496504/zip"
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
@@ -283,18 +283,6 @@ jobs:
             ${{env.SPARK_RESULT}}
           ls -lh
           unzip spark_result.zip
-
-
-      - name: Download spark result using curl if SPARK_RUNNER is not 0
-        if: env.SPARK_RESULT != '0'
-        run: |
-          curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
-            -o spark_result.zip \
-            https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2102496505/zip
-          ls -lh
-          # unzip spark_result_${{ env.SPARK_RUNNER }}_${{ env.SCALE_FACTOR }}.zip
-
-
 
       - name: Download CHUKONU_RESULT using actions/download-artifact if CHUKONU_RESULT is "0"
         if: env.CHUKONU_RESULT == '0'
