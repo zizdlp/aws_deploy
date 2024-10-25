@@ -264,6 +264,7 @@ jobs:
             https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2101938627/zip
           
           unzip chukonu_result_${{ env.SPARK_RUNNER }}_${{ env.SCALE_FACTOR }}.zip -d ./spark_results
+          ls -lh
       # - name: Download chukonu result
       #   uses: actions/download-artifact@v3
       #   with:
