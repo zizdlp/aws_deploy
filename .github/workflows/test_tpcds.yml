@@ -50,7 +50,7 @@ jobs:
     timeout-minutes: 1200
     strategy:
       matrix:
-        runner: ${{ needs.set-runner.outputs.runner }}
+        runner: []
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
