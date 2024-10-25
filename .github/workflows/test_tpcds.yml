@@ -36,7 +36,6 @@ jobs:
         runner: [spark,chukonu]
     steps:
     - name: Checkout code
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
       uses: actions/checkout@v3
 
     - name: Install deps for worker
