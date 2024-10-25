@@ -240,8 +240,9 @@ jobs:
     - name: Terminate EC2 instances
       if: always()
       run: |
-        python ./.github/scripts/terminate_ec2_instances.py --runner ${{ matrix.runner }} --spark ${{env.SPARK_RESULT}} 
-  
+        python ./.github/scripts/terminate_ec2_instances.py --runner ${{ matrix.runner }} \
+         --spark ${{ env.SPARK_RESULT }} \
+         --chukonu ${{ env.CHUKONU_RESULT != '' && env.CHUKONU_RESULT || '' }}
   aggregate-results:
     runs-on: ubuntu-latest
     needs: run-spark-test
