@@ -256,15 +256,24 @@ jobs:
             https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/${{env.ARTIFACT_ID}}/zip
           
           unzip spark_result_${{ env.SPARK_RUNNER }}_${{ env.SCALE_FACTOR }}.zip -d ./spark_results
-      - name: Download chukonu result
-        uses: actions/download-artifact@v3
-        with:
-          name: chukonu_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
+
+      - name: Download spark result using curl if SPARK_RUNNER is not 0
+        run: |
+          curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
+            -o chukonu_result_${{ env.SPARK_RUNNER }}_${{ env.SCALE_FACTOR }}.zip \
+            https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2101938627/zip
+          
+          unzip spark_result_${{ env.SPARK_RUNNER }}_${{ env.SCALE_FACTOR }}.zip -d ./spark_results
+      # - name: Download chukonu result
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: chukonu_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
 
       - name: Compare Test Results
         run: python3 ./.github/scripts/compare.py \
           --spark ./spark_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}_${{env.SCALE_FACTOR}}.csv \
-          --chukonu ./chukonu_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
+          --chukonu ./chukonu_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}_${{env.SCALE_FACTOR}}.csv 
+          # --chukonu ./chukonu_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
 
       - name: Upload Comparison Results
         uses: actions/upload-artifact@v3
