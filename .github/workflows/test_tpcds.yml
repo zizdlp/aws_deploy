@@ -280,7 +280,7 @@ jobs:
         run: |
           curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
             -o spark_result.zip \
-            ${{env.SPARK_RESULT}}/zip
+            ${{env.SPARK_RESULT}}
           unzip spark_result.zip
 
       - name: Download CHUKONU_RESULT using actions/download-artifact if CHUKONU_RESULT is "0"
