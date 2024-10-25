@@ -46,10 +46,11 @@ jobs:
 
   run-spark-test:
     runs-on: ubuntu-latest
+    needs: set-runner-matrix
     timeout-minutes: 1200
     strategy:
       matrix:
-        runner: [${{ fromJson(needs.set-runner-matrix.outputs.matrix-value) }}]
+        runner: [${{ fromJson(needs.set-runner.outputs.runner) }}]
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
