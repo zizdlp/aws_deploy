@@ -245,7 +245,7 @@ jobs:
 
   aggregate-results:
     runs-on: ubuntu-latest
-    # needs: run-spark-test
+    needs: run-spark-test
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
