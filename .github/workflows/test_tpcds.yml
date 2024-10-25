@@ -270,7 +270,7 @@ jobs:
       #     name: chukonu_result_${{ github.run_number }}_${{env.SCALE_FACTOR}}.csv
 
       - name: Compare Test Results
-        run: python3 ./.github/scripts/compare.py
+        run: python3 ./.github/scripts/compare.py --spark "abc.csv"
       - name: Compare Test Results
         run: python3 ./.github/scripts/compare.py \
           --spark ./spark_result_${{ env.SPARK_RUNNER != 0 && env.SPARK_RUNNER || github.run_number }}_${{env.SCALE_FACTOR}}.csv \
