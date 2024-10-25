@@ -26,7 +26,7 @@ env:  # Define environment variables here
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
   SPARK_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938630"
-  CHUKONU_RESULT: ""
+  CHUKONU_RESULT: "0" ## 执行
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
       uses: ./.github/actions/install_deps
 
     - name: Deploy EC2 Instances
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: ./.github/actions/aws_create
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -51,30 +51,30 @@ jobs:
         instance-type: ${{ env.INSTANCE_TYPE }}
         runner: ${{ matrix.runner }}
     - name: Clone and Compress Repo
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: ./.github/actions/clone_and_compress
       with:
         ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
         deploy_key: ${{ secrets.DEPLOY_KEY }}
 
     - name: Test SSH connection to master
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       run: |
         ssh -i ~/.ssh/local_test.pem ubuntu@node0 'hostname'
 
     - name: Print Environment Variables
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       run: |
         echo "NUM_INSTANCES: $NUM_INSTANCES"
         echo "INSTANCE_TYPE: $INSTANCE_TYPE"
 
     - name: Update vars with env
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       run: |
         python3 ./.github/scripts/update_var.py 
 
     - name: Read inventory.ini content
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       id: read_inventory
       run: |
         cat ./ansible/inventory.ini
@@ -83,7 +83,7 @@ jobs:
         echo "EOF" >> $GITHUB_ENV
 
     - name: Read known_hosts content
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       id: read_known_hosts
       run: |
         cat ~/.ssh/known_hosts
@@ -92,7 +92,7 @@ jobs:
         echo "EOF" >> $GITHUB_ENV
 
     - name: set ssh & nfs
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_deps.yml
@@ -101,7 +101,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: use nvme
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/use_nvme.yml
@@ -110,7 +110,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: install sbt
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_sbt.yml
@@ -119,7 +119,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: install scala
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_scala.yml
@@ -128,7 +128,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: install spark
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_spark.yml
@@ -137,7 +137,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: install hadoop
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_hadoop.yml
@@ -146,7 +146,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: install mysql 
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_mysql.yml
@@ -155,7 +155,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: install hive
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_hive.yml
@@ -164,7 +164,7 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: install tpcds
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_tpcds.yml
@@ -172,7 +172,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
     - name: install chukonu
-      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '')
+      if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ./ansible/install_chukonu.yml
@@ -181,58 +181,58 @@ jobs:
         known_hosts: ${{ env.KNOWN_HOSTS_CONTENT }}
 
     - name: Run spark Test
-      if: matrix.runner == 'spark' && env.SPARK_RESULT == ''
+      if: matrix.runner == 'spark' && env.SPARK_RESULT == '0'
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-spark.sh true true false false > ~/spark_test_log.txt 2>&1"
 
     - name: download spark test log
-      if: matrix.runner == 'spark' && env.SPARK_RESULT == ''
+      if: matrix.runner == 'spark' && env.SPARK_RESULT == '0'
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/spark_test_log.txt spark_test_log.txt
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_spark/PowerRuntimes.csv spark_result.csv
     - name: upload spark test log
-      if: matrix.runner == 'spark' && env.SPARK_RESULT == ''
+      if: matrix.runner == 'spark' && env.SPARK_RESULT == '0'
       uses: actions/upload-artifact@v3
       with:
         name: spark_test_log.txt
         path: spark_test_log.txt
     - name: upload spark result
-      if: matrix.runner == 'spark' && env.SPARK_RESULT == ''
+      if: matrix.runner == 'spark' && env.SPARK_RESULT == '0'
       uses: actions/upload-artifact@v3
       with:
         name: spark_result.csv
         path: spark_result.csv
 
     - name: Run chuknou first Test
-      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == ''
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false > ~/chuknou_test_log.txt 2>&1"
     - name: download chuknou test log
-      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == ''
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:~/chuknou_test_log.txt chuknou_test_log.txt
 
     - name: upload chuknou test log
-      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == ''
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
       uses: actions/upload-artifact@v3
       with:
         name: chuknou_test_log.txt
         path: chuknou_test_log.txt
 
     - name: Run chuknou second Test
-      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == ''
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
       run: |
         timeout 4h ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 \
         "cd /opt/tpcds-benchmark && sudo ./run-chukonu.sh true true false false"
     # 使用 scp 将文件从 node0 拷贝到宿主
     - name: download tpcds result from node0
-      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == ''
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
       run: |
         scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/tmp_chukonu/PowerRuntimes.csv chukonu_result.csv
     - name: upload chukonu result
-      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == ''
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
       uses: actions/upload-artifact@v3
       with:
         name: chukonu_result.csv
@@ -242,7 +242,7 @@ jobs:
       run: |
         python ./.github/scripts/terminate_ec2_instances.py --runner ${{ matrix.runner }} \
          --spark ${{ env.SPARK_RESULT }} \
-         --chukonu ${{ env.CHUKONU_RESULT != '' && env.CHUKONU_RESULT || '' }}
+         --chukonu ${{ env.CHUKONU_RESULT }}
   aggregate-results:
     runs-on: ubuntu-latest
     needs: run-spark-test
