@@ -279,7 +279,7 @@ jobs:
         if: env.SPARK_RESULT != '0'
         run: |
           curl -L -H "Authorization: token ${{ secrets.ACT_TOKEN }}" \
-            -o spark_result.zip \
+            -o spark_result_53_100.zip \
             ${{env.SPARK_RESULT}}
           unzip spark_result.zip
 
