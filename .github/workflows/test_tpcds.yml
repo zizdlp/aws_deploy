@@ -27,7 +27,6 @@ env:  # Define environment variables here
   MAXIMUM_ALLOCATION_VCORES: 45
   SPARK_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938630"
   CHUKONU_RESULT: ""
-  ARTIFACT_ID: 2101938630
 jobs:
   set-runner:
     runs-on: ubuntu-latest
@@ -38,10 +37,10 @@ jobs:
         id: set-output
         run: |
           if [[ -z "${{ env.SPARK_RESULT }}" ]]; then
-            echo "runner=spark,chukonu" >> $GITHUB_ENV
+            echo "runner=[spark,chukonu]" >> $GITHUB_ENV
             echo "::set-output name=runner::spark,chukonu"
           else
-            echo "runner=chukonu" >> $GITHUB_ENV
+            echo "runner=[chukonu]" >> $GITHUB_ENV
             echo "::set-output name=runner::chukonu"
           fi
 
