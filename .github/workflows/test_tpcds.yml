@@ -25,8 +25,10 @@ env:  # Define environment variables here
   MAXIMUM_ALLOCATION_MB: 307200
   MINIMUM_ALLOCATION_MB: 2048
   MAXIMUM_ALLOCATION_VCORES: 45
-  SPARK_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938630"
-  CHUKONU_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938627" ## '0' 执行
+  SPARK_RESULT: '0'
+  CHUKONU_RESULT: '0'
+  # SPARK_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938630"
+  # CHUKONU_RESULT: "https://github.com/zizdlp/aws_deploy/actions/runs/11494315795/artifacts/2101938627" ## '0' 执行
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
