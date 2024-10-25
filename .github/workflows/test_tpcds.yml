@@ -29,12 +29,27 @@ env:  # Define environment variables here
   CHUKONU_RESULT: ""
   ARTIFACT_ID: 2101938630
 jobs:
+  set-runner-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix-value: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix based on SPARK_RESULT
+        id: set-matrix
+        run: |
+          if [[ -z "${{ env.SPARK_RESULT }}" ]]; then
+            echo "matrix=spark,chukonu" >> $GITHUB_ENV
+            echo "::set-output name=matrix::spark,chukonu"
+          else
+            echo "matrix=chukonu" >> $GITHUB_ENV
+            echo "::set-output name=matrix::chukonu"
+
   run-spark-test:
     runs-on: ubuntu-latest
     timeout-minutes: 1200
     strategy:
       matrix:
-        runner: [spark,chukonu] # spark, chukonu
+        runner: [${{ fromJson(needs.set-runner-matrix.outputs.matrix-value) }}]
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
