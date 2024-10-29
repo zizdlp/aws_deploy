@@ -8,34 +8,57 @@ on:
         description: "The branch to trigger the workflow on"
         required: false
         default: "main"
+      scale_factor:
+        description: "Scale factor"
+        required: false
+        default: "100"
+      spark_result:
+        description: "Spark result URL"
+        required: false
+        default: "0" # default use previous test case: 100g
+      chukonu_result:
+        description: "Chukonu result URL"
+        required: false
+        default: "0"
+      commit_id:
+        description: "Chukonu commit id"
+        required: false
+        default: ""
   pull_request:
     branches:
       - main
   push:
     branches:
       - main
-env:  # Define environment variables here
-  NUM_INSTANCES: 4  # Set the number of instances here
-  INSTANCE_TYPE: i4i.4xlarge  # Set the instance type here
-  SCALE_FACTOR: 100
+
+env:
+  NUM_INSTANCES: 4
+  INSTANCE_TYPE:  'i4i.4xlarge'
+  SCALE_FACTOR: ${{ github.event.inputs.scale_factor || 100 }}
   SPARK_NUM_EXECUTORS: 3
   SPARK_EXECUTOR_CORES: 12
-  SPARK_EXECUTOR_MEMORY: 90g
-  SPARK_OFFSIZE: 0g
-  SPARK_OVERHEAD: 6g
-  CHUKONU_NUM_EXECUTORS: 3
-  CHUKONU_EXECUTOR_CORES: 12
-  CHUKONU_EXECUTOR_MEMORY: 47g
-  CHUKONU_OFFSIZE: 1g
-  CHUKONU_OVERHEAD: 48g
-  NODEMANAGER_MEMORY_MB: 102400
-  MAXIMUM_ALLOCATION_MB: 307200
-  MINIMUM_ALLOCATION_MB: 2048
-  MAXIMUM_ALLOCATION_VCORES: 45
-  # SPARK_RESULT: '0'
-  # CHUKONU_RESULT: '0'
-  SPARK_RESULT: "https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2102496505/zip"
-  CHUKONU_RESULT: "https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2102496504/zip"
+  SPARK_EXECUTOR_MEMORY:  '90g'
+  SPARK_OFFSIZE:   '0g' 
+  SPARK_OVERHEAD:  '6g' 
+  CHUKONU_NUM_EXECUTORS:  3
+  CHUKONU_EXECUTOR_CORES:  12
+  CHUKONU_EXECUTOR_MEMORY:  '47g'
+  CHUKONU_OFFSIZE:  '1g' 
+  CHUKONU_OVERHEAD:  '48g'
+  NODEMANAGER_MEMORY_MB:  102400
+  MAXIMUM_ALLOCATION_MB:  307200
+  MINIMUM_ALLOCATION_MB:  2048
+  MAXIMUM_ALLOCATION_VCORES:  45
+  SPARK_RESULT: ${{ github.event.inputs.spark_result || '0' }} # default use previous test case: 100g
+  CHUKONU_RESULT: ${{ github.event.inputs.chukonu_result || '0' }} # default rerun this test
+  COMMIT_ID: ${{ github.event.inputs.commit_id || '' }}
+  # SPARK_RESULT: '0' # run test
+  # CHUKONU_RESULT: '0' # run test
+  # SPARK_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2111124608/zip" # 100g,keep only 400days,start from 2024-1028
+  # CHUKONU_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2111124602/zip" # 100g,keep only 400days,start from 2024-1028
+
+  # SPARK_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2110549627/zip" # 1000g,keep only 90days,start from 2024-1028
+  # CHUKONU_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2110549625/zip" # 1000g,keep only 90days,start from 2024-1028
 jobs:
   run-spark-test:
     runs-on: ubuntu-latest
@@ -59,12 +82,14 @@ jobs:
         num-instances: ${{ env.NUM_INSTANCES }}
         instance-type: ${{ env.INSTANCE_TYPE }}
         runner: ${{ matrix.runner }}
+        run-number: ${{ github.run_number }}
     - name: Clone and Compress Repo
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
       uses: ./.github/actions/clone_and_compress
       with:
         ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
         deploy_key: ${{ secrets.DEPLOY_KEY }}
+        commit_id: ${{ env.COMMIT_ID }}
 
     - name: Test SSH connection to master
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0')
@@ -206,13 +231,14 @@ jobs:
       with:
         name: spark_test_log.txt
         path: spark_test_log.txt
+        retention-days: 400
     - name: upload spark result
       if: matrix.runner == 'spark' && env.SPARK_RESULT == '0'
       uses: actions/upload-artifact@v3
       with:
         name: spark_result.csv
         path: spark_result.csv
-
+        retention-days: 400
     - name: Run chuknou first Test
       if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
       run: |
@@ -229,7 +255,7 @@ jobs:
       with:
         name: chuknou_test_log.txt
         path: chuknou_test_log.txt
-
+        retention-days: 400
     - name: Run chuknou second Test
       if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
       run: |
@@ -246,12 +272,40 @@ jobs:
       with:
         name: chukonu_result.csv
         path: chukonu_result.csv
+        retention-days: 400
+    # Step 1: 压缩 node0 上的 /opt/event_logs
+    - name: Compress event_logs on node0
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/event_logs.tar.gz event_logs.tar.gz
+    - name: Upload event_logs
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
+      uses: actions/upload-artifact@v3
+      with:
+        name: event_logs.tar.gz
+        path: event_logs.tar.gz
+        retention-days: 400
+    - name: Compress chukonu_cache on node0
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
+      run: |
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0 "sudo tar -czf /opt/chukonu_cache.tar.gz -C /opt chukonu_cache"
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/local_test.pem ubuntu@node0:/opt/chukonu_cache.tar.gz chukonu_cache.tar.gz
+    - name: Upload chukonu_cache
+      if: matrix.runner == 'chukonu' && env.CHUKONU_RESULT == '0'
+      uses: actions/upload-artifact@v3
+      with:
+        name: chukonu_cache.tar.gz
+        path: chukonu_cache.tar.gz
+        retention-days: 400
+
     - name: Terminate EC2 instances
       if: always()
       run: |
         python ./.github/scripts/terminate_ec2_instances.py --runner ${{ matrix.runner }} \
          --spark ${{ env.SPARK_RESULT }} \
-         --chukonu ${{ env.CHUKONU_RESULT }}
+         --chukonu ${{ env.CHUKONU_RESULT }} \
+         --run-number ${{ github.run_number }}
   aggregate-results:
     runs-on: ubuntu-latest
     needs: run-spark-test
@@ -306,3 +360,4 @@ jobs:
         with:
           name: tpcds_result.csv
           path: tpcds_result.csv
+          retention-days: 400

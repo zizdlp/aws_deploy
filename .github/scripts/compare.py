@@ -27,11 +27,11 @@ def compare_result(spark,chukonu):
 
     # 添加耗时对比列（百分比）
     merged_df['Time_Difference_First_Half_Percentage'] = (
-        (merged_df['Runtime_spark'] - merged_df['Runtime_chukonu_first']) / merged_df['Runtime_chukonu_first']
+        (merged_df['Runtime_spark']) / merged_df['Runtime_chukonu_first']
     ) * 100
 
     merged_df['Time_Difference_Second_Half_Percentage'] = (
-        (merged_df['Runtime_spark'] - merged_df['Runtime_chukonu_second']) / merged_df['Runtime_chukonu_second']
+        (merged_df['Runtime_spark']) / merged_df['Runtime_chukonu_second']
     ) * 100
 
     # 设置打印选项以显示所有行
@@ -48,8 +48,8 @@ def compare_result(spark,chukonu):
     total_runtime_chukonu_second_half = df_chukonu_second_half["Runtime"].sum()  # 后半部分的运行时间总和
 
     # 计算差异百分比
-    percentage_difference_first_half = ((total_runtime_spark - total_runtime_chukonu_first_half) / total_runtime_chukonu_first_half) * 100
-    percentage_difference_second_half = ((total_runtime_spark - total_runtime_chukonu_second_half) / total_runtime_chukonu_second_half) * 100
+    percentage_difference_first_half = ((total_runtime_spark) / total_runtime_chukonu_first_half) * 100
+    percentage_difference_second_half = ((total_runtime_spark) / total_runtime_chukonu_second_half) * 100
 
     # 打印总运行时间对比和百分比差异
     print(f"\nTotal Runtime for Spark: {total_runtime_spark}")

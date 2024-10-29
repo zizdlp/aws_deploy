@@ -241,6 +241,24 @@
     #     extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
     #   become: yes
 
+    # - name: Download LLVM installation script
+    #   ansible.builtin.get_url:
+    #     url: https://apt.llvm.org/llvm.sh
+    #     dest: /tmp/llvm.sh
+    #     mode: '0755'
+    
+    # - name: Run LLVM installation script
+    #   ansible.builtin.command: /tmp/llvm.sh 18 all
+    #   args:
+    #     chdir: /tmp
+
+    # - name: Verify clang installation
+    #   ansible.builtin.shell: ls /usr/bin/ | grep clang
+    #   register: clang_files
+
+    # - name: Display clang files
+    #   ansible.builtin.debug:
+    #     msg: "{{ clang_files.stdout_lines }}"
     ## 5.设置环境变量 java_home
     - name: Set JAVA_HOME in profile.d
       copy:

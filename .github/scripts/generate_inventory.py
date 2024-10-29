@@ -28,7 +28,6 @@ worker_nodes = [node for node in nodes_info if not node.startswith('node0')]
 # 获取 master 和 worker 的 DNS、Private IP 和 Public IP 信息
 master_index, master_public_dns, master_private_ip, master_public_ip = master_node.split()
 worker_details = [node.split() for node in worker_nodes]
-
 # 生成 inventory.ini 文件内容
 inventory_content = f"""[master]
 node0
@@ -45,11 +44,12 @@ for node in nodes_info:
     index, _, private_ip, _ = node.split()  # 这里依旧存储的是 Private IP
     nodes_ip_map[f"{index}"] = private_ip
 
-# 添加 [all:vars] 部分，包含节点 Private IP 映射变量
+# 添加 [all:vars] 部分，包含节点 Private IP 映射变量和 SSH keepalive 配置
 inventory_content += """
 [all:vars]
 ansible_user=ubuntu
 ansible_ssh_private_key_file=/home/runner/.ssh/local_test.pem
+ansible_ssh_extra_args='-o ServerAliveInterval=60 -o ServerAliveCountMax=5'
 nodes_ip_map='"""
 # 将字典转换为 JSON 字符串
 inventory_content += json.dumps(nodes_ip_map)

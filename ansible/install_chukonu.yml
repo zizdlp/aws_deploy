@@ -47,10 +47,9 @@
       command: sbt assembly
       args:
         chdir: /opt/chukonu/scala
-
     - name: Run cmake build
       ansible.builtin.command:
-        cmd: cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMR_BUILD_BB=OFF -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
+        cmd: cmake -DCMAKE_BUILD_TYPE=Release -DCMR_BUILD_APPLICATIONS=OFF -DCMAKE_C_COMPILER="/usr/bin/clang-18" -DCMAKE_CXX_COMPILER="/usr/bin/clang++-18" -DCMR_BUILD_BB=OFF -DCMR_BUILD_EXAMPLES=OFF -DCMR_BUILD_MICROBENCHMARK=OFF -DCMR_BUILD_TESTS=OFF -DCMR_BUILD_TOOLS=OFF -DCMR_BUILD_TPCDS=OFF -DCMAKE_INSTALL_PREFIX=/opt/chukonu_install ..
         chdir: /opt/chukonu/build
       environment:
         CC: gcc

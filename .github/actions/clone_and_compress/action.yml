@@ -8,7 +8,9 @@ inputs:
   deploy_key:
     description: 'Deploy key for cloning the repository'
     required: true
-
+  commit_id:
+    description: 'commit id to cover default branch'
+    required: false
 runs:
   using: "composite"
   steps:
@@ -26,12 +28,32 @@ runs:
         echo "${{ inputs.deploy_key }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan github.com >> ~/.ssh/known_hosts
+    - name: Get current commit ID
+      shell: bash
+      run: |
+        echo "Current commit ID is: $GITHUB_SHA"
+    - name: Print and store current branch
+      shell: bash
+      run: |
+        if [ -n "$GITHUB_HEAD_REF" ]; then
+          branch_name="$GITHUB_HEAD_REF"
+        else
+          branch_name="${GITHUB_REF##*/}"
+        fi
+        echo "Current branch: $branch_name"
+        echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
     - name: Clone the private repository
       shell: bash  # Add shell
       run: |
-        git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
-        # cd chukonu
-        # git checkout 8c230bae66a6ebb30f7abb4ab8e1066684bef56f
+        echo "Cloning chukonu repository on branch $BRANCH_NAME"
+        git clone  --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
+        cd chukonu
+        if [ -n "${{ inputs.commit_id }}" ]; then
+          echo "Checking out to commit ID ${{ inputs.commit_id }}"
+          git checkout "${{ inputs.commit_id }}"
+        else
+          echo "Using the latest commit on default branch"
+        fi
     - name: Compress the cloned repository into a tar.gz file
       shell: bash  # Add shell
       run: |

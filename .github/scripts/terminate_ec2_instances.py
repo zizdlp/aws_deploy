@@ -15,7 +15,7 @@ def terminate_instance(instance):
     print(f'Instance {instance.id} has been terminated.')
     return instance.id
 
-def terminate_instances(runner,spark,chukonu):
+def terminate_instances(runner,spark,chukonu,run_number):
     if runner=="chukonu" and chukonu!='0':
         print("not run instances for chukonu")
         return
@@ -27,7 +27,7 @@ def terminate_instances(runner,spark,chukonu):
     
     # 根据标签过滤实例
     instances = ec2.instances.filter(
-        Filters=[{'Name': 'tag:Name', 'Values': [f'SparkNode-{commit_hash}-{runner}']}]
+        Filters=[{'Name': 'tag:Name', 'Values': [f'SparkNode-{run_number}-{commit_hash}-{runner}']}]
     )
 
     instance_list = list(instances)  # 转换为列表以便并行处理
@@ -56,6 +56,6 @@ if __name__ == "__main__":
     parser.add_argument('--runner', type=str, default='all', help='runner case for spark or ?')
     parser.add_argument('--spark', type=str, default='0', help='runn spark')
     parser.add_argument('--chukonu', type=str, default='0', help='run chukonu')
-
+    parser.add_argument('--run-number', type=str, default='0', help='github action run number')
     args = parser.parse_args()
-    terminate_instances(args.runner,args.spark,args.chukonu)
+    terminate_instances(args.runner,args.spark,args.chukonu,args.run_number)

@@ -26,10 +26,10 @@ def get_commit_hash():
     # 获取当前 Git commit hash
     commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode('utf-8')
     return commit_hash
-def save_info(runner):
+def save_info(runner,run_number):
     # 获取标签键为 Name 且值完全匹配 SparkNode-{commit_hash} 的实例
     commit_hash = get_commit_hash()  # 获取当前 commit hash
-    tag_value = f'SparkNode-{commit_hash}-{runner}'  # 定义要搜索的标签值
+    tag_value = f'SparkNode-{run_number}-{commit_hash}-{runner}'  # 定义要搜索的标签值
     instances = get_instances_by_tag('Name', tag_value)
 
     # 保存节点信息到一个文件，包含 Public IP 地址
@@ -54,8 +54,8 @@ def save_info(runner):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='save node info')
     parser.add_argument('--runner', type=str, default='all', help='runner case for spark or ?')
-    
+    parser.add_argument('--run-number', type=str, default='0', help='github action run number')
     args = parser.parse_args()
     
     # Launch instances based on command line inputs
-    save_info(args.runner)
+    save_info(args.runner,args.run_number)

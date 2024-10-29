@@ -11,7 +11,7 @@ def get_commit_hash():
     commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode('utf-8')
     return commit_hash
 
-def create_instance(index, instance_type,runner):
+def create_instance(index, instance_type,runner,run_number):
     commit_hash = get_commit_hash()  # Get current commit hash
 
     user_data_script = '''#!/bin/bash
@@ -20,7 +20,7 @@ def create_instance(index, instance_type,runner):
     '''.format(index)
     
     instance = ec2.create_instances(
-        ImageId='ami-092169ca69a0bfc8a',  # Replace with your AMI ID:'ami-092169ca69a0bfc8a' ori:ami-063dbdfa885edce48 
+        ImageId='ami-0526af3e5b649f1de',  # Replace with your AMI ID:'ami-0526af3e5b649f1de' ori:ami-063dbdfa885edce48 
         MinCount=1,
         MaxCount=1,
         InstanceType=instance_type,  # Pass instance type from the command line
@@ -47,7 +47,7 @@ def create_instance(index, instance_type,runner):
             {
                 'ResourceType': 'instance',
                 'Tags': [
-                        {'Key': 'Name', 'Value': f'SparkNode-{commit_hash}-{runner}'},
+                        {'Key': 'Name', 'Value': f'SparkNode-{run_number}-{commit_hash}-{runner}'},
                         {'Key': 'Index', 'Value': f'{index}'}
                          ]
             }
@@ -64,11 +64,11 @@ def create_instance(index, instance_type,runner):
     return instance
 
 # Function to manage parallel instance creation
-def parallel_create_instances(num_instances, instance_type,runner):
+def parallel_create_instances(num_instances, instance_type,runner,run_number):
     instances = []
     with ThreadPoolExecutor(max_workers=num_instances) as executor:
         # Submit tasks for parallel execution
-        future_to_index = {executor.submit(create_instance, index, instance_type,runner): index for index in range(num_instances)}
+        future_to_index = {executor.submit(create_instance, index, instance_type,runner,run_number): index for index in range(num_instances)}
         
         # Process results as they complete
         for future in as_completed(future_to_index):
@@ -88,8 +88,9 @@ if __name__ == "__main__":
     parser.add_argument('--num-instances', type=int, default=4, help='Number of instances to launch')
     parser.add_argument('--instance-type', type=str, default='i4i.4xlarge', help='EC2 instance type')
     parser.add_argument('--runner', type=str, default='all', help='runner case for spark or ?')
+    parser.add_argument('--run-number', type=str, default='0', help='github action run number')
     
     args = parser.parse_args()
     
     # Launch instances based on command line inputs
-    instances = parallel_create_instances(args.num_instances, args.instance_type,args.runner)
+    instances = parallel_create_instances(args.num_instances, args.instance_type,args.runner,args.run_number)

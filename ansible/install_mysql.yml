@@ -76,19 +76,3 @@
         name: mysql
         state: restarted
       when: "'master' in group_names"
-    - name: Install net-tools package (for netstat)
-      apt:
-        name: net-tools
-        state: present
-      when: "'master' in group_names"
-
-    - name: Check if MySQL is listening on port 3306
-      shell: "netstat -plunt | grep 3306"
-      register: mysql_listening
-      failed_when: mysql_listening.rc != 0
-      when: "'master' in group_names"
-
-    - name: Print MySQL listening check output
-      debug:
-        var: mysql_listening.stdout
-      when: "'master' in group_names"
