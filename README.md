@@ -12,3 +12,5 @@ curl -H "Authorization: token <YOUR_GITHUB_TOKEN>" \
 curl -L -H "Authorization: token <YOUR_GITHUB_TOKEN>" \
   -o spark_result_53_100.zip \
   https://api.github.com/repos/<OWNER>/<REPO>/actions/artifacts/<ARTIFACT_ID>/zip
+
+# try self host
