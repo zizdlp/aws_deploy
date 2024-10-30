@@ -61,7 +61,7 @@ env:
   # CHUKONU_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2110549625/zip" # 1000g,keep only 90days,start from 2024-1028
 jobs:
   run-spark-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 1200
     strategy:
       matrix:
