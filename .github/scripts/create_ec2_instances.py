@@ -20,7 +20,7 @@ def create_instance(index, instance_type,runner,run_number):
     '''.format(index)
     
     instance = ec2.create_instances(
-        ImageId='ami-063dbdfa885edce48',  # Replace with your AMI ID:'ami-0526af3e5b649f1de' ori:ami-063dbdfa885edce48 
+        ImageId='ami-005fc0f236362e99f',  # Replace with your AMI ID:'ami-0526af3e5b649f1de' ori:ami-063dbdfa885edce48 
         MinCount=1,
         MaxCount=1,
         InstanceType=instance_type,  # Pass instance type from the command line
