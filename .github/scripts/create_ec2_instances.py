@@ -4,7 +4,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Initialize EC2 client
-ec2 = boto3.resource('ec2', region_name='cn-northwest-1')
+ec2 = boto3.resource('ec2', region_name='us-east-1')
 
 def get_commit_hash():
     # Get the current Git commit hash
@@ -20,13 +20,13 @@ def create_instance(index, instance_type,runner,run_number):
     '''.format(index)
     
     instance = ec2.create_instances(
-        ImageId='ami-0526af3e5b649f1de',  # Replace with your AMI ID:'ami-0526af3e5b649f1de' ori:ami-063dbdfa885edce48 
+        ImageId='ami-063dbdfa885edce48',  # Replace with your AMI ID:'ami-0526af3e5b649f1de' ori:ami-063dbdfa885edce48 
         MinCount=1,
         MaxCount=1,
         InstanceType=instance_type,  # Pass instance type from the command line
         KeyName='local_test',  # Your EC2 key pair
-        SecurityGroupIds=['sg-01afc3b646b79f84b'],  # Replace with your security group ID
-        SubnetId='subnet-09117acf49a3d9a6b',  # Replace with your subnet ID
+        SecurityGroupIds=['sg-08ed7eb7b2004cb86'],  # Replace with your security group ID
+        SubnetId='subnet-0b6831b742d3007b7',  # Replace with your subnet ID
         IamInstanceProfile={
             'Name': 's3_read'  # Replace with your IAM role name
         },
@@ -41,7 +41,7 @@ def create_instance(index, instance_type,runner,run_number):
             }
         ],
         Placement={
-            'AvailabilityZone': 'cn-northwest-1a'  # Choose availability zone
+            'AvailabilityZone': 'us-east-1a'  # Choose availability zone 
         },
         TagSpecifications=[
             {

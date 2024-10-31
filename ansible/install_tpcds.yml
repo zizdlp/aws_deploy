@@ -21,7 +21,7 @@
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的S3 bucket名称
         object: "tpcds-benchmark.tar.gz"  # S3中的对象路径
-        region: "cn-northwest-1"  # 替换为你的 S3 桶所在区域
+        region: "us-east-1"  # 替换为你的 S3 桶所在区域
         dest: "/opt/tpcds-benchmark.tar.gz"  # 下载到本地的路径
         mode: get  # 下载模式
 
@@ -34,7 +34,7 @@
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的S3 bucket名称
         object: "tpcds-kit.tar.gz"  # S3中的对象路径
-        region: "cn-northwest-1"  # 替换为你的 S3 桶所在区域
+        region: "us-east-1"  # 替换为你的 S3 桶所在区域
         dest: "/opt/tpcds-kit.tar.gz"  # 下载到本地的路径
         mode: get  # 下载模式
 

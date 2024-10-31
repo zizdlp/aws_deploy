@@ -7,7 +7,7 @@
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
         object: "sbt-1.10.1.tgz"  # S3 中的 SBT 包
-        region: "cn-northwest-1"  # 替换为你的 S3 区域
+        region: "us-east-1"  # 替换为你的 S3 区域
         dest: "/opt/sbt-1.10.1.tgz"  # 下载路径
         mode: get
     - name: Extract SBT

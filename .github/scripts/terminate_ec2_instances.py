@@ -23,7 +23,7 @@ def terminate_instances(runner,spark,chukonu,run_number):
         print("not run instances for spark")
         return
     commit_hash = get_commit_hash()  # 获取当前 commit hash
-    ec2 = boto3.resource('ec2', region_name='cn-northwest-1')
+    ec2 = boto3.resource('ec2', region_name='us-east-1')
     
     # 根据标签过滤实例
     instances = ec2.instances.filter(
