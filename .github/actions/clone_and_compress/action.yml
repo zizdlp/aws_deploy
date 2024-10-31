@@ -46,13 +46,13 @@ runs:
       shell: bash  # Add shell
       run: |
         echo "Cloning chukonu repository on branch $BRANCH_NAME"
-        git clone  --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
+        git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
         cd chukonu
         if [ -n "${{ inputs.commit_id }}" ]; then
           echo "Checking out to commit ID ${{ inputs.commit_id }}"
           git checkout "${{ inputs.commit_id }}"
         else
-          echo "Using the latest commit on default branch"
+          echo "Using the latest commit on branch $BRANCH_NAME"
         fi
     - name: Compress the cloned repository into a tar.gz file
       shell: bash  # Add shell

@@ -2,9 +2,7 @@ import subprocess
 import re
 import argparse
 def process_data(runner):
-    # Execute the Hadoop command and get output
-    command = "hadoop fs -ls hdfs:///tpcds/tpcds_result"
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    result = subprocess.run(["sudo", "-i", "hadoop fs -ls hdfs:///tpcds/tpcds_result"], shell=True, capture_output=True, text=True)
 
     # Parse lines and filter for 'timestamp=' lines
     lines = result.stdout.splitlines()
