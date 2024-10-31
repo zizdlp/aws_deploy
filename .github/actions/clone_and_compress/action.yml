@@ -46,7 +46,7 @@ runs:
       shell: bash  # Add shell
       run: |
         echo "Cloning chukonu repository on branch $BRANCH_NAME"
-        git clone --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
+        git clone --branch $BRANCH_NAME  --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
         cd chukonu
         if [ -n "${{ inputs.commit_id }}" ]; then
           echo "Checking out to commit ID ${{ inputs.commit_id }}"

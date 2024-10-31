@@ -58,3 +58,28 @@
         - confargs.sh
         - run-spark.sh
         - run-chukonu.sh
+
+    - name: Copy conf to spark
+      copy:
+        src: ./{{ item }}
+        dest: /usr/local/spark/conf/{{ item }}
+        owner: root
+        mode: 0755
+      loop:
+        - spark-defaults-chukonu.conf
+        - spark-defaults-chukonuclang.conf
+        - spark-defaults-spark.conf
+
+    - name: Copy vars to root
+      copy:
+        src: ./{{ item }}
+        dest: /home/ubuntu/{{ item }}
+        owner: root
+        mode: 0755
+      loop:
+        - spark-sql-perf-assembly-0.5.1-SNAPSHOT.jar
+        - create_table.sh
+        - gen_data.sh
+        - get_tpcds_result.sh
+        - 99query.sh
+        - process_data.py
