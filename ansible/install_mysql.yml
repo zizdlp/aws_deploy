@@ -21,23 +21,23 @@
  
   tasks:
     # preinstalled in ami
-    - name: Install MySQL Server
-      apt:
-        name: mysql-server
-        state: present
-        update_cache: yes
-      when: "'master' in group_names"
-    - name: Ensure MySQL service is running
-      service:
-        name: mysql
-        state: started
-        enabled: yes
-      when: "'master' in group_names"
-    - name: Install Python MySQL dependencies (PyMySQL for Python 3)
-      package:
-        name: python3-pymysql
-        state: present
-      when: "'master' in group_names"
+    # - name: Install MySQL Server
+    #   apt:
+    #     name: mysql-server
+    #     state: present
+    #     update_cache: yes
+    #   when: "'master' in group_names"
+    # - name: Ensure MySQL service is running
+    #   service:
+    #     name: mysql
+    #     state: started
+    #     enabled: yes
+    #   when: "'master' in group_names"
+    # - name: Install Python MySQL dependencies (PyMySQL for Python 3)
+    #   package:
+    #     name: python3-pymysql
+    #     state: present
+    #   when: "'master' in group_names"
 
     - name: Create /root/.my.cnf file for MySQL root user
       copy:

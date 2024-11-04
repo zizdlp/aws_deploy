@@ -16,8 +16,8 @@ def terminate_instance(instance):
     return instance.id
 
 def terminate_instances(runner,spark,chukonu,run_number):
-    if runner=="chukonu" and chukonu!='0':
-        print("not run instances for chukonu")
+    if runner=="chukonuclang" and chukonu!='0':
+        print("not run instances for chukonuclang")
         return
     elif runner=="spark" and spark!='0':
         print("not run instances for spark")

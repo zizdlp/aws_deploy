@@ -155,110 +155,110 @@
     #       deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
     #   become: yes
 
-    ## 4.3. 更新包列表并升级
-    - name: Update package list
-      apt:
-        update_cache: yes
-      register: update_result
-      retries: 3
-      delay: 10
-      until: update_result is succeeded
-      become: yes
+    # ## 4.3. 更新包列表并升级
+    # - name: Update package list
+    #   apt:
+    #     update_cache: yes
+    #   register: update_result
+    #   retries: 3
+    #   delay: 10
+    #   until: update_result is succeeded
+    #   become: yes
 
-    - name: Upgrade all packages
-      apt:
-        upgrade: dist
-      register: upgrade_result
-      retries: 3
-      delay: 10
-      until: upgrade_result.failed == false  # 检查任务是否成功
-      become: yes
+    # - name: Upgrade all packages
+    #   apt:
+    #     upgrade: dist
+    #   register: upgrade_result
+    #   retries: 3
+    #   delay: 10
+    #   until: upgrade_result.failed == false  # 检查任务是否成功
+    #   become: yes
 
-    - name: Install necessary software
-      apt:
-        name:
-          - tmux
-          - unzip
-          - git
-          - byacc
-          - flex
-          - bison
-          - locales
-          - tzdata
-          - ccache
-          - cmake
-          - ninja-build
-          - build-essential
-          - llvm-11-dev
-          - clang-11
-          - libiberty-dev
-          - libdwarf-dev
-          - libre2-dev
-          - libz-dev
-          - libssl-dev
-          - libboost-all-dev
-          - libcurl4-openssl-dev
-          - openjdk-11-jdk
-          - maven
-          - libtbb-dev
-          - libjemalloc-dev
-          - libspdlog-dev
-          - g++
-          - g++-9
-          - g++-10
-          - libmsgsl-dev
-          - libgtest-dev
-          - nfs-common
-          - nfs-kernel-server
-          - pkg-config
-          - libbenchmark-dev
-        state: present
-      register: install_result
-      retries: 3
-      delay: 15
-      until: install_result.failed == false  # 检查任务是否成功
+    # - name: Install necessary software
+    #   apt:
+    #     name:
+    #       - tmux
+    #       - unzip
+    #       - git
+    #       - byacc
+    #       - flex
+    #       - bison
+    #       - locales
+    #       - tzdata
+    #       - ccache
+    #       - cmake
+    #       - ninja-build
+    #       - build-essential
+    #       - llvm-11-dev
+    #       - clang-11
+    #       - libiberty-dev
+    #       - libdwarf-dev
+    #       - libre2-dev
+    #       - libz-dev
+    #       - libssl-dev
+    #       - libboost-all-dev
+    #       - libcurl4-openssl-dev
+    #       - openjdk-11-jdk
+    #       - maven
+    #       - libtbb-dev
+    #       - libjemalloc-dev
+    #       - libspdlog-dev
+    #       - g++
+    #       - g++-9
+    #       - g++-10
+    #       - libmsgsl-dev
+    #       - libgtest-dev
+    #       - nfs-common
+    #       - nfs-kernel-server
+    #       - pkg-config
+    #       - libbenchmark-dev
+    #     state: present
+    #   register: install_result
+    #   retries: 3
+    #   delay: 15
+    #   until: install_result.failed == false  # 检查任务是否成功
 
-    preinstall on ami
-    - name: Ensure Python 3 is installed
-      apt:
-        name: python3
-        state: present
-      become: yes
-      when: ansible_os_family == 'Debian'
+    # preinstall on ami
+    # - name: Ensure Python 3 is installed
+    #   apt:
+    #     name: python3
+    #     state: present
+    #   become: yes
+    #   when: ansible_os_family == 'Debian'
 
-    - name: Ensure Python 3 pip is installed
-      apt:
-        name: python3-pip
-        state: present
-      become: yes
-      when: ansible_os_family == 'Debian'
+    # - name: Ensure Python 3 pip is installed
+    #   apt:
+    #     name: python3-pip
+    #     state: present
+    #   become: yes
+    #   when: ansible_os_family == 'Debian'
 
-    - name: Ensure boto3 and botocore are installed
-      pip:
-        name:
-          - boto3
-          - botocore
-        extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
-      become: yes
+    # - name: Ensure boto3 and botocore are installed
+    #   pip:
+    #     name:
+    #       - boto3
+    #       - botocore
+    #     extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
+    #   become: yes
 
-    - name: Download LLVM installation script
-      ansible.builtin.get_url:
-        url: https://apt.llvm.org/llvm.sh
-        dest: /tmp/llvm.sh
-        mode: '0755'
+    # - name: Download LLVM installation script
+    #   ansible.builtin.get_url:
+    #     url: https://apt.llvm.org/llvm.sh
+    #     dest: /tmp/llvm.sh
+    #     mode: '0755'
     
-    - name: Run LLVM installation script
-      ansible.builtin.command: /tmp/llvm.sh 18 all
-      args:
-        chdir: /tmp
+    # - name: Run LLVM installation script
+    #   ansible.builtin.command: /tmp/llvm.sh 18 all
+    #   args:
+    #     chdir: /tmp
 
-    - name: Verify clang installation
-      ansible.builtin.shell: ls /usr/bin/ | grep clang
-      register: clang_files
+    # - name: Verify clang installation
+    #   ansible.builtin.shell: ls /usr/bin/ | grep clang
+    #   register: clang_files
 
-    - name: Display clang files
-      ansible.builtin.debug:
-        msg: "{{ clang_files.stdout_lines }}"
+    # - name: Display clang files
+    #   ansible.builtin.debug:
+    #     msg: "{{ clang_files.stdout_lines }}"
     ## 5.设置环境变量 java_home
     - name: Set JAVA_HOME in profile.d
       copy:
