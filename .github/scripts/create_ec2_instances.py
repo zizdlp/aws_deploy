@@ -4,7 +4,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Initialize EC2 client
-ec2 = boto3.resource('ec2', region_name='us-east-1')
+ec2 = boto3.resource('ec2', region_name='us-west-1')
 
 def get_commit_hash():
     # Get the current Git commit hash
@@ -25,8 +25,8 @@ def create_instance(index, instance_type,runner,run_number):
         MaxCount=1,
         InstanceType=instance_type,  # Pass instance type from the command line
         KeyName='aws_test',  # Your EC2 key pair
-        SecurityGroupIds=['sg-08ed7eb7b2004cb86'],  # Replace with your security group ID
-        SubnetId='subnet-0b6831b742d3007b7',  # Replace with your subnet ID
+        SecurityGroupIds=['sg-04a32dc62a01e42d6'],  # Replace with your security group ID
+        SubnetId='subnet-07a2f99a594ac6b0a',  # Replace with your subnet ID
         IamInstanceProfile={
        'Name': 's3_read_profile'  # 使用实例配置文件的名称
         },
@@ -41,7 +41,7 @@ def create_instance(index, instance_type,runner,run_number):
             }
         ],
         Placement={
-            'AvailabilityZone': 'us-east-1a'  # Choose availability zone 
+            'AvailabilityZone': 'us-west-1a'  # Choose availability zone 
         },
         TagSpecifications=[
             {

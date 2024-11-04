@@ -28,7 +28,7 @@
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
         object: "hive-{{ hive_version }}.tar.gz"  # S3 中的 Hive 包
-        region: "us-east-1"  # 替换为你的 S3 区域
+        region: "us-west-1"  # 替换为你的 S3 区域
         dest: "/opt/hive-{{ hive_version }}.tar.gz"  # 下载路径
         mode: get
 
