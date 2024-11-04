@@ -72,6 +72,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: echo false
+      run : | 
+        echo ${{!((matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'))}}
+        echo ${{(matrix.runner == 'spark' && env.SPARK_RESULT == '0')}}
+        echo ${{((matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'))}}
     - name: Install deps for worker
       uses: ./.github/actions/install_deps
 
@@ -299,6 +304,7 @@ jobs:
         name: chukonu_cache.tar.gz
         path: chukonu_cache.tar.gz
         retention-days: 400
+
 
     - name: Terminate EC2 instances
       if: always()
