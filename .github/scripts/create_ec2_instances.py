@@ -28,8 +28,8 @@ def create_instance(index, instance_type,runner,run_number):
         SecurityGroupIds=['sg-08ed7eb7b2004cb86'],  # Replace with your security group ID
         SubnetId='subnet-0b6831b742d3007b7',  # Replace with your subnet ID
         IamInstanceProfile={
-            # 'Name': 's3_read'  # Replace with your IAM role name
-            'Arn': 'arn:aws:iam::225671211978:role/s3_read'  # 替换为您的 IAM 角色 ARN
+            'Name': 's3_read'  # Replace with your IAM role name
+            # 'Arn': 'arn:aws:iam::225671211978:role/s3_read'  # 替换为您的 IAM 角色 ARN
         },
         BlockDeviceMappings=[
             {
