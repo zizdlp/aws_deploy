@@ -27,9 +27,9 @@ def create_instance(index, instance_type,runner,run_number):
         KeyName='local_test',  # Your EC2 key pair
         SecurityGroupIds=['sg-08ed7eb7b2004cb86'],  # Replace with your security group ID
         SubnetId='subnet-0b6831b742d3007b7',  # Replace with your subnet ID
-        # IamInstanceProfile={
-        #     'Name': 's3_read'  # Replace with your IAM role name
-        # },
+        IamInstanceProfile={
+            'Name': 's3_read'  # Replace with your IAM role name
+        },
         BlockDeviceMappings=[
             {
                 'DeviceName': '/dev/sda1',  # Root volume
