@@ -90,7 +90,7 @@ jobs:
     - name: Test SSH connection to master
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       run: |
-        ssh -i ~/.ssh/aws_test.pem ec2-user@node0 'hostname'
+        ssh -i ~/.ssh/aws_test.pem ubuntu@node0 'hostname'
 
     - name: Print Environment Variables
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
@@ -212,24 +212,24 @@ jobs:
     - name: Run gen data
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       run: |
-        ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0 \
+        ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0 \
         "sudo ./gen_data.sh spark ${{env.SCALE_FACTOR}}"
     - name: Run create table
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       run: |
-        ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0 \
+        ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0 \
         "sudo ./create_table.sh spark"
 
     - name: Run First Test
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       run: |
-        ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0 \
+        ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0 \
         "sudo ./99query.sh ${{matrix.runner}}; python3 process_data.py --runner ${{matrix.runner}}"
 
     - name: download first test result
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0:~/${{matrix.runner}}_result.csv ${{matrix.runner}}_result_first.csv
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0:~/${{matrix.runner}}_result.csv ${{matrix.runner}}_result_first.csv
     - name: upload result
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       uses: actions/upload-artifact@v3
@@ -242,14 +242,14 @@ jobs:
     - name: Run Second Test
       if: (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       run: |
-        ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0 \
+        ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=60 -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0 \
         "sudo ./99query.sh ${{matrix.runner}}; python3 process_data.py --runner ${{matrix.runner}}"
 
 
     - name: download second test result
       if:  (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0:~/${{matrix.runner}}_result.csv ${{matrix.runner}}_result_second.csv
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0:~/${{matrix.runner}}_result.csv ${{matrix.runner}}_result_second.csv
     - name: upload result
       if:  (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       uses: actions/upload-artifact@v3
@@ -263,8 +263,8 @@ jobs:
     - name: Compress event_logs on node0
       if: matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0:/opt/event_logs.tar.gz event_logs.tar.gz
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0 "sudo tar -czf /opt/event_logs.tar.gz -C /opt event_logs"
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0:/opt/event_logs.tar.gz event_logs.tar.gz
     - name: Upload event_logs
       if: matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'
       uses: actions/upload-artifact@v3
@@ -275,8 +275,8 @@ jobs:
     - name: Compress chukonu_cache on node0
       if: matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0 "sudo tar -czf /opt/chukonu_cache.tar.gz -C /opt chukonu_cache"
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ec2-user@node0:/opt/chukonu_cache.tar.gz chukonu_cache.tar.gz
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0 "sudo tar -czf /opt/chukonu_cache.tar.gz -C /opt chukonu_cache"
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/aws_test.pem ubuntu@node0:/opt/chukonu_cache.tar.gz chukonu_cache.tar.gz
     - name: Upload chukonu_cache
       if: matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'
       uses: actions/upload-artifact@v3
