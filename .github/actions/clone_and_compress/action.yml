@@ -18,8 +18,8 @@ runs:
       shell: bash  # Add shell
       run: |
         mkdir -p ~/.ssh
-        echo "${{ inputs.ssh_private_key }}" > ~/.ssh/local_test.pem
-        chmod 400 ~/.ssh/local_test.pem  
+        echo "${{ inputs.ssh_private_key }}" > ~/.ssh/aws_test.pem
+        chmod 400 ~/.ssh/aws_test.pem  
 
     - name: Setup SSH
       shell: bash  # Add shell
@@ -52,7 +52,7 @@ runs:
           echo "Checking out to commit ID ${{ inputs.commit_id }}"
           git checkout "${{ inputs.commit_id }}"
         else
-          echo "Using the latest commit on default branch"
+          echo "Using the latest commit on branch $BRANCH_NAME"
         fi
     - name: Compress the cloned repository into a tar.gz file
       shell: bash  # Add shell

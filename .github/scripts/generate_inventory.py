@@ -48,7 +48,7 @@ for node in nodes_info:
 inventory_content += """
 [all:vars]
 ansible_user=ubuntu
-ansible_ssh_private_key_file=/home/runner/.ssh/local_test.pem
+ansible_ssh_private_key_file=/home/runner/.ssh/aws_test.pem
 ansible_ssh_extra_args='-o ServerAliveInterval=60 -o ServerAliveCountMax=5'
 nodes_ip_map='"""
 # 将字典转换为 JSON 字符串

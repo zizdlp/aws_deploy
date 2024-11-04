@@ -10,14 +10,25 @@ inputs:
   num-instances:
     description: 'number of instances'
     required: true
-  instance-type:
-    description: 'instance type,e.g i4i.large'
+  region:
     required: true
-  runner:
-    description: 'runner type,e.g spark'
+  instance-type:
+    required: true
+  instance-zone:
+    required: true
+  ami:
+    required: true
+  key-pair:
+    required: true
+  security-group-id:
+    required: true
+  subnet-id:
+    required: true
+  use-nvme:
+    required: true
+  run-type:
     required: true
   run-number:
-    description: 'run number'
     required: true
 runs:
   using: 'composite'
@@ -28,17 +39,21 @@ runs:
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
-        aws-region: cn-northwest-1
+        aws-region: us-west-1
     # Step 2. 创建aws集群
     - name: Launch EC2 instances
       run: |
-        python ./.github/scripts/create_ec2_instances.py --num-instances ${{ inputs.num-instances }} --instance-type ${{ inputs.instance-type }} --runner ${{ inputs.runner }} --run-number ${{ inputs.run-number }}
+        python ./.github/scripts/create_ec2_instances.py --num-instances ${{ inputs.num-instances }} --region ${{ inputs.region }} \
+         --instance-type ${{ inputs.instance-type }} --instance-zone ${{ inputs.instance-zone }} --ami ${{ inputs.ami }} \
+         --key-pair ${{ inputs.key-pair }} --security-group-id ${{ inputs.security-group-id }} \
+         --subnet-id ${{ inputs.subnet-id }} --use-nvme ${{ inputs.use-nvme }} \
+         --run-number ${{ inputs.run-number }} --run-type ${{ inputs.run-type }}
       shell: bash  # 添加 shell 指定属性
 
     # Step 3. 获取各个节点dns和ip，并存入文件
     - name: Wait for EC2 instances
       run: |
-        python ./.github/scripts/get_instance_dns.py --runner ${{ inputs.runner }} --run-number ${{ inputs.run-number }}
+        python ./.github/scripts/get_instance_dns.py --run-number ${{ inputs.run-number }} --run-type ${{ inputs.run-type }}
       shell: bash  # 添加 shell 指定属性
 
     # Step 4: 根据./.github/scripts/nodes_info.txt 生成动态 inventory.ini 文件

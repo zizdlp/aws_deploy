@@ -21,7 +21,7 @@
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的S3 bucket名称
         object: "tpcds-benchmark.tar.gz"  # S3中的对象路径
-        region: "cn-northwest-1"  # 替换为你的 S3 桶所在区域
+        region: "us-west-1"  # 替换为你的 S3 桶所在区域
         dest: "/opt/tpcds-benchmark.tar.gz"  # 下载到本地的路径
         mode: get  # 下载模式
 
@@ -34,7 +34,7 @@
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的S3 bucket名称
         object: "tpcds-kit.tar.gz"  # S3中的对象路径
-        region: "cn-northwest-1"  # 替换为你的 S3 桶所在区域
+        region: "us-west-1"  # 替换为你的 S3 桶所在区域
         dest: "/opt/tpcds-kit.tar.gz"  # 下载到本地的路径
         mode: get  # 下载模式
 
@@ -58,3 +58,28 @@
         - confargs.sh
         - run-spark.sh
         - run-chukonu.sh
+
+    - name: Copy conf to spark
+      copy:
+        src: ./{{ item }}
+        dest: /usr/local/spark/conf/{{ item }}
+        owner: root
+        mode: 0755
+      loop:
+        - spark-defaults-chukonu.conf
+        - spark-defaults-chukonuclang.conf
+        - spark-defaults-spark.conf
+
+    - name: Copy vars to root
+      copy:
+        src: ./{{ item }}
+        dest: /home/ubuntu/{{ item }}
+        owner: root
+        mode: 0755
+      loop:
+        - spark-sql-perf-assembly-0.5.1-SNAPSHOT.jar
+        - create_table.sh
+        - gen_data.sh
+        - get_tpcds_result.sh
+        - 99query.sh
+        - process_data.py

@@ -10,7 +10,7 @@
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的 S3 bucket 名称
         object: "scala-2.12.18.tgz"  # S3 中的 Hive 包
-        region: "cn-northwest-1"  # 替换为你的 S3 区域
+        region: "us-west-1"  # 替换为你的 S3 区域
         dest: "/opt/scala-2.12.18.tgz"  # 下载路径
         mode: get
 
