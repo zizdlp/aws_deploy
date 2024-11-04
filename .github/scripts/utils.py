@@ -82,8 +82,8 @@ def parallel_create_instances(num_instances,region,instance_type,instance_zone,a
     
     return instances
 
-def get_instances_by_tag(region,tag_key, tag_value):
-    ec2 = boto3.resource('ec2', region_name=region)
+def get_instances_by_tag(tag_key, tag_value):
+    ec2 = boto3.client('ec2')
     response = ec2.describe_instances(
         Filters=[
             {
@@ -100,9 +100,9 @@ def get_instances_by_tag(region,tag_key, tag_value):
     instances = [i for r in response['Reservations'] for i in r['Instances']]
     return instances
 
-def save_info(region,run_type,run_number):
+def save_info(run_type,run_number):
     tag_value = f'{run_type}-{run_number}-{get_commit_hash()}'
-    instances = get_instances_by_tag(region,'Name', tag_value)
+    instances = get_instances_by_tag('Name', tag_value)
 
     # 保存节点信息到一个文件，包含 Public IP 地址
     with open('./.github/scripts/nodes_info.txt', 'w') as f:
