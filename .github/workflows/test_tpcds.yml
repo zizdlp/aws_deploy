@@ -71,12 +71,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: echo false
-      run : | 
-        echo ${{!((matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'))}}
-        echo ${{(matrix.runner == 'spark' && env.SPARK_RESULT == '0')}}
-        echo ${{((matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'))}}
     - name: Install deps for worker
       uses: ./.github/actions/install_deps
 
@@ -305,14 +299,23 @@ jobs:
         path: chukonu_cache.tar.gz
         retention-days: 400
 
+    - name: Determine if instances should be terminated
+      run: |
+        if [ "${{ matrix.runner }}" == "spark" ] && [ "${{ env.SPARK_RESULT }}" == "0" ]; then
+          echo "IGNORE_TERMINATE=false" >> $GITHUB_ENV
+        elif [ "${{ matrix.runner }}" == "chukonuclang" ] && [ "${{ env.CHUKONU_RESULT }}" == "0" ]; then
+          echo "IGNORE_TERMINATE=false" >> $GITHUB_ENV
+        else
+          echo "IGNORE_TERMINATE=true" >> $GITHUB_ENV
+        fi
 
     - name: Terminate EC2 instances
       if: always()
       run: |
-        python ./.github/scripts/terminate_ec2_instances.py --region ${{env.REGION}} \
-         --run-number ${{ github.run_number }} \
-         --run-type ${{matrix.runner}} \
-         --ignore ${{!((matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'))}}
+        python ./.github/scripts/terminate_ec2_instances.py --region ${{ env.REGION }} \
+          --run-number ${{ github.run_number }} \
+          --run-type ${{ matrix.runner }} \
+          --ignore ${{ env.IGNORE_TERMINATE }}
   aggregate-results:
     runs-on: ubuntu-latest
     needs: run-spark-test
