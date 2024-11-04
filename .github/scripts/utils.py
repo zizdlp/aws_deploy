@@ -1,7 +1,7 @@
 import boto3
 
 def create_aws_instance(region,instance_type,instance_zone,ami,key_pair,security_group_id,subnet_id,instance_index,
-                         runner,run_number,commit_hash):
+                        commit_hash,use_nvme,run_number,run_type):
     # 1.Initialize EC2 client
     ec2 = boto3.resource('ec2', region_name=region)
 
@@ -23,7 +23,7 @@ def create_aws_instance(region,instance_type,instance_zone,ami,key_pair,security
         IamInstanceProfile={
             'Name': 's3_read_profile'          # 使用实例配置文件的名称
         },
-        BlockDeviceMappings=[
+        BlockDeviceMappings= [
             {
                 'DeviceName': '/dev/sda1',  # Root volume
                 'Ebs': {
@@ -32,7 +32,7 @@ def create_aws_instance(region,instance_type,instance_zone,ami,key_pair,security
                     'DeleteOnTermination': True  # Delete volume on instance termination
                 }
             }
-        ],
+        ] if use_nvme else [],
         Placement={
             'AvailabilityZone': instance_zone  # Choose availability zone 
         },
@@ -40,7 +40,7 @@ def create_aws_instance(region,instance_type,instance_zone,ami,key_pair,security
             {
                 'ResourceType': 'instance',
                 'Tags': [
-                        {'Key': 'Name', 'Value': f'SparkNode-{run_number}-{commit_hash}-{runner}'},
+                        {'Key': 'Name', 'Value': f'{run_type}-{run_number}-{commit_hash}'},
                         {'Key': 'Index', 'Value': f'{instance_index}'}
                          ]
             }

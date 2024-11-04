@@ -24,7 +24,7 @@ def create_instance(index, instance_type,runner,run_number):
         MinCount=1,
         MaxCount=1,
         InstanceType=instance_type,  # Pass instance type from the command line
-        KeyName='local_test',  # Your EC2 key pair
+        KeyName='aws_test',  # Your EC2 key pair
         SecurityGroupIds=['sg-08ed7eb7b2004cb86'],  # Replace with your security group ID
         SubnetId='subnet-0b6831b742d3007b7',  # Replace with your subnet ID
         IamInstanceProfile={

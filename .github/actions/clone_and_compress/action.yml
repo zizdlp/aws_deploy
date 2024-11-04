@@ -18,8 +18,8 @@ runs:
       shell: bash  # Add shell
       run: |
         mkdir -p ~/.ssh
-        echo "${{ inputs.ssh_private_key }}" > ~/.ssh/local_test.pem
-        chmod 400 ~/.ssh/local_test.pem  
+        echo "${{ inputs.ssh_private_key }}" > ~/.ssh/aws_test.pem
+        chmod 400 ~/.ssh/aws_test.pem  
 
     - name: Setup SSH
       shell: bash  # Add shell
