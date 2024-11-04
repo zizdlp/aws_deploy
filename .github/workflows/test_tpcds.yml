@@ -29,12 +29,12 @@ on:
 
 env:
   NUM_INSTANCES: 4
-  REGION: ""
-  INSTANCE_ZONE: ""
-  AMI: ""
-  KEY_PAIR: ""
-  SECURITY_GROUP: ""
-  SUBNET_ID: ""
+  REGION: "us-west-1"
+  INSTANCE_ZONE: "us-west-1a"
+  AMI: "ami-0819a8650d771b8be"
+  KEY_PAIR: "aws_test"
+  SECURITY_GROUP: "sg-015b9bb06f0a09b38"
+  SUBNET_ID: "subnet-07a2f99a594ac6b0a"
   INSTANCE_TYPE:  'i4i.4xlarge'
   SCALE_FACTOR: ${{ github.event.inputs.scale_factor || 100 }}
   SPARK_NUM_EXECUTORS: 3

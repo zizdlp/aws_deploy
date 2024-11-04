@@ -9,27 +9,27 @@ inputs:
     required: true
   num-instances:
     description: 'number of instances'
-    required: false
+    required: true
   region:
-    required: false
+    required: true
   instance-type:
-    required: false
+    required: true
   instance-zone:
-    required: false
+    required: true
   ami:
-    required: false
+    required: true
   key-pair:
-    required: false
+    required: true
   security-group-id:
-    required: false
+    required: true
   subnet-id:
-    required: false
+    required: true
   use-nvme:
-    required: false
+    required: true
   run-type:
-    required: false
+    required: true
   run-number:
-    required: false
+    required: true
 runs:
   using: 'composite'
   steps:
