@@ -119,7 +119,7 @@
         create: yes
         backup: yes
       notify: Restart SSH
-    warning: use ami
+    # warning: use ami
     ### info:这里通过替换ami安装
     # ### 4 install deps
     # - name: Update package list
