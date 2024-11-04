@@ -25,7 +25,7 @@ def create_instance(index, instance_type,runner,run_number):
         MaxCount=1,
         InstanceType=instance_type,  # Pass instance type from the command line
         KeyName='aws_test',  # Your EC2 key pair
-        SecurityGroupIds=['sg-04a32dc62a01e42d6'],  # Replace with your security group ID
+        SecurityGroupIds=['sg-015b9bb06f0a09b38'],  # Replace with your security group ID
         SubnetId='subnet-07a2f99a594ac6b0a',  # Replace with your subnet ID
         IamInstanceProfile={
        'Name': 's3_read_profile'  # 使用实例配置文件的名称
