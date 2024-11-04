@@ -7,10 +7,10 @@
 </div>
 
 curl -H "Authorization: token <YOUR_GITHUB_TOKEN>" \
-  https://api.github.com/repos/<OWNER>/<REPO>/actions/runs/<RUN_ID>/artifacts
+  <https://api.github.com/repos/><OWNER>/<REPO>/actions/runs/<RUN_ID>/artifacts
 
 curl -L -H "Authorization: token <YOUR_GITHUB_TOKEN>" \
   -o spark_result_53_100.zip \
-  https://api.github.com/repos/<OWNER>/<REPO>/actions/artifacts/<ARTIFACT_ID>/zip
+  <https://api.github.com/repos/><OWNER>/<REPO>/actions/artifacts/<ARTIFACT_ID>/zip
 
-# try self host
+## try self host

@@ -9,16 +9,27 @@ inputs:
     required: true
   num-instances:
     description: 'number of instances'
-    required: true
+    required: false
+  region:
+    required: false
   instance-type:
-    description: 'instance type,e.g i4i.large'
-    required: true
-  runner:
-    description: 'runner type,e.g spark'
-    required: true
+    required: false
+  instance-zone:
+    required: false
+  ami:
+    required: false
+  key-pair:
+    required: false
+  security-group-id:
+    required: false
+  subnet-id:
+    required: false
+  use-nvme:
+    required: false
+  run-type:
+    required: false
   run-number:
-    description: 'run number'
-    required: true
+    required: false
 runs:
   using: 'composite'
   steps:
@@ -32,13 +43,18 @@ runs:
     # Step 2. 创建aws集群
     - name: Launch EC2 instances
       run: |
-        python ./.github/scripts/create_ec2_instances.py --num-instances ${{ inputs.num-instances }} --instance-type ${{ inputs.instance-type }} --runner ${{ inputs.runner }} --run-number ${{ inputs.run-number }}
+        python ./.github/scripts/create_ec2_instances.py --num-instances ${{ inputs.num-instances }} --region ${{ inputs.region }} \
+         --instance-type ${{ inputs.instance-type }} --instance-zone ${{ inputs.instance-zone }} --ami ${{ inputs.ami }} \
+         --key-pair ${{ inputs.key-pair }} --security-group-id ${{ inputs.security-group-id }} \
+         --subnet-id ${{ inputs.subnet-id }} --use-nvme ${{ inputs.use-nvme }} \
+         --run-number ${{ inputs.run-number }} --run-type ${{ inputs.run-type }}
       shell: bash  # 添加 shell 指定属性
 
     # Step 3. 获取各个节点dns和ip，并存入文件
     - name: Wait for EC2 instances
       run: |
-        python ./.github/scripts/get_instance_dns.py --runner ${{ inputs.runner }} --run-number ${{ inputs.run-number }}
+        python ./.github/scripts/get_instance_dns.py  --region ${{ inputs.region }} \
+         --run-number ${{ inputs.run-number }} --run-type ${{ inputs.run-type }}
       shell: bash  # 添加 shell 指定属性
 
     # Step 4: 根据./.github/scripts/nodes_info.txt 生成动态 inventory.ini 文件

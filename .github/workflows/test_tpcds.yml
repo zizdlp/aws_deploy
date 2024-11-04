@@ -29,6 +29,12 @@ on:
 
 env:
   NUM_INSTANCES: 4
+  REGION: ""
+  INSTANCE_ZONE: ""
+  AMI: ""
+  KEY_PAIR: ""
+  SECURITY_GROUP: ""
+  SUBNET_ID: ""
   INSTANCE_TYPE:  'i4i.4xlarge'
   SCALE_FACTOR: ${{ github.event.inputs.scale_factor || 100 }}
   SPARK_NUM_EXECUTORS: 3
@@ -78,7 +84,16 @@ jobs:
         num-instances: ${{ env.NUM_INSTANCES }}
         instance-type: ${{ env.INSTANCE_TYPE }}
         runner: ${{ matrix.runner }}
+        region: ${{env.REGION}}
+        instance-zone: ${{env.INSTANCE_ZONE}}
+        ami: ${{env.AMI}}
+        key-pair: ${{env.KEY_PAIR}}
+        security-group-id: ${{env.SECURITY_GROUP}}
+        subnet-id: ${{env.SUBNET_ID}}
+        use-nvme: True
+        run-type: ${{ matrix.runner }}
         run-number: ${{ github.run_number }}
+
     - name: Clone and Compress Repo
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       uses: ./.github/actions/clone_and_compress
@@ -288,10 +303,10 @@ jobs:
     - name: Terminate EC2 instances
       if: always()
       run: |
-        python ./.github/scripts/terminate_ec2_instances.py --runner ${{ matrix.runner }} \
-         --spark ${{ env.SPARK_RESULT }} \
-         --chukonu ${{ env.CHUKONU_RESULT }} \
+        python ./.github/scripts/terminate_ec2_instances.py --region ${{env.REGION}} \
          --run-number ${{ github.run_number }}
+         --run-type ${{matrix.runner}}
+         --ignore ${{!((matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0'))}}
   aggregate-results:
     runs-on: ubuntu-latest
     needs: run-spark-test
