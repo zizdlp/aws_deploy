@@ -47,7 +47,7 @@ for node in nodes_info:
 # 添加 [all:vars] 部分，包含节点 Private IP 映射变量和 SSH keepalive 配置
 inventory_content += """
 [all:vars]
-ansible_user=ec2-user
+ansible_user=ubuntu
 ansible_ssh_private_key_file=/home/runner/.ssh/aws_test.pem
 ansible_ssh_extra_args='-o ServerAliveInterval=60 -o ServerAliveCountMax=5'
 nodes_ip_map='"""
