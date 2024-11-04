@@ -29,8 +29,6 @@ def create_instance(index, instance_type,runner,run_number):
         SubnetId='subnet-0b6831b742d3007b7',  # Replace with your subnet ID
         IamInstanceProfile={
        'Name': 's3_read_profile'  # 使用实例配置文件的名称
-            # 或者使用角色名称
-            # 'Name': 's3_read'
         },
         BlockDeviceMappings=[
             {
