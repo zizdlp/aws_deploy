@@ -131,10 +131,7 @@ def terminate_instance(instance):
     print(f'Instance {instance.id} has been terminated.')
     return instance.id
 
-def terminate_instances(region,run_type,run_number,ignore):
-    if(ignore):
-        print("terminate_instances ignored!!!")
-        return
+def terminate_instances(region,run_type,run_number):
     ec2 = boto3.resource('ec2', region_name=region)
     
     # 根据标签过滤实例
