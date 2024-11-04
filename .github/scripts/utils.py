@@ -45,7 +45,7 @@ def create_aws_instance(instance_index,region,instance_type,instance_zone,ami,ke
             {
                 'ResourceType': 'instance',
                 'Tags': [
-                        {'Key': 'Name', 'Value': f'{run_type}-{run_number}-{get_commit_hash()}'},
+                        {'Key': 'Name', 'Value': f'{run_number}-{run_type}-{get_commit_hash()}'},
                         {'Key': 'Index', 'Value': f'{instance_index}'}
                          ]
             }
@@ -101,7 +101,7 @@ def get_instances_by_tag(tag_key, tag_value):
     return instances
 
 def save_info(run_type,run_number):
-    tag_value = f'{run_type}-{run_number}-{get_commit_hash()}'
+    tag_value = f'{run_number}-{run_type}-{get_commit_hash()}'
     instances = get_instances_by_tag('Name', tag_value)
 
     # 保存节点信息到一个文件，包含 Public IP 地址
@@ -139,7 +139,7 @@ def terminate_instances(region,run_type,run_number,ignore):
     
     # 根据标签过滤实例
     instances = ec2.instances.filter(
-        Filters=[{'Name': 'tag:Name', 'Values': [f'{run_type}-{run_number}-{get_commit_hash()}']}]
+        Filters=[{'Name': 'tag:Name', 'Values': [f'{run_number}-{run_type}-{get_commit_hash()}']}]
     )
 
     instance_list = list(instances)  # 转换为列表以便并行处理
