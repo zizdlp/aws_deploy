@@ -1,6 +1,5 @@
 import pandas as pd
 import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def compare(spark_path,chukonu_path):
     # Load the two CSV files

@@ -13,5 +13,4 @@ runs:
       run: |
         python -m pip install --upgrade pip
         pip install boto3
-        pip install pandas
       shell: bash  # 添加 shell 指定属性
