@@ -24,7 +24,6 @@
         mode: 0755
       loop:
         - spark-defaults-chukonu.conf
-        - spark-defaults-chukonuclang.conf
         - spark-defaults-spark.conf
 
     - name: Copy vars to root
