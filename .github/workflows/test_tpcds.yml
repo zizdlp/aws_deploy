@@ -51,12 +51,12 @@ env:
   MAXIMUM_ALLOCATION_MB:  307200
   MINIMUM_ALLOCATION_MB:  2048
   MAXIMUM_ALLOCATION_VCORES:  45
-  SPARK_RESULT: ${{ github.event.inputs.spark_result || '0' }} # default use previous test case: 100g
+  SPARK_RESULT: ${{ github.event.inputs.spark_result || 'https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2140592901/zip' }} # default use previous test case: 100g
   CHUKONU_RESULT: ${{ github.event.inputs.chukonu_result || '0' }} # default rerun this test
   COMMIT_ID: ${{ github.event.inputs.commit_id || '' }}
   # SPARK_RESULT: '0' #  run test
   # CHUKONU_RESULT: '0' # run test
-  # SPARK_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2139084230/zip" # 100g,keep only 400days,start from 2024-1104
+  # SPARK_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2140592901/zip" # 100g,keep only 400days,start from 2024-1104
   # CHUKONU_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2139084227/zip" # 100g,keep only 400days,start from 2024-1104
 
   # SPARK_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2132816123/zip" # 1000g,keep only 400days,start from 2024-1101
