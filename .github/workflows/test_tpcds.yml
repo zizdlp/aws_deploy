@@ -37,29 +37,29 @@ env:
   SUBNET_ID: "subnet-07a2f99a594ac6b0a"
   INSTANCE_TYPE:  'i4i.4xlarge'
   SCALE_FACTOR: ${{ github.event.inputs.scale_factor || 100 }}
-
-  SPARK_DRIVER_MEMORY: '14g'
-  SPARK_EXECUTOR_CORES: 13
-  SPARK_EXECUTOR_MEMORY:  '89g'
-  SPARK_OVERHEAD: '5g' 
+  
+  SPARK_DRIVER_MEMORY: '4g'
+  SPARK_EXECUTOR_CORES: 12
+  SPARK_EXECUTOR_MEMORY:  '90g'
+  SPARK_OVERHEAD: '6g' 
  
-  CHUKONU_DRIVER_OVERHEAD: '3g'
-  CHUKONU_DRIVER_MEMORY: '2g'
-  CHUKONU_EXECUTOR_CORES:  13
-  CHUKONU_EXECUTOR_MEMORY:  '48g'
-  CHUKONU_OVERHEAD:  '45g'
+  CHUKONU_DRIVER_OVERHEAD: '4g'
+  CHUKONU_DRIVER_MEMORY: '4g'
+  CHUKONU_EXECUTOR_CORES:  12
+  CHUKONU_EXECUTOR_MEMORY:  '47g'
+  CHUKONU_OVERHEAD:  '48g'
 
   NODEMANAGER_MEMORY_MB:  102400
   MAXIMUM_ALLOCATION_MB:  307200
   MINIMUM_ALLOCATION_MB:  2048
   MAXIMUM_ALLOCATION_VCORES:  45
   SPARK_RESULT: ${{ github.event.inputs.spark_result || 'https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2140592901/zip' }} # default use previous test case: 100g
-  CHUKONU_RESULT: ${{ github.event.inputs.chukonu_result || '0' }} # default rerun this test
+  CHUKONU_RESULT: ${{ github.event.inputs.chukonu_result || 'https://api.github.com/repos/zizdlp/aws_deploy/actions/artifacts/2144866548/zip' }} # default rerun this test
   COMMIT_ID: ${{ github.event.inputs.commit_id || '' }}
   # SPARK_RESULT: '0' #  run test
   # CHUKONU_RESULT: '0' # run test
   # SPARK_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2140592901/zip" # 100g,keep only 400days,start from 2024-1104
-  # CHUKONU_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2139084227/zip" # 100g,keep only 400days,start from 2024-1104
+  # CHUKONU_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2144866548/zip" # 100g,keep only 400days,start from 2024-1104
 
   # SPARK_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2132816123/zip" # 1000g,keep only 400days,start from 2024-1101
   # CHUKONU_RESULT: "https://api.github.com/repos/chukonu-team/chukonu/actions/artifacts/2132816119/zip" # 1000g,keep only 400days,start from 2024-1101
