@@ -1,6 +1,6 @@
 ---
-- name: Install SBT on master on master
-  hosts: master
+- name: Install SBT
+  hosts: all
   become: yes
   tasks:
     - name: Download sbt from S3

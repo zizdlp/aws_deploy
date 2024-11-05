@@ -1,5 +1,5 @@
-- name: Install and Configure tpcds on master
-  hosts: master
+- name: Install and Configure tpcds
+  hosts: all
   become: yes
   tasks:
     - name: Download tpcds-kit from S3

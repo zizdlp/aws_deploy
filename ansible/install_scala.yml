@@ -1,5 +1,5 @@
-- name: Install Scala on master
-  hosts: master
+- name: Install Scala
+  hosts: all
   become: yes
   vars:
     scala_version: "2.12.18"
