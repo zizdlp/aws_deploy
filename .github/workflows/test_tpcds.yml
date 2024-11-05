@@ -74,6 +74,14 @@ jobs:
     - name: Install deps for worker
       uses: ./.github/actions/install_deps
 
+    # Step 1: 配置 AWS 凭据
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{env.REGION}}
+
     - name: Deploy EC2 Instances
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       uses: ./.github/actions/aws_create
