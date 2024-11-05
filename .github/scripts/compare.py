@@ -1,6 +1,5 @@
 import pandas as pd
 import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def compare(spark_path,chukonu_path):
     # Load the two CSV files
@@ -25,9 +24,14 @@ def compare(spark_path,chukonu_path):
         'Spark/Chukonu': [result['Spark Result'].sum() / result['Chukonu Result'].sum()]  # Ratio of the sums
     })
 
-    # Print total times for Spark and Chukonu
-    print(f"======= total time: Spark: {sum_row['Spark Result'].iloc[0]}, Chukonu: {sum_row['Chukonu Result'].iloc[0]},Spark/Chukonu: {sum_row['Spark/Chukonu'].iloc[0]}")
-
+    RED = "\033[91m"
+    GREEN = "\033[92m"
+    BLUE = "\033[94m"
+    RESET = "\033[0m"
+    # Print total times for Spark and Chukonu with color highlights
+    print(f"{GREEN}======= Total Time: {RESET}Spark: {GREEN}{sum_row['Spark Result'].iloc[0]}{RESET}, "
+        f"Chukonu: {BLUE}{sum_row['Chukonu Result'].iloc[0]}{RESET}, "
+        f"Spark/Chukonu: {RED}{sum_row['Spark/Chukonu'].iloc[0]}{RESET}")
     # Append the sum row to the result DataFrame
     result = pd.concat([result, sum_row], ignore_index=True)
 
