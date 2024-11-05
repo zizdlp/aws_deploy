@@ -45,14 +45,14 @@ runs:
     - name: Clone the private repository
       shell: bash  # Add shell
       run: |
-        echo "Cloning chukonu repository on branch $BRANCH_NAME"
+        echo -e "\033[1;32mCloning chukonu repository on branch: $NUM_INSTANCES\033[0m"
         git clone  --recurse-submodules git@github.com:chukonu-team/chukonu.git chukonu
         cd chukonu
         if [ -n "${{ inputs.commit_id }}" ]; then
-          echo "Checking out to commit ID ${{ inputs.commit_id }}"
+          echo -e "\033[1;32mChecking out to commit ID ${{ inputs.commit_id }}\033[0m"
           git checkout "${{ inputs.commit_id }}"
         else
-          echo "Using the latest commit on branch $BRANCH_NAME"
+          echo -e "\033[1;32mUsing the latest commit on branch $BRANCH_NAME\033[0m"
         fi
     - name: Compress the cloned repository into a tar.gz file
       shell: bash  # Add shell
