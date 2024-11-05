@@ -81,8 +81,13 @@ jobs:
         aws-region: ${{env.REGION}}
     - name: Print Environment Variables
       run: |
-        echo -e "\033[1;33mNUM_INSTANCES: $NUM_INSTANCES\033[0m"
-        echo -e "\033[1;33mINSTANCE_TYPE: $INSTANCE_TYPE\033[0m"
+        echo -e "\033[1;32mNUM_INSTANCES: $NUM_INSTANCES\033[0m"
+        echo -e "\033[1;32mINSTANCE_TYPE: $INSTANCE_TYPE\033[0m"
+        echo -e "\033[1;32mREGION: $REGION\033[0m"
+        echo -e "\033[1;32mSPARK_RESULT: $SPARK_RESULT\033[0m"
+        echo -e "\033[1;32mCHUKONU_RESULT: $CHUKONU_RESULT\033[0m"
+        echo -e "\033[1;32mCOMMIT_ID: $COMMIT_ID\033[0m"
+
     - name: Deploy EC2 Instances
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
       uses: ./.github/actions/aws_create
