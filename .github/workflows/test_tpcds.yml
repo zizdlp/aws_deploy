@@ -31,7 +31,7 @@ env:
   NUM_INSTANCES: 4
   REGION: "us-west-1"
   INSTANCE_ZONE: "us-west-1a"
-  AMI: "ami-0621a9de5e97a850e" #"ami-0819a8650d771b8be"
+  AMI: "ami-018efc92806865019" #"ami-0819a8650d771b8be"
   KEY_PAIR: "aws_test"
   SECURITY_GROUP: "sg-015b9bb06f0a09b38"
   SUBNET_ID: "subnet-07a2f99a594ac6b0a"

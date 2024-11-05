@@ -27,3 +27,8 @@ chmod +x llvm.sh
 sudo ./llvm.sh 18 all
 ls /usr/bin/ | grep clang
 ```
+
+```sh
+pip install boto3
+pip install botocore
+```

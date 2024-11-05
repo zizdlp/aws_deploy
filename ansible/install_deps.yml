@@ -205,7 +205,6 @@
     #     name:
     #       - boto3
     #       - botocore
-    #     extra_args: "--index-url https://mirrors.aliyun.com/pypi/simple/"
     #   become: yes
 
     # - name: Download LLVM installation script
