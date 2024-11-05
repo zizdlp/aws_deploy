@@ -1,35 +1,7 @@
 - name: Install and Configure tpcds
   hosts: all
   become: yes
-  vars:
-    spark_version: "3.4.1"  # Adjust Spark version as needed
-    hadoop_home: "/usr/local/hadoop"
-    hive_version: "4.0.0"    # Update as needed
-    hive_home: "/usr/local/hive"
-    spark_home: "/usr/local/spark"
-    java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
-    hadoop_user: "root"
-    mysql_host: "{{ groups['master'][0] }}"  # 主节点地址
-    mysql_database: "hive"
-    mysql_user: "hiveuser"
-    mysql_password: "your_password"
-  # Define handlers for restarting the SSH service
- 
   tasks:
-  
-    - name: Download tpcds-benchmark from S3
-      aws_s3:
-        bucket: "zzbuckent"  # 替换为你的S3 bucket名称
-        object: "tpcds-benchmark.tar.gz"  # S3中的对象路径
-        region: "us-west-1"  # 替换为你的 S3 桶所在区域
-        dest: "/opt/tpcds-benchmark.tar.gz"  # 下载到本地的路径
-        mode: get  # 下载模式
-
-    - name: Extract tpcds-benchmark
-      unarchive:
-        src: "/opt/tpcds-benchmark.tar.gz"
-        dest: "/opt/"
-        remote_src: yes
     - name: Download tpcds-kit from S3
       aws_s3:
         bucket: "zzbuckent"  # 替换为你的S3 bucket名称
@@ -43,21 +15,6 @@
         src: "/opt/tpcds-kit.tar.gz"
         dest: "/opt/"
         remote_src: yes
-    - name: Execute the prepare.sh script
-      command: "/bin/bash /opt/tpcds-benchmark/prepare.sh"
-      args:
-        chdir: "/opt/tpcds-benchmark"
-    - name: Copy var.sh and other scripts
-      copy:
-        src: ./{{ item }}
-        dest: /opt/tpcds-benchmark/{{ item }}
-        owner: root
-        mode: 0755
-      loop:
-        - var.sh
-        - confargs.sh
-        - run-spark.sh
-        - run-chukonu.sh
 
     - name: Copy conf to spark
       copy:
