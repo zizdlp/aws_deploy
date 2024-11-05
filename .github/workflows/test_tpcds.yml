@@ -31,7 +31,7 @@ env:
   NUM_INSTANCES: 4
   REGION: "us-west-1"
   INSTANCE_ZONE: "us-west-1a"
-  AMI: "ami-0819a8650d771b8be"
+  AMI: "ami-0621a9de5e97a850e" #"ami-0819a8650d771b8be"
   KEY_PAIR: "aws_test"
   SECURITY_GROUP: "sg-015b9bb06f0a09b38"
   SUBNET_ID: "subnet-07a2f99a594ac6b0a"
@@ -87,6 +87,7 @@ jobs:
         echo -e "\033[1;32mSPARK_RESULT: $SPARK_RESULT\033[0m"
         echo -e "\033[1;32mCHUKONU_RESULT: $CHUKONU_RESULT\033[0m"
         echo -e "\033[1;32mCOMMIT_ID: $COMMIT_ID\033[0m"
+        echo -e "\033[1;32mAMI: $AMI\033[0m"
 
     - name: Deploy EC2 Instances
       if: (matrix.runner == 'spark' && env.SPARK_RESULT == '0') || (matrix.runner == 'chukonuclang' && env.CHUKONU_RESULT == '0')
